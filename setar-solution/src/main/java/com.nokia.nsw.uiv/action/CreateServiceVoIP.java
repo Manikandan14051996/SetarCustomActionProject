@@ -70,7 +70,6 @@ public class CreateServiceVoIP implements HttpAction {
                 Validations.validateMandatoryParams(req.getOntModel(), "ontModel");
                 Validations.validateMandatoryParams(req.getServiceId(), "serviceId");
                 Validations.validateMandatoryParams(req.getVoipServiceCode(), "voipServiceCode");
-                Validations.validateMandatoryParams(req.getVoipPackage(), "voipPackage");
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             } catch (BadRequestException bre) {
                 return new CreateServiceVoIPResponse(
@@ -81,7 +80,7 @@ public class CreateServiceVoIP implements HttpAction {
                         null
                 );
             }
-            String ontName ="ONT" + req.getOntSN();
+            String ontName = "ONT" + req.getOntSN();
             if (ontName.length() > 100) {
                 return new CreateServiceVoIPResponse(
                         "400",
@@ -95,7 +94,7 @@ public class CreateServiceVoIP implements HttpAction {
             AtomicBoolean isSubscriptionExist = new AtomicBoolean(true);
             AtomicBoolean isProductExist = new AtomicBoolean(true);
             // Step 2 & 3: Subscriber
-            String subscriberNameStr = req.getSubscriberName() + Constants.UNDER_SCORE  + req.getOntSN();
+            String subscriberNameStr = req.getSubscriberName() + Constants.UNDER_SCORE + req.getOntSN();
             if (subscriberNameStr.length() > 100) {
                 return new CreateServiceVoIPResponse(
                         "400",
@@ -107,10 +106,10 @@ public class CreateServiceVoIP implements HttpAction {
             }
             Customer subscriber = null;
             Optional<Customer> subscriberOpt = customerRepo.findByDiscoveredName(subscriberNameStr);
-            if(subscriberOpt.isPresent()){
+            if (subscriberOpt.isPresent()) {
                 subscriber = subscriberOpt.get();
-                log.error("Subscriber already exist with subscriberName: "+subscriberNameStr);
-            }else{
+                log.error("Subscriber already exist with subscriberName: " + subscriberNameStr);
+            } else {
                 Customer newSub = new Customer();
                 isSubscriberExist.set(false);
                 try {
@@ -131,7 +130,7 @@ public class CreateServiceVoIP implements HttpAction {
                 customerRepo.save(newSub);
             }
             // Step 4: Subscription
-            String subscriptionName = req.getSubscriberName() + Constants.UNDER_SCORE  + req.getServiceId() + Constants.UNDER_SCORE  + req.getOntSN();
+            String subscriptionName = req.getSubscriberName() + Constants.UNDER_SCORE + req.getServiceId() + Constants.UNDER_SCORE + req.getOntSN();
             if (subscriptionName.length() > 100) {
                 return new CreateServiceVoIPResponse(
                         "400",
@@ -143,10 +142,10 @@ public class CreateServiceVoIP implements HttpAction {
             }
             Subscription subscription = null;
             Optional<Subscription> subscriptionOpt = subscriptionRepo.findByDiscoveredName(subscriptionName);
-            if(subscriptionOpt.isPresent()){
+            if (subscriptionOpt.isPresent()) {
                 subscription = subscriptionOpt.get();
-                log.error("Subscription already exist with subscriptionName: "+subscriptionName);
-            }else{
+                log.error("Subscription already exist with subscriptionName: " + subscriptionName);
+            } else {
                 isSubscriptionExist.set(false);
                 Subscription subs = new Subscription();
                 try {
@@ -188,17 +187,19 @@ public class CreateServiceVoIP implements HttpAction {
             subsProps.put("simaCustId", req.getSimaCustID());
             subsProps.put("simaSubsId", req.getSimaSubsID());
             subsProps.put("simaEndpointId", req.getSimaEndpointID());
-            subsProps.put("voipPackage", req.getVoipPackage());
+            if (req.getVoipPackage() != null && !req.getVoipPackage().isEmpty()) {
+                subsProps.put("voipPackage", req.getVoipPackage());
+            }
             subsProps.put("voipServiceCode", req.getVoipServiceCode());
-            subsProps.put("serviceLink",(req.getOntSN()!=null && req.getOntSN().startsWith("ALCL"))?"ONT":"Cable_Modem");
-            if(!isSubscriberExist.get() && !isSubscriptionExist.get()){
+            subsProps.put("serviceLink", (req.getOntSN() != null && req.getOntSN().startsWith("ALCL")) ? "ONT" : "Cable_Modem");
+            if (!isSubscriberExist.get() && !isSubscriptionExist.get()) {
                 subscription.setProperties(subsProps);
                 subscriber.setProperties(subProps);
                 customerRepo.save(subscriber);
                 subscriptionRepo.save(subscription);
             }
             // Step 7: Product
-            String productNameStr = req.getSubscriberName() +Constants.UNDER_SCORE + req.getProductSubtype() +Constants.UNDER_SCORE + req.getServiceId();
+            String productNameStr = req.getSubscriberName() + Constants.UNDER_SCORE + req.getProductSubtype() + Constants.UNDER_SCORE + req.getServiceId();
             if (productNameStr.length() > 100) {
                 return new CreateServiceVoIPResponse(
                         "400",
@@ -210,10 +211,10 @@ public class CreateServiceVoIP implements HttpAction {
             }
             Product product = null;
             Optional<Product> productOpt = productRepo.findByDiscoveredName(productNameStr);
-            if(productOpt.isPresent()){
+            if (productOpt.isPresent()) {
                 product = productOpt.get();
-                log.error("Product already exist with productName: "+productNameStr);
-            }else{
+                log.error("Product already exist with productName: " + productNameStr);
+            } else {
                 Product prod = new Product();
                 isProductExist.set(false);
                 try {
@@ -232,27 +233,27 @@ public class CreateServiceVoIP implements HttpAction {
                 product = prod;
                 productRepo.save(prod);
             }
-            if(isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()){
+            if (isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()) {
                 log.error("createServiceVOIP service already exist");
-                return new CreateServiceVoIPResponse("409","Service already exist/Duplicate entry",Instant.now().toString(),subscriptionName,"ONT" + req.getOntSN());
+                return new CreateServiceVoIPResponse("409", "Service already exist/Duplicate entry", Instant.now().toString(), subscriptionName, "ONT" + req.getOntSN());
             }
-            if(isSubscriptionExist.get()){
+            if (isSubscriptionExist.get()) {
                 subscription = subscriptionRepo.findByDiscoveredName(subscription.getDiscoveredName()).get();
                 Set<Service> existingServices = subscription.getService();
                 existingServices.add(product);
                 subscription.setService(existingServices);
-            }else{
+            } else {
                 subscription.setService(new HashSet<>(List.of(product)));
             }
-            subscriptionRepo.save(subscription,2);
+            subscriptionRepo.save(subscription, 2);
             // Step 8: CFS
             String cfsName = "CFS" + Constants.UNDER_SCORE + subscriptionName;
             Service cfs = null;
             Optional<Service> cfsOpt = serviceCustomRepository.findByDiscoveredName(cfsName);
-            if(cfsOpt.isPresent()){
+            if (cfsOpt.isPresent()) {
                 cfs = cfsOpt.get();
-                log.error("CFS is already exist with cfsName: "+cfsName);
-            }else{
+                log.error("CFS is already exist with cfsName: " + cfsName);
+            } else {
                 Service newCfs = new Service();
                 try {
                     newCfs.setLocalName(Validations.encryptName(cfsName));
@@ -274,12 +275,12 @@ public class CreateServiceVoIP implements HttpAction {
             }
             // Step 9: RFS
             String rfsName = "RFS" + Constants.UNDER_SCORE + subscriptionName;
-            Service rfs=null;
+            Service rfs = null;
             Optional<Service> rfsOpt = serviceCustomRepository.findByDiscoveredName(rfsName);
-            if(rfsOpt.isPresent()){
-                rfs=rfsOpt.get();
-                log.error("RFS is already exist with name RFSName: "+rfsName);
-            }else{
+            if (rfsOpt.isPresent()) {
+                rfs = rfsOpt.get();
+                log.error("RFS is already exist with name RFSName: " + rfsName);
+            } else {
                 Service newRfs = new Service();
                 try {
                     newRfs.setLocalName(Validations.encryptName(rfsName));
@@ -298,13 +299,13 @@ public class CreateServiceVoIP implements HttpAction {
                 serviceCustomRepository.save(newRfs);
             }
 
-            String oltName=req.getOltName();
+            String oltName = req.getOltName();
             LogicalDevice olt = null;
             Optional<LogicalDevice> oltOpt = logicalDeviceRepo.findByDiscoveredName(oltName);
-            if(oltOpt.isPresent()){
-                olt=oltOpt.get();
-                log.error("OLTDevice is already present with oltName: "+oltName);
-            }else{
+            if (oltOpt.isPresent()) {
+                olt = oltOpt.get();
+                log.error("OLTDevice is already present with oltName: " + oltName);
+            } else {
                 LogicalDevice dev = new LogicalDevice();
                 try {
                     dev.setLocalName(Validations.encryptName(req.getOltName()));
@@ -320,15 +321,15 @@ public class CreateServiceVoIP implements HttpAction {
                 oltProps.put("ontTemplate", req.getTemplateNameOnt());
                 dev.setProperties(oltProps);
                 dev.setUsingService(new HashSet<>(List.of(rfs)));
-                olt=dev;
+                olt = dev;
                 logicalDeviceRepo.save(dev);
             }
-            LogicalDevice ont=null;
+            LogicalDevice ont = null;
             Optional<LogicalDevice> ontOpt = logicalDeviceRepo.findByDiscoveredName(ontName);
-            if(ontOpt.isPresent()){
+            if (ontOpt.isPresent()) {
                 ont = ontOpt.get();
-                log.error("ONTDevice is already exist with ontName: "+ontName);
-            }else {
+                log.error("ONTDevice is already exist with ontName: " + ontName);
+            } else {
                 LogicalDevice dev = new LogicalDevice();
                 try {
                     dev.setLocalName(Validations.encryptName(ontName));
@@ -366,11 +367,11 @@ public class CreateServiceVoIP implements HttpAction {
             if ("1".equals(req.getOntPort())) {
                 ontProps.put("potsPort1Number", req.getVoipNumber1());
                 oltProps.put("voipPots1Template", req.getTemplateNamePots1());
-                cpeDevice.getProperties().put("voipPort1",req.getVoipNumber1());
+                cpeDevice.getProperties().put("voipPort1", req.getVoipNumber1());
             } else {
                 ontProps.put("potsPort2Number", req.getVoipNumber1());
                 oltProps.put("voipPots2Template", req.getTemplateNamePots2());
-                cpeDevice.getProperties().put("voipPort2",req.getVoipNumber1());
+                cpeDevice.getProperties().put("voipPort2", req.getVoipNumber1());
             }
             oltProps.put("voipServiceTemplate", req.getVoipServiceTemplate());
 
@@ -378,10 +379,10 @@ public class CreateServiceVoIP implements HttpAction {
             olt.setProperties(oltProps);
 
             logicalDeviceRepo.save(cpeDevice);
-            ont = logicalDeviceRepo.findByDiscoveredName(ont.getDiscoveredName()).orElseThrow(()->new RuntimeException("OLTDevice not found: "+ontName));
+            ont = logicalDeviceRepo.findByDiscoveredName(ont.getDiscoveredName()).orElseThrow(() -> new RuntimeException("OLTDevice not found: " + ontName));
             ont.setProperties(ontProps);
             logicalDeviceRepo.save(ont);
-            olt = logicalDeviceRepo.findByDiscoveredName(olt.getDiscoveredName()).orElseThrow(()->new RuntimeException("OLTDevice not found: "+oltName));
+            olt = logicalDeviceRepo.findByDiscoveredName(olt.getDiscoveredName()).orElseThrow(() -> new RuntimeException("OLTDevice not found: " + oltName));
             olt.setProperties(oltProps);
             logicalDeviceRepo.save(olt);
             log.error(Constants.ACTION_COMPLETED);

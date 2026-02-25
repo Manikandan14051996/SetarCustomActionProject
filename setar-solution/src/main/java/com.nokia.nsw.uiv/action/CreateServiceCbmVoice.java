@@ -78,7 +78,6 @@ public class CreateServiceCbmVoice implements HttpAction {
             Validations.validateMandatoryParams(request.getCbmModel(), "cbmModel");
             Validations.validateMandatoryParams(request.getHhid(), "hhid");
             Validations.validateMandatoryParams(request.getServiceId(), "serviceId");
-            Validations.validateMandatoryParams(request.getQosProfile(), "qosProfile");
             Validations.validateMandatoryParams(request.getVoipNumber1(), "voipNumber1");
             Validations.validateMandatoryParams(request.getSimaCustId(), "simaCustId");
             Validations.validateMandatoryParams(request.getSimaSubsId(), "simaSubsId");
@@ -391,7 +390,7 @@ public class CreateServiceCbmVoice implements HttpAction {
                     cpeDeviceRepository.save(cpe, 2);
                 } catch (Exception e) {
                     log.error("Persistence error updating CPE device", e);
-                    return createErrorResponse(CODE_PERSISTENCE_ERROR, "Persistence error while updating CPE device: " + e.getMessage());
+                    return createErrorResponse(CODE_PERSISTENCE_ERROR, "Persistence error while updating CPE device: "+cpeDeviceName + e.getMessage());
                 }
             }
             log.error(Constants.ACTION_COMPLETED);
