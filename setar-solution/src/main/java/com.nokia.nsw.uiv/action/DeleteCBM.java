@@ -79,7 +79,7 @@ public class DeleteCBM implements HttpAction {
             log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);// <-- added
             // serviceFlag was previously validated in your code; it's optional in spec — validate only if required.
         } catch (BadRequestException bre) {
-            return new DeleteCBMResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
+            return new DeleteCBMResponse("400", ERROR_PREFIX  + bre.getMessage(),
                     Instant.now().toString(), "", "");
         }
 

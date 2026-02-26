@@ -62,7 +62,7 @@ public class ModifyCBM implements HttpAction {
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             } catch (BadRequestException bre) {
                 return new ModifyCBMResponse("400",
-                        ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
+                        ERROR_PREFIX +  bre.getMessage(),
                         getCurrentTimestamp(), "", "");
             }
 
