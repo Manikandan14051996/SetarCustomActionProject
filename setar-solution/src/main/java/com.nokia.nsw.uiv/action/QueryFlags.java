@@ -165,7 +165,7 @@ public class QueryFlags implements HttpAction {
                                     Constants.UNDER_SCORE + serviceID)) {
                                 continue;
                             }
-                            if (rfs.getDiscoveredName() != null) {
+                            if (rfs.getDiscoveredName() != null && rfs.getDiscoveredName().contains(rfsName)) {
                                 Service rfs1=serviceCustomRepository.findByDiscoveredName(rfs.getDiscoveredName()).get();
                                 Service cfs=rfs1.getUsedService().stream().findFirst().get();
                                 cfs = serviceCustomRepository.findByDiscoveredName(cfs.getDiscoveredName()).get();

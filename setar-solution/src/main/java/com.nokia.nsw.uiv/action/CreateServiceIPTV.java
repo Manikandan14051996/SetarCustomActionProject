@@ -87,7 +87,7 @@ public class CreateServiceIPTV implements HttpAction {
                 Validations.validateMandatoryParams(request.getCustomerGroupID(), "customerGroupId");
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             }catch (BadRequestException bre) {
-                return new CreateServiceIPTVResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
+                return new CreateServiceIPTVResponse("400", ERROR_PREFIX  + bre.getMessage(),
                         Instant.now().toString(), "","");
             }
             AtomicBoolean isSubscriberExist = new AtomicBoolean(true);

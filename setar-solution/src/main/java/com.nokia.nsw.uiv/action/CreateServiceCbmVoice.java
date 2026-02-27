@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class CreateServiceCbmVoice implements HttpAction {
     protected static final String ACTION_LABEL = Constants.CREATE_SERVICE_CBM_VOICE;
     // Error code mappings (adjust if you use different codes)
+    private static final String ERROR_PREFIX = "UIV action CreateServiceCBMVoice execution failed - ";
     private static final String CODE_SUCCESS = "201";
     private static final String CODE_MISSING_PARAMS = "400"; // $code5
     private static final String CODE_ALREADY_EXISTS = "409"; // $code2
@@ -85,7 +86,7 @@ public class CreateServiceCbmVoice implements HttpAction {
             log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
         } catch (BadRequestException bre) {
             return createErrorResponse(CODE_MISSING_PARAMS,
-                    bre.getMessage());
+                    ERROR_PREFIX+bre.getMessage());
         }
         AtomicBoolean isSubscriberExist = new AtomicBoolean(true);
         AtomicBoolean isSubscriptionExist = new AtomicBoolean(true);

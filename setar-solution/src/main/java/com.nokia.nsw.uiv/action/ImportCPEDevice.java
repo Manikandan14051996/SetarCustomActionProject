@@ -61,7 +61,7 @@ public class ImportCPEDevice implements HttpAction {
                 Validations.validateMandatoryParams(request.getCpeMacAddress(), "cpeMacAddress");
                 Validations.validateMandatoryParams(request.getCpeGwMacAddress(), "cpeGwMacAddress");
             } catch (BadRequestException bre) {
-                return new ImportCPEDeviceResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
+                return new ImportCPEDeviceResponse("400", ERROR_PREFIX +  bre.getMessage(),
                         Instant.now().toString());
             }
 

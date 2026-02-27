@@ -74,7 +74,7 @@ public class CreateServiceVoIP implements HttpAction {
             } catch (BadRequestException bre) {
                 return new CreateServiceVoIPResponse(
                         "400",
-                        ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
+                        ERROR_PREFIX  + bre.getMessage(),
                         Instant.now().toString(),
                         null,
                         null
