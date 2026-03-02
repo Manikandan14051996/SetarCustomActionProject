@@ -89,25 +89,25 @@ public class ChangeTechnology implements HttpAction {
 
         try {
             // Declare variables from req
-            String subscriberName   = req.getSubscriberName();
-            String productSubtype   = req.getProductSubtype();
-            String serviceId        = req.getServiceId();
-            String fxOrderId        = req.getFxOrderId();
-            String ontSN            = req.getOntSN();
-            String ontMacAddr       = req.getOntMacAddr();
-            String cbmSn            = req.getCbmSn();
-            String qosProfile       = req.getQosProfile();
-            String oltName          = req.getOltName();
-            String templateNameOnt  = req.getTemplateNameOnt();
+            String subscriberName = req.getSubscriberName();
+            String productSubtype = req.getProductSubtype();
+            String serviceId = req.getServiceId();
+            String fxOrderId = req.getFxOrderId();
+            String ontSN = req.getOntSN();
+            String ontMacAddr = req.getOntMacAddr();
+            String cbmSn = req.getCbmSn();
+            String qosProfile = req.getQosProfile();
+            String oltName = req.getOltName();
+            String templateNameOnt = req.getTemplateNameOnt();
             String templateNameVeip = req.getTemplateNameVeip();
-            String templateNameHsi  = req.getTemplateNameHsi();
+            String templateNameHsi = req.getTemplateNameHsi();
             String templateNameIptv = req.getTemplateNameIptv();
             String templateNameIgmp = req.getTemplateNameIgmp();
-            String menm             = req.getMenm();
-            String vlanId           = req.getVlanId();
-            String ontModel         = req.getOntModel();
-            String cbmMac           = req.getCbmMac();
-            String hhid             = req.getHhid();
+            String menm = req.getMenm();
+            String vlanId = req.getVlanId();
+            String ontModel = req.getOntModel();
+            String cbmMac = req.getCbmMac();
+            String hhid = req.getHhid();
 
 // Validate mandatory parameters
             try {
@@ -127,7 +127,7 @@ public class ChangeTechnology implements HttpAction {
             } catch (BadRequestException bre) {
                 return new ChangeTechnologyResponse(
                         "400",
-                        ERROR_PREFIX  + bre.getMessage(),
+                        ERROR_PREFIX + bre.getMessage(),
                         Instant.now().toString(),
                         "",
                         ""
@@ -135,25 +135,24 @@ public class ChangeTechnology implements HttpAction {
             }
 
 
-
             // 2. Prepare states - in UIV we typically store as properties; if there are dedicated entities, repo lookups would be used.
             // Legacy ensures existence of SubscriberStatus/SubscriberType/Admin/Operational state entities.
             // In UIV mapped model we set properties accordingly (create missing objects handled by repositories when needed).
 
             // 3. Prepare names
-            String subscriptionName = subscriberName + Constants.UNDER_SCORE  + serviceId;
+            String subscriptionName = subscriberName + Constants.UNDER_SCORE + serviceId;
             String cfsName = "CFS" + Constants.UNDER_SCORE + subscriptionName;
             String rfsName = "RFS" + Constants.UNDER_SCORE + subscriptionName;
-            String cbmName = "CBM"+ Constants.UNDER_SCORE +cbmSn;
-            String mgmtVlanName = menm + Constants.UNDER_SCORE  + vlanId;
-            String ontName ="ONT"+Constants.UNDER_SCORE + ontSN;
-            String subscriberNameFibernet = subscriberName + Constants.UNDER_SCORE  + ontSN;
-            String subscriberNameCbmKey = subscriberName + Constants.UNDER_SCORE  + cbmMac.replace(":", "");
+            String cbmName = "CBM"+ cbmSn;
+            String mgmtVlanName = menm + Constants.UNDER_SCORE + vlanId;
+            String ontName = "ONT" + ontSN;
+            String subscriberNameFibernet = subscriberName + Constants.UNDER_SCORE + ontSN;
+            String subscriberNameCbmKey = subscriberName + Constants.UNDER_SCORE + cbmMac.replace(":", "");
 
             // 4. Update existing subscriber (only when productSubtype == Fibernet)
             if ("Fibernet".equalsIgnoreCase(productSubtype)) {
                 if (subscriberNameFibernet.length() > 100) {
-                    return new ChangeTechnologyResponse("400", ERROR_PREFIX + "Subscriber name too long", Instant.now().toString(),subscriptionName,ontName);
+                    return new ChangeTechnologyResponse("400", ERROR_PREFIX + "Subscriber name too long", Instant.now().toString(), subscriptionName, ontName);
                 }
                 // Try find CBM-keyed subscriber
                 Optional<Customer> maybeCbmSubscriber = customerRepo.findByDiscoveredName(subscriberNameCbmKey);
@@ -179,7 +178,7 @@ public class ChangeTechnology implements HttpAction {
                 }
             }
             if (subscriptionName.length() > 100) {
-                return new ChangeTechnologyResponse("400", ERROR_PREFIX + "Subscription name too long", Instant.now().toString(),subscriptionName,"");
+                return new ChangeTechnologyResponse("400", ERROR_PREFIX + "Subscription name too long", Instant.now().toString(), subscriptionName, "");
             }
             // 5. Update existing subscription (if exists)
             Optional<Subscription> maybeSubscription = subscriptionRepo.findByDiscoveredName(subscriptionName);
@@ -193,14 +192,14 @@ public class ChangeTechnology implements HttpAction {
                 subProps.put("serviceSubType", "Broadband");
                 if ("Fibernet".equalsIgnoreCase(productSubtype)) {
                     if (qosProfile != null) subProps.put("veipQosSessionProfile", qosProfile);
-                    subscription.setDiscoveredName(subscriptionName + Constants.UNDER_SCORE  + ontSN);
-                    
+                    subscription.setDiscoveredName(subscriptionName + Constants.UNDER_SCORE + ontSN);
+
                     // link to subscriber updated earlier if present
                     Optional<Customer> maybeSub = customerRepo.findByDiscoveredName(subscriberNameFibernet);
                     if (maybeSub.isPresent()) {
                         Customer newCustomer = maybeSub.get();
                         Customer oldCustomer = subscription.getCustomer();
-                        if(oldCustomer!=null){
+                        if (oldCustomer != null) {
                             oldCustomer.getSubscription().remove(subscription);   // 💥 removes HAS edge
                             customerRepo.save(oldCustomer);
                         }
@@ -217,13 +216,12 @@ public class ChangeTechnology implements HttpAction {
             Optional<Service> maybeCfs = serviceCustomRepository.findByDiscoveredName(cfsName);
             if (maybeCfs.isPresent() && "Fibernet".equalsIgnoreCase(productSubtype)) {
                 Service cfs = maybeCfs.get();
-                // Append ONT_SN to existing CFS name as per specification
                 cfs.setDiscoveredName(cfs.getDiscoveredName() + Constants.UNDER_SCORE + ontSN);
                 if (fxOrderId != null) {
                     Map<String, Object> p = cfs.getProperties() != null ? cfs.getProperties() : new HashMap<>();
-                    cfs.setProperties(p);
+                    cfs.getProperties().put("TransactionId", fxOrderId);
                 }
-                serviceCustomRepository.save(cfs);
+                serviceCustomRepository.save(cfs, 2);
             }
 
             // 7. Update existing RFS (if exists)
@@ -232,7 +230,7 @@ public class ChangeTechnology implements HttpAction {
                 Service rfs = maybeRfs.get();
                 // Append ONT_SN to existing RFS name as per specification
                 rfs.setDiscoveredName(rfs.getDiscoveredName() + Constants.UNDER_SCORE + ontSN);
-                serviceCustomRepository.save(rfs);
+                serviceCustomRepository.save(rfs, 2);
             }
 
             // 8. Prepare OLT device (create if missing)
@@ -267,7 +265,7 @@ public class ChangeTechnology implements HttpAction {
 
             // validate ont name length
             if (ontName.length() > 100) {
-                return new ChangeTechnologyResponse("400", ERROR_PREFIX + "ONT name too long", Instant.now().toString(),"","");
+                return new ChangeTechnologyResponse("400", ERROR_PREFIX + "ONT name too long", Instant.now().toString(), "", "");
             }
 
             // 9. Prepare ONT device (create if missing)
@@ -289,7 +287,7 @@ public class ChangeTechnology implements HttpAction {
                         Map<String, Object> p = new HashMap<>();
                         p.put("OperationalState", "Active");
                         p.put("serialNo", ontSN);
-                        p.put("deviceModel",ontModel );
+                        p.put("deviceModel", ontModel);
                         p.put("description", menm);
                         p.put("veipVlan", vlanId);
                         p.put("iptvVlan", vlanId);
@@ -304,7 +302,7 @@ public class ChangeTechnology implements HttpAction {
                     });
 
             if (mgmtVlanName.length() > 100) {
-                return new ChangeTechnologyResponse("400", ERROR_PREFIX + "Vlan name too long", Instant.now().toString(),"","");
+                return new ChangeTechnologyResponse("400", ERROR_PREFIX + "Vlan name too long", Instant.now().toString(), "", "");
             }
             // 10. Create or retrieve management VLAN interface
             vlanRepo.findByDiscoveredName(mgmtVlanName).orElseGet(() -> {
@@ -346,7 +344,7 @@ public class ChangeTechnology implements HttpAction {
 
                 cbmDevice.setProperties(cbmProps);
                 // remove from inventory
-                cbmRepo.save(cbmDevice,2);
+                cbmRepo.delete(cbmDevice);
             }
 
             // 12. Reassign CPE devices
@@ -408,17 +406,29 @@ public class ChangeTechnology implements HttpAction {
 // -------------------------
 // CBM CPE updates
 // -------------------------
-            oldProps.put("description"," "); // safer than setting null
+            oldProps.put("description", " "); // safer than setting null
             oldProps.put("AdministrativeState", Constants.ADMIN_STATE_AVAILABLE);
             oldProps.put("OperationalState", Constants.OPER_STATE_AVAILABLE);
 
 // Apply properties
-            cpeNew.setProperties(newProps);
-            cpeOld.setProperties(oldProps);
+            if (cpeNew.getKind().equalsIgnoreCase(Constants.SETAR_KIND_CPE_DEVICE))
+            {
+                cpeNew.setProperties(newProps);
+                cpeRepo.save(cpeNew);
+            }
+
+            if (cpeOld.getKind().equalsIgnoreCase(Constants.SETAR_KIND_CPE_DEVICE))
+            {
+                cpeOld.setProperties(oldProps);
+                cpeRepo.save(cpeOld);
+
+            }
+
+
 
 // Persist changes
-            cpeRepo.save(cpeOld);
-            cpeRepo.save(cpeNew);
+
+
 
 
             // 13. Final success response: include subscriptionName and ontName
