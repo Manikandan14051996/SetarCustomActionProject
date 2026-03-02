@@ -173,7 +173,7 @@ public class ChangeTechnology implements HttpAction {
                             Constants.SUBSCRIBER_TYPE_REGULAR);
 
                     props.put("accountNumber", subscriberName);
-//                    if (hhid != null) props.put("householdId", hhid);
+                    if (hhid != null) props.put("houseHoldId", hhid);
                     cbmSubscriber.setProperties(props);
                     customerRepo.save(cbmSubscriber);
                 }
