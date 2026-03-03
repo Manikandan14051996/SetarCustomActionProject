@@ -23,4 +23,5 @@ public class ImportCPEDeviceRequest{
     private String cpeMacAddressMta;
     private String cpeManufacturer;
     private String cpeModelSubType;
+    private String createdBy;
 }

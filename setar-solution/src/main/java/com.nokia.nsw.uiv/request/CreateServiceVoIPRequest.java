@@ -75,4 +75,5 @@ public class CreateServiceVoIPRequest {
     private String companyName;
     private String contactPhone;
     private String fxOrderID;
+    private String createdBy;
 }

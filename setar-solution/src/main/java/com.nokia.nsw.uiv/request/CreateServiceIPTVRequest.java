@@ -46,4 +46,5 @@ public class CreateServiceIPTVRequest {
     private String fxOrderID;
     private String kenanUidNo;
     private String gatewayMac;
+    private String createdBy;
 }

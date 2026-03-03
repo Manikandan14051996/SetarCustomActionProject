@@ -79,6 +79,13 @@ public class CreateProductSubscription implements HttpAction {
             if (subscriberName.length() > 100) {
                 throw new BadRequestException("Subscriber name too long");
             }
+            String createdBy="";
+            if(request.getCreatedBy().isEmpty())
+            {
+                createdBy="CA";
+            }else {
+                createdBy=request.getCreatedBy();
+            }
 
             Optional<Customer> optSubscriber = subscriberRepository.findByDiscoveredName(subscriberName);
             Customer subscriber;
@@ -96,6 +103,8 @@ public class CreateProductSubscription implements HttpAction {
                 props.put("name", subscriberName);
                 props.put("subscriberStatus", "Active");
                 props.put("subscriberType", "Regular");
+                props.put("createdBy", createdBy);
+                props.put("actionName", ACTION_LABEL);
                 subscriber.setProperties(props);
                 subscriberRepository.save(subscriber, 2);
                 log.error("Created new subscriber: {}", subscriberName);
@@ -123,6 +132,8 @@ public class CreateProductSubscription implements HttpAction {
                 props.put("name", subscriptionName);
                 props.put("subscriptionStatus", "Active");
                 props.put("serviceID", request.getServiceID());
+                props.put("createdBy", createdBy);
+                props.put("actionName", ACTION_LABEL);
                 subscription.setProperties(props);
                 subscription.setCustomer(subscriber);
                 subscriptionRepository.save(subscription, 2);
@@ -154,6 +165,8 @@ public class CreateProductSubscription implements HttpAction {
                 props.put("productId", request.getReferenceID());
                 props.put("catalogItemName", request.getProduct());
                 props.put("catalogItemVersion", request.getProductVariant());
+                props.put("createdBy", createdBy);
+                props.put("actionName", ACTION_LABEL);
                 product.setProperties(props);
                 product.setCustomer(subscriber);
                 productRepository.save(product, 2);

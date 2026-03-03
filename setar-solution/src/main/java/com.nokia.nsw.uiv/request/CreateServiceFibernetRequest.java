@@ -43,4 +43,5 @@ public class CreateServiceFibernetRequest {
     private String ontModel;
     private String fxOrderID;
     private String kenanUidNo;
+    private String createdBy;
 }

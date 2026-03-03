@@ -137,6 +137,12 @@ public class CreateServiceIPTV implements HttpAction {
                 subscriberProps.put("companyName", request.getCompanyName());
                 subscriberProps.put("contactPhoneNumber", request.getContactPhone());
                 subscriberProps.put("subscriberAddress",request.getSubsAddress());
+                subscriberProps.put("createdBy",
+                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                ? request.getCreatedBy()
+                                : "CA"
+                );
+                subscriberProps.put("actionName", ACTION_LABEL);
                 subscriber.setProperties(subscriberProps);
                 customerRepository.save(subscriber, 2);
                 log.error("Created Subscriber: {}", subscriberName);
@@ -169,7 +175,12 @@ public class CreateServiceIPTV implements HttpAction {
                 subscriptionProps.put("kenanSubscriberId", request.getKenanUidNo());
                 subscriptionProps.put("gatewayMacAddress", request.getGatewayMac());
                 subscriptionProps.put("serviceLink",((request.getOltName()!=null) && request.getOltName().equalsIgnoreCase("SRX"))?"SRX":"ONT");
-
+                subscriptionProps.put("createdBy",
+                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                ? request.getCreatedBy()
+                                : "CA"
+                );
+                subscriptionProps.put("actionName", ACTION_LABEL);
                 subscription.setProperties(subscriptionProps);
                 subscription.setCustomer(subscriber); // association
                 subscriptionRepository.save(subscription, 2);
@@ -193,7 +204,12 @@ public class CreateServiceIPTV implements HttpAction {
                 Map<String, Object> productProps = new HashMap<>();
                 productProps.put("productType", request.getProductType());
                 productProps.put("productStatus", "ACTIVE");
-
+                productProps.put("createdBy",
+                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                ? request.getCreatedBy()
+                                : "CA"
+                );
+                productProps.put("actionName", ACTION_LABEL);
                 product.setProperties(productProps);
                 product.setCustomer(subscriber);
                 productRepository.save(product, 2);
@@ -232,7 +248,12 @@ public class CreateServiceIPTV implements HttpAction {
                 cfsProps.put("transactionId", request.getFxOrderID());
                 cfsProps.put("serviceStatus", "ACTIVE");
                 cfsProps.put("serviceType", request.getProductType());
-
+                cfsProps.put("createdBy",
+                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                ? request.getCreatedBy()
+                                : "CA"
+                );
+                cfsProps.put("actionName", ACTION_LABEL);
                 cfs.setProperties(cfsProps);
                 cfs.setUsingService(new HashSet<>(List.of(product)));
                 serviceCustomRepository.save(cfs, 2);
@@ -256,7 +277,12 @@ public class CreateServiceIPTV implements HttpAction {
                 Map<String, Object> rfsProps = new HashMap<>();
                 rfsProps.put("serviceStatus", "ACTIVE");
                 rfsProps.put("serviceType", request.getProductType());
-
+                rfsProps.put("createdBy",
+                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                ? request.getCreatedBy()
+                                : "CA"
+                );
+                rfsProps.put("actionName", ACTION_LABEL);
                 rfs.setProperties(rfsProps);
                 rfs.setUsedService(new HashSet<>(List.of(cfs)));
                 serviceCustomRepository.save(rfs, 2);
@@ -289,7 +315,12 @@ public class CreateServiceIPTV implements HttpAction {
                 oltProps.put("veipServiceTemplate", request.getTemplateNameVEIP());
                 oltProps.put("veipIptvTemplate", request.getTemplateNameIPTV());
                 oltProps.put("igmpTemplate", request.getTemplateNameIGMP());
-
+                oltProps.put("createdBy",
+                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                ? request.getCreatedBy()
+                                : "CA"
+                );
+                oltProps.put("actionName", ACTION_LABEL);
                 oltDevice.setProperties(oltProps);
                 oltDevice.setUsingService(new HashSet<>(List.of(rfs)));
                 logicalDeviceRepository.save(oltDevice, 2);
@@ -317,6 +348,12 @@ public class CreateServiceIPTV implements HttpAction {
                 ontProps.put("oltPosition",request.getOltName());
                 ontProps.put("OperationalState", "Active");
                 ontProps.put("iptvVlan", request.getVlanID());
+                ontProps.put("createdBy",
+                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                ? request.getCreatedBy()
+                                : "CA"
+                );
+                ontProps.put("actionName", ACTION_LABEL);
                 ontDevice.setProperties(ontProps);
                 ontDevice.setUsingService(new HashSet<>(List.of(rfs)));
                 ontDevice.setUsedResource(new HashSet<>(List.of(oltDevice)));
@@ -340,6 +377,12 @@ public class CreateServiceIPTV implements HttpAction {
                 Map<String, Object> vlanProps = new HashMap<>();
                 vlanProps.put("vlanId", request.getVlanID());
                 vlanProps.put("OperationalState", "Active");
+                vlanProps.put("createdBy",
+                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                ? request.getCreatedBy()
+                                : "CA"
+                );
+                vlanProps.put("actionName", ACTION_LABEL);
                 vlanInterface.setProperties(vlanProps);
                 vlanRepository.save(vlanInterface, 2);
                 log.error("Created VLAN Interface: {}", mgmtVlanName);

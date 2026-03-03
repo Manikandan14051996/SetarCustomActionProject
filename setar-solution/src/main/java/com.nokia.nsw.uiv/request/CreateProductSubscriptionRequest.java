@@ -22,4 +22,6 @@ public class CreateProductSubscriptionRequest {
     private String product;
     @NotNull
     private String referenceID;
+
+    private String createdBy;
 }

@@ -125,6 +125,12 @@ public class CreateServiceVoIP implements HttpAction {
                 subProps.put("subscriberType", "Regular");
                 subProps.put("accountNumber", req.getSubscriberName());
                 subProps.put("houseHoldId", req.getHhid());
+                subProps.put("createdBy",
+                        req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
+                                ? req.getCreatedBy()
+                                : "CA"
+                );
+                subProps.put("actionName", ACTION_LABEL);
                 newSub.setProperties(subProps);
                 subscriber = newSub;
                 customerRepo.save(newSub);
@@ -162,6 +168,12 @@ public class CreateServiceVoIP implements HttpAction {
                 subProps.put("serviceID", req.getServiceId());
                 subProps.put("oltPosition", req.getOltName());
                 subProps.put("householdId", req.getHhid());
+                subProps.put("createdBy",
+                        req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
+                                ? req.getCreatedBy()
+                                : "CA"
+                );
+                subProps.put("actionName", ACTION_LABEL);
                 subs.setProperties(subProps);
                 subs.setCustomer(subscriber);
                 subscription = subs;
@@ -191,6 +203,7 @@ public class CreateServiceVoIP implements HttpAction {
                 subsProps.put("voipPackage", req.getVoipPackage());
             }
             subsProps.put("voipServiceCode", req.getVoipServiceCode());
+
             subsProps.put("serviceLink", (req.getOntSN() != null && req.getOntSN().startsWith("ALCL")) ? "ONT" : "Cable_Modem");
             if (!isSubscriberExist.get() && !isSubscriptionExist.get()) {
                 subscription.setProperties(subsProps);
@@ -228,6 +241,12 @@ public class CreateServiceVoIP implements HttpAction {
                 Map<String, Object> prodProps = new HashMap<>();
                 prodProps.put("productStatus", "Active");
                 prodProps.put("productType", req.getProductType());
+                prodProps.put("createdBy",
+                        req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
+                                ? req.getCreatedBy()
+                                : "CA"
+                );
+                prodProps.put("actionName", ACTION_LABEL);
                 prod.setProperties(prodProps);
                 prod.setCustomer(subscriber);
                 product = prod;
@@ -267,6 +286,12 @@ public class CreateServiceVoIP implements HttpAction {
                 cfsProps.put("serviceStatus", "Active");
                 cfsProps.put("serviceType", req.getProductType());
                 cfsProps.put("serviceStartDate", Instant.now().toString());
+                cfsProps.put("createdBy",
+                        req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
+                                ? req.getCreatedBy()
+                                : "CA"
+                );
+                cfsProps.put("actionName", ACTION_LABEL);
                 if (req.getFxOrderID() != null) cfsProps.put("transactionId", req.getFxOrderID());
                 newCfs.setProperties(cfsProps);
                 newCfs.setUsingService(new HashSet<>(List.of(product)));
@@ -293,6 +318,12 @@ public class CreateServiceVoIP implements HttpAction {
                 Map<String, Object> rfsProps = new HashMap<>();
                 rfsProps.put("serviceStatus", "Active");
                 rfsProps.put("serviceType", req.getProductType());
+                rfsProps.put("createdBy",
+                        req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
+                                ? req.getCreatedBy()
+                                : "CA"
+                );
+                rfsProps.put("actionName", ACTION_LABEL);
                 newRfs.setProperties(rfsProps);
                 newRfs.setUsedService(new HashSet<>(List.of(cfs)));
                 rfs = newRfs;
@@ -319,6 +350,12 @@ public class CreateServiceVoIP implements HttpAction {
                 oltProps.put("OperationalState", "Active");
                 oltProps.put("oltPosition", req.getOltName());
                 oltProps.put("ontTemplate", req.getTemplateNameOnt());
+                oltProps.put("createdBy",
+                        req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
+                                ? req.getCreatedBy()
+                                : "CA"
+                );
+                oltProps.put("actionName", ACTION_LABEL);
                 dev.setProperties(oltProps);
                 dev.setUsingService(new HashSet<>(List.of(rfs)));
                 olt = dev;
@@ -345,6 +382,12 @@ public class CreateServiceVoIP implements HttpAction {
                 ontProps.put("deviceModel", req.getOntModel());
                 ontProps.put("oltPosition", req.getOltName());
                 ontProps.put("ontTemplate", req.getTemplateNameOnt());
+                ontProps.put("createdBy",
+                        req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
+                                ? req.getCreatedBy()
+                                : "CA"
+                );
+                ontProps.put("actionName", ACTION_LABEL);
                 dev.setProperties(ontProps);
                 dev.setUsedResource(new HashSet<>(List.of(olt)));
                 dev.setUsingService(new HashSet<>(List.of(rfs)));

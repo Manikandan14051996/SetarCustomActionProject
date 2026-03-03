@@ -43,5 +43,6 @@ public class CreateServiceCBMRequest {
     private String kenanUidNo;
     private String email;
     private String emailPassword;
+    private String createdBy;
 }
 

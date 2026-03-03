@@ -76,6 +76,7 @@ public class CreateServiceCBM implements HttpAction {
                     Instant.now().toString(), "","");
         }
 
+
         AtomicBoolean isSubscriberExist = new AtomicBoolean(true);
         AtomicBoolean isSubscriptionExist = new AtomicBoolean(true);
         AtomicBoolean isProductExist = new AtomicBoolean(true);
@@ -107,6 +108,8 @@ public class CreateServiceCBM implements HttpAction {
         if (subscriberName.length() > 100) {
             return createErrorResponse("Subscriber name too long", 400);
         }
+
+
         Customer subscriber = subscriberRepository.findByDiscoveredName(subscriberName)
                 .orElseGet(() -> {
                     isSubscriberExist.set(false);
@@ -126,6 +129,12 @@ public class CreateServiceCBM implements HttpAction {
                     prop.put("subscriberUserName", request.getUserName());
                     prop.put("address", request.getSubsAddress());
                     prop.put("subscriberType", "Regular");
+                    prop.put("createdBy",
+                            request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                    ? request.getCreatedBy()
+                                    : "CA"
+                    );
+                    prop.put("actionName", ACTION_LABEL);
                     s.setProperties(prop);
 
                     subscriberRepository.save(s, 2);
@@ -178,6 +187,12 @@ public class CreateServiceCBM implements HttpAction {
                     prop.put("subscriberID_CableModem", request.getSubscriberId());
                     prop.put("servicePackage", request.getServicePackage());
                     prop.put("kenanSubscriberId", request.getKenanUidNo());
+                    prop.put("createdBy",
+                            request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                    ? request.getCreatedBy()
+                                    : "CA"
+                    );
+                    prop.put("actionName", ACTION_LABEL);
                     sub.setCustomer(subscriber);
                     sub.setProperties(prop);
                     subscriptionRepository.save(sub, 2);
@@ -206,6 +221,12 @@ public class CreateServiceCBM implements HttpAction {
                     Map<String, Object> prop = new HashMap<>();
                     prop.put("productStatus", "Active");
                     prop.put("productType",request.getProductType());
+                    prop.put("createdBy",
+                            request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                    ? request.getCreatedBy()
+                                    : "CA"
+                    );
+                    prop.put("actionName", ACTION_LABEL);
                     p.setProperties(prop);
                     p.setCustomer(subscriber);
                     productRepository.save(p, 2);
@@ -252,6 +273,12 @@ public class CreateServiceCBM implements HttpAction {
                         prop.put("TransactionID",request.getProductType());
                     }
                     prop.put("serviceStartDate",new Date());
+                    prop.put("createdBy",
+                            request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                    ? request.getCreatedBy()
+                                    : "CA"
+                    );
+                    prop.put("actionName", ACTION_LABEL);
                     c.setProperties(prop);
                     c.setUsingService(new HashSet<>(List.of(product)));
                     serviceRepository.save(c, 2);
@@ -279,6 +306,12 @@ public class CreateServiceCBM implements HttpAction {
                     prop.put("serviceStatus", "Active");
                     prop.put("serviceType",request.getProductType());
                     prop.put("CFSReference",cfs.getDiscoveredName());
+                    prop.put("createdBy",
+                            request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                    ? request.getCreatedBy()
+                                    : "CA"
+                    );
+                    prop.put("actionName", ACTION_LABEL);
                     r.setProperties(prop);
                     r.setUsedService(new HashSet<>(List.of(cfs)));
                     serviceRepository.save(r, 2);
@@ -304,6 +337,12 @@ public class CreateServiceCBM implements HttpAction {
                     deviceProps.put("manufacturer", request.getCbmManufacturer());
                     deviceProps.put("deviceModel", request.getCbmModel());
                     deviceProps.put("OperationalState", "Active");
+                    deviceProps.put("createdBy",
+                            request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                    ? request.getCreatedBy()
+                                    : "CA"
+                    );
+                    deviceProps.put("actionName", ACTION_LABEL);
                     d.setProperties(deviceProps);
                     d.setUsingService(new HashSet<>(List.of(rfs)));
                     cbmDeviceRepository.save(d, 2);

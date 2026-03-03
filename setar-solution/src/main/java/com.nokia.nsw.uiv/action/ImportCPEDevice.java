@@ -100,7 +100,12 @@ public class ImportCPEDevice implements HttpAction {
                 properties.put("macAddressMta", request.getCpeMacAddressMta());
                 properties.put("manufacturer", request.getCpeManufacturer());
                 properties.put("modelSubType", request.getCpeModelSubType());
-
+                properties.put("createdBy",
+                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                ? request.getCreatedBy()
+                                : "CA"
+                );
+                properties.put("actionName", ACTION_LABEL);
                 properties.put("OperationalState", "Active");
                 properties.put("AdministrativeState", "Available");
 
@@ -111,14 +116,14 @@ public class ImportCPEDevice implements HttpAction {
 
             // Create POTS ports
             log.error("-----------------Create POTS ports------------------");
-            createPotsPort(request.getCpeSerialNo(), "POTS_1", cpeDevice);
-            createPotsPort(request.getCpeSerialNo(), "POTS_2", cpeDevice);
+            createPotsPort(request, "POTS_1", cpeDevice);
+            createPotsPort(request, "POTS_2", cpeDevice);
 
             // Create Ethernet ports
             log.error("-----------------Create Ethernet ports------------------");
             int noOfPorts = determineNumberOfEthernetPorts(request.getCpeType(), request.getCpeModel());
             for (int i = 1; i <= noOfPorts; i++) {
-                createEthernetPort(request.getCpeSerialNo(), "ETH_" + i, cpeDevice);
+                createEthernetPort(request, "ETH_" + i, cpeDevice);
             }
 
             log.error(Constants.ACTION_COMPLETED);
@@ -139,10 +144,10 @@ public class ImportCPEDevice implements HttpAction {
         }
     }
 
-    private void createPotsPort(String serialNo, String portType, LogicalDevice cpeDevice)
+    private void createPotsPort(ImportCPEDeviceRequest request, String portType, LogicalDevice cpeDevice)
             throws BadRequestException, AccessForbiddenException, ModificationNotAllowedException {
         log.error("-----------------Create POTS ports-Started------------------");
-        String portName = serialNo + Constants.UNDER_SCORE + portType;
+        String portName = request.getCpeSerialNo() + Constants.UNDER_SCORE + portType;
         Optional<LogicalComponent> optPort = componentRepository.findByDiscoveredName(portName);
 
         if (!optPort.isPresent()) {
@@ -154,11 +159,17 @@ public class ImportCPEDevice implements HttpAction {
             potsPort.setContext(Constants.SETAR);
             Map<String, Object> properties = new HashMap<>();
             properties.put("portName", portName);
-            properties.put("serialNumber", serialNo);
+            properties.put("serialNumber", request.getCpeSerialNo());
             properties.put("portStatus", "Available");
             properties.put("portType", portType);
             properties.put("serviceCount", "0");
             properties.put("description","Voice Port");
+            properties.put("createdBy",
+                    request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                            ? request.getCreatedBy()
+                            : "CA"
+            );
+            properties.put("actionName", ACTION_LABEL);
             potsPort.setProperties(properties);
 
             componentRepository.save(potsPort, 2);
@@ -171,10 +182,10 @@ public class ImportCPEDevice implements HttpAction {
         log.error("-----------------Create POTS ports-Completed------------------");
     }
 
-    private void createEthernetPort(String serialNo, String portType, LogicalDevice cpeDevice)
+    private void createEthernetPort(ImportCPEDeviceRequest request, String portType, LogicalDevice cpeDevice)
             throws BadRequestException, AccessForbiddenException, ModificationNotAllowedException {
 
-        String portName = serialNo + Constants.UNDER_SCORE + portType;
+        String portName = request.getCpeSerialNo() + Constants.UNDER_SCORE + portType;
         Optional<LogicalComponent> optPort = componentRepository.findByDiscoveredName(portName);
         if (!optPort.isPresent()) {
             log.error("Creating Ethernet port: {}", portName);
@@ -185,12 +196,17 @@ public class ImportCPEDevice implements HttpAction {
             ethPort.setContext(Constants.SETAR);
             Map<String, Object> properties = new HashMap<>();
             properties.put("portName", portName);
-            properties.put("serialNumber", serialNo);
+            properties.put("serialNumber", request.getCpeSerialNo());
             properties.put("portType", portType);
             properties.put("serviceCount", "0");
             properties.put("portStatus", "Available");
             properties.put("description","Data Port");
-
+            properties.put("createdBy",
+                    request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                            ? request.getCreatedBy()
+                            : "CA"
+            );
+            properties.put("actionName", ACTION_LABEL);
             ethPort.setProperties(properties);
             componentRepository.save(ethPort, 2);
 //            cpeDevice.setContained(new HashSet<>(List.of(ethPort)));
@@ -224,6 +240,12 @@ public class ImportCPEDevice implements HttpAction {
                         vlanProps.put("serviceType", "");
                         vlanProps.put("vlanId", "");
                         vlanProps.put("vlanStatus", "Available");
+                        vlanProps.put("createdBy",
+                                request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                        ? request.getCreatedBy()
+                                        : "CA"
+                        );
+                        vlanProps.put("actionName", ACTION_LABEL);
                         vlanProps.put("description","VLAN Interface for " + portName);
                         vlan.setProperties(vlanProps);
                         logicalInterfaceRepository.save(vlan, 2);

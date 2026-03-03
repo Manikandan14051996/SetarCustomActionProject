@@ -178,6 +178,12 @@ public class CreateServiceEVPN implements HttpAction {
                             if (req.getCompanyName() != null) subProps.put("companyName", req.getCompanyName());
                             if (req.getContactPhone() != null)
                                 subProps.put("contactPhoneNumber", req.getContactPhone());
+                            subProps.put("createdBy",
+                                    req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
+                                            ? req.getCreatedBy()
+                                            : "CA"
+                            );
+                            subProps.put("actionName", ACTION_LABEL);
                             if (req.getSubsAddress() != null) subProps.put("subscriberAddress", req.getSubsAddress());
                             newSub.setProperties(subProps);
                             return customerRepo.save(newSub);
@@ -211,6 +217,12 @@ public class CreateServiceEVPN implements HttpAction {
                     if (req.getVlanId() != null) subsProps.put("evpnVLAN", req.getVlanId());
                     subsProps.put("serviceID", req.getServiceId());
                     subsProps.put("householdId", req.getHhid());
+                    subsProps.put("createdBy",
+                            req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
+                                    ? req.getCreatedBy()
+                                    : "CA"
+                    );
+                    subsProps.put("actionName", ACTION_LABEL);
                     subsProps.put("serviceLink", ("IPBH".equalsIgnoreCase(req.getProductSubtype()) ? "SRX" : "ONT"));
                     // compute OLT position string per spec
                     String oltPos;
@@ -267,6 +279,12 @@ public class CreateServiceEVPN implements HttpAction {
                     prodProps.put("productStatus", "Active");
                     prodProps.put("linkedSubscriber", subscriber.getDiscoveredName());
                     prodProps.put("linkedSubscription", subscription.getDiscoveredName());
+                    prodProps.put("createdBy",
+                            req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
+                                    ? req.getCreatedBy()
+                                    : "CA"
+                    );
+                    prodProps.put("actionName", ACTION_LABEL);
                     prod.setProperties(prodProps);
                     prod.setCustomer(subscriber);
                     product = prod;
@@ -306,6 +324,12 @@ public class CreateServiceEVPN implements HttpAction {
                     cfsProps.put("serviceStatus", "Active");
                     cfsProps.put("serviceType", req.getProductType());
                     cfsProps.put("serviceStartDate", Instant.now().toString());
+                    cfsProps.put("createdBy",
+                            req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
+                                    ? req.getCreatedBy()
+                                    : "CA"
+                    );
+                    cfsProps.put("actionName", ACTION_LABEL);
                     if (req.getFxOrderID() != null) cfsProps.put("transactionId", req.getFxOrderID());
                     cfsProps.put("linkedProduct", product.getDiscoveredName());
                     newCfs.setProperties(cfsProps);
@@ -334,6 +358,12 @@ public class CreateServiceEVPN implements HttpAction {
                     rfsProps.put("serviceStatus", "Active");
                     rfsProps.put("serviceType", req.getProductType());
                     rfsProps.put("linkedCFS", cfs.getDiscoveredName());
+                    rfsProps.put("createdBy",
+                            req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
+                                    ? req.getCreatedBy()
+                                    : "CA"
+                    );
+                    rfsProps.put("actionName", ACTION_LABEL);
                     newRfs.addUsedService(cfs);
                     rfs = newRfs;
                     newRfs.setProperties(rfsProps);
@@ -359,6 +389,12 @@ public class CreateServiceEVPN implements HttpAction {
                     Map<String, Object> oltProps = new HashMap<>();
                     oltProps.put("OperationalState", "Active");
                     oltProps.put("oltPosition", req.getOltName());
+                    oltProps.put("createdBy",
+                            req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
+                                    ? req.getCreatedBy()
+                                    : "CA"
+                    );
+                    oltProps.put("actionName", ACTION_LABEL);
                     if (req.getTemplateNameOnt() != null) oltProps.put("ontTemplate", req.getTemplateNameOnt());
                     dev.setProperties(oltProps);
                     // link RFS reference if exists
@@ -395,6 +431,12 @@ public class CreateServiceEVPN implements HttpAction {
                     ontProps.put("evpnEthPort3Template", "0");
                     ontProps.put("evpnEthPort4Template", "0");
                     ontProps.put("evpnEthPort5Template", "0");
+                    ontProps.put("createdBy",
+                            req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
+                                    ? req.getCreatedBy()
+                                    : "CA"
+                    );
+                    ontProps.put("actionName", ACTION_LABEL);
                     ontProps.put("oltPosition", req.getOltName());
                     // management fields
                     if (req.getTemplateNameVlanMgmnt() != null)
@@ -448,6 +490,12 @@ public class CreateServiceEVPN implements HttpAction {
                         if (req.getTemplateNameVlanMgmnt() != null)
                             vProps.put("mgmtTemplate", req.getTemplateNameVlanMgmnt());
                         vProps.put("OperationalState", "Active");
+                        vProps.put("createdBy",
+                                req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
+                                        ? req.getCreatedBy()
+                                        : "CA"
+                        );
+                        vProps.put("actionName", ACTION_LABEL);
                         v.setProperties(vProps);
                         vlanRepo.save(v);
                     }
@@ -501,6 +549,12 @@ public class CreateServiceEVPN implements HttpAction {
                             putIfNotNull(vProps, "serviceId", req.getServiceId());
                             putIfNotNull(vProps, "vlanCreateTemplate", req.getTemplateNameVlanCreate());
                             putIfNotNull(vProps, "configuredVplsTemplate", req.getTemplateNameVpls());
+                            vProps.put("createdBy",
+                                    req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
+                                            ? req.getCreatedBy()
+                                            : "CA"
+                            );
+                            vProps.put("actionName", ACTION_LABEL);
                             // associate with ONT
                             vProps.put("linkedOnt", ont.getDiscoveredName());
                         } else {
@@ -640,6 +694,12 @@ public class CreateServiceEVPN implements HttpAction {
                                     putIfNotNull(svProps, "vlanCreateTemplate", req.getTemplateNameVlanCreate());
 
                                     svProps.put("OperationalState", "Active");
+                                    svProps.put("createdBy",
+                                            req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
+                                                    ? req.getCreatedBy()
+                                                    : "CA"
+                                    );
+                                    svProps.put("actionName", ACTION_LABEL);
                                     svProps.put("linkedOnt", ont.getDiscoveredName());
                                     singleVlan.setProperties(svProps);
                                     vlanRepo.save(singleVlan);

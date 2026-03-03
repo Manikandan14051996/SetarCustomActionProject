@@ -61,4 +61,5 @@ public class CreateServiceEVPNRequest {
     private String fxOrderID;
     private String subscriberId;
     private String kenanUidNo;
+    private String createdBy;
 }

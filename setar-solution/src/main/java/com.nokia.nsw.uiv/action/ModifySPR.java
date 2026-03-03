@@ -120,8 +120,12 @@ public class ModifySPR implements HttpAction {
                     success = handleEVPN(request, subscription);
                 } else if (isVoip(request)) {
                     success = handleVOIP(request, subscription, ontName);
-                } else if (isOntModification(request)) {
-                    success = handleModifyONT(request, ontName, flag);
+                }
+
+                if (!success) {
+                    if (isOntModification(request)) {
+                        success = handleModifyONT(request, ontName, flag);
+                    }
                 }
             } catch (BadRequestException bre) {
                 log.error("Validation or not found error: {}", bre.getMessage(), bre);
@@ -136,7 +140,8 @@ public class ModifySPR implements HttpAction {
                 return new ModifySPRResponse("200", "UIV action ModifySPR executed successfully.", getCurrentTimestamp(),
                         ontName, subscriptionName);
             } else {
-                throw new Exception("Modify operation failed");
+                return new ModifySPRResponse("200", "UIV action ModifySPR executed successfully.Modification not done", getCurrentTimestamp(),
+                        ontName, subscriptionName);
             }
 
         } catch (BadRequestException bre) {

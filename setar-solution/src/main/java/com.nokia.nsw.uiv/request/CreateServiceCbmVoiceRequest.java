@@ -51,5 +51,6 @@ public class CreateServiceCbmVoiceRequest {
     private String voipPort;           // O
     private String userName;           // O
     private String servicePackage;     // O
-    private String kenanUidNo;         // O
+    private String kenanUidNo;
+    private String createdBy;// O
 }

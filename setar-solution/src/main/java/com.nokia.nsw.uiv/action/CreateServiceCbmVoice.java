@@ -167,6 +167,12 @@ public class CreateServiceCbmVoice implements HttpAction {
                         if (request.getUserName() != null && !request.getUserName().trim().isEmpty()) {
                             subProps.put("userName", request.getUserName());
                         }
+                        subProps.put("createdBy",
+                                request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                        ? request.getCreatedBy()
+                                        : "CA"
+                        );
+                        subProps.put("actionName", ACTION_LABEL);
                         s.setProperties(subProps);
                         // save with depth 2 as in your codebase
                         subscriberRepository.save(s, 2);
@@ -222,6 +228,12 @@ public class CreateServiceCbmVoice implements HttpAction {
                         props.put("simaEndpointId", request.getSimaEndpointId());
                         props.put("voipServiceCode",request.getVoipServiceCode());
                         props.put("servicePackage",request.getServicePackage());
+                        props.put("createdBy",
+                                request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                        ? request.getCreatedBy()
+                                        : "CA"
+                        );
+                        props.put("actionName", ACTION_LABEL);
 
                         // if both servicePackage and voipServiceCode provided, store them
                         if (request.getServicePackage() != null && request.getServicePackage().trim().length() > 0
@@ -269,6 +281,12 @@ public class CreateServiceCbmVoice implements HttpAction {
                         Map<String, Object> prodProps = new HashMap<>();
                         prodProps.put("productStatus", "Active");
                         prodProps.put("productType",request.getProductType());
+                        prodProps.put("createdBy",
+                                request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                        ? request.getCreatedBy()
+                                        : "CA"
+                        );
+                        prodProps.put("actionName", ACTION_LABEL);
                         p.setProperties(prodProps);
                         p.setCustomer(subscriber);
                         productRepository.save(p, 2);
@@ -306,6 +324,12 @@ public class CreateServiceCbmVoice implements HttpAction {
                         cfsProps.put("serviceStatus", "Active");
                         cfsProps.put("serviceType", request.getProductType());
                         cfsProps.put("serviceStartDate", Instant.now().toString());
+                        cfsProps.put("createdBy",
+                                request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                        ? request.getCreatedBy()
+                                        : "CA"
+                        );
+                        cfsProps.put("actionName", ACTION_LABEL);
                         if (request.getFxOrderID() != null) cfsProps.put("transactionId", request.getFxOrderID());
                         c.setProperties(cfsProps);
                         c.setUsingService(new HashSet<>(List.of(product)));
@@ -328,6 +352,12 @@ public class CreateServiceCbmVoice implements HttpAction {
                         Map<String, Object> rfsProps = new HashMap<>();
                         rfsProps.put("serviceStatus", "Active");
                         rfsProps.put("serviceType", request.getProductType());
+                        rfsProps.put("createdBy",
+                                request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                        ? request.getCreatedBy()
+                                        : "CA"
+                        );
+                        rfsProps.put("actionName", ACTION_LABEL);
                         r.setProperties(rfsProps);
                         r.setUsedService(new HashSet<>(List.of(cfs)));
                         serviceCustomRepository.save(r, 2);
@@ -349,6 +379,12 @@ public class CreateServiceCbmVoice implements HttpAction {
                         Map<String, Object> deviceProps = new HashMap<>();
                         deviceProps.put("serialNo", request.getCbmSN());
                         deviceProps.put("macAddress", request.getCbmMac());
+                        deviceProps.put("createdBy",
+                                request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                        ? request.getCreatedBy()
+                                        : "CA"
+                        );
+                        deviceProps.put("actionName", ACTION_LABEL);
                         if (request.getCbmGatewayMac() != null) deviceProps.put("gatewayMacAddress", request.getCbmGatewayMac());
                         if (request.getCbmType() != null) deviceProps.put("deviceType", request.getCbmType());
                         if (request.getCbmManufacturer() != null) deviceProps.put("manufacturer", request.getCbmManufacturer());

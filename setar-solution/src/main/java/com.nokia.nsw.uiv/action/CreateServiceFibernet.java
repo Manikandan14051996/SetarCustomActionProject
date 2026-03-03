@@ -134,6 +134,12 @@ public class CreateServiceFibernet implements HttpAction {
                 if (request.getHhid() != null) custProps.put("houseHoldId", request.getHhid());
                 if (request.getEmail() != null) custProps.put("email", request.getEmail());
                 if (request.getEmailPassword() != null) custProps.put("emailPassword", request.getEmailPassword());
+                custProps.put("createdBy",
+                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                ? request.getCreatedBy()
+                                : "CA"
+                );
+                custProps.put("actionName", ACTION_LABEL);
                 subscriber.setProperties(custProps);
                 customerRepository.save(subscriber, 2);
                 log.error("Created subscriber: {}", subscriberName);
@@ -162,6 +168,12 @@ public class CreateServiceFibernet implements HttpAction {
                 subProps.put("oltPosition", request.getOltName());
                 subProps.put("householdID", request.getHhid());
                 subProps.put("subscriberID_CableModem", request.getSubscriberID());
+                subProps.put("createdBy",
+                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                ? request.getCreatedBy()
+                                : "CA"
+                );
+                subProps.put("actionName", ACTION_LABEL);
                 if (request.getQosProfile() != null) subProps.put("veipQosSessionProfile", request.getQosProfile());
                 if (request.getKenanUidNo() != null) subProps.put("kenanSubscriberId", request.getKenanUidNo());
                 subscription.setProperties(subProps);
@@ -187,6 +199,12 @@ public class CreateServiceFibernet implements HttpAction {
                 prodProps.put("productType", request.getProductType());
                 prodProps.put("productSubtype", request.getProductSubtype());
                 prodProps.put("productStatus", "Active");
+                prodProps.put("createdBy",
+                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                ? request.getCreatedBy()
+                                : "CA"
+                );
+                prodProps.put("actionName", ACTION_LABEL);
                 product.setProperties(prodProps);
                 product.setCustomer(subscriber);
                 productRepository.save(product, 2);
@@ -222,6 +240,13 @@ public class CreateServiceFibernet implements HttpAction {
                 cfsProps.put("serviceStartDate", Instant.now().toString());
                 cfsProps.put("serviceType", request.getProductType());
                 cfsProps.put("serviceStatus", "Active");
+                cfsProps.put("createdBy",
+                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                ? request.getCreatedBy()
+                                : "CA"
+                );
+                cfsProps.put("actionName", ACTION_LABEL);
+                cfs.setProperties(cfsProps);
                 if (request.getFxOrderID() != null) cfsProps.put("transactionId", request.getFxOrderID());
                 cfs.setUsingService(new HashSet<>(List.of(product)));
                 serviceRepository.save(cfs, 2);
@@ -243,6 +268,12 @@ public class CreateServiceFibernet implements HttpAction {
                 Map<String, Object> rfsProps = new HashMap<>();
                 rfsProps.put("serviceType", request.getProductType());
                 rfsProps.put("serviceStatus", "Active");
+                rfsProps.put("createdBy",
+                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                ? request.getCreatedBy()
+                                : "CA"
+                );
+                rfsProps.put("actionName", ACTION_LABEL);
 //                if (request.getFxOrderID() != null) rfsProps.put("transactionId", request.getFxOrderID());
                 rfs.setProperties(rfsProps);
                 rfs.setUsedService(new HashSet<>(List.of(cfs)));
@@ -268,6 +299,12 @@ public class CreateServiceFibernet implements HttpAction {
                     if (request.getTemplateNameHSI() != null) props.put("veipHsiTemplate", request.getTemplateNameHSI());
                     props.put("oltPosition", request.getOltName());
                     props.put("OperationalState", "Active");
+                    props.put("createdBy",
+                            request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                    ? request.getCreatedBy()
+                                    : "CA"
+                    );
+                    props.put("actionName", ACTION_LABEL);
                     oltDevice.setProperties(props);
                     oltDevice.setUsingService(new HashSet<>(List.of(rfs)));
                     logicalDeviceRepository.save(oltDevice, 2);
@@ -284,6 +321,12 @@ public class CreateServiceFibernet implements HttpAction {
                 ontDevice = optOnt.get();
                 Map<String, Object> ontProps = ontDevice.getProperties();
                 ontProps.put("serialNo", request.getOntSN());
+                ontProps.put("createdBy",
+                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                ? request.getCreatedBy()
+                                : "CA"
+                );
+                ontProps.put("actionName", ACTION_LABEL);
                 if (request.getOntModel() != null) ontProps.put("deviceModel", request.getOntModel());
                 if (request.getTemplateNameONT() != null) ontProps.put("ontTemplate", request.getTemplateNameONT());
                 if (request.getMenm() != null) ontProps.put("description", request.getMenm());
@@ -304,6 +347,12 @@ public class CreateServiceFibernet implements HttpAction {
                 ontProps.put("serialNo", request.getOntSN());
                 ontProps.put("oltPosition", request.getOltName());
                 ontProps.put("OperationalState", "Active");
+                ontProps.put("createdBy",
+                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                ? request.getCreatedBy()
+                                : "CA"
+                );
+                ontProps.put("actionName", ACTION_LABEL);
                 if (request.getOntModel() != null) ontProps.put("deviceModel", request.getOntModel());
                 if (request.getTemplateNameONT() != null) ontProps.put("ontTemplate", request.getTemplateNameONT());
                 if (request.getMenm() != null) ontProps.put("description", request.getMenm());
@@ -331,6 +380,12 @@ public class CreateServiceFibernet implements HttpAction {
                     vlanProps.put("vlanId", request.getVlanID());
                     vlanProps.put("OperationalState", "Active");
                     vlanProps.put("serviceId", request.getServiceID());
+                    vlanProps.put("createdBy",
+                            request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                    ? request.getCreatedBy()
+                                    : "CA"
+                    );
+                    vlanProps.put("actionName", ACTION_LABEL);
                     vlan.setProperties(vlanProps);
                     //uncommented for checking devicetointerface association
                     logicalInterfaceRepository.save(vlan, 2);
