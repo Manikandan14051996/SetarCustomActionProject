@@ -128,6 +128,7 @@ public class CreateServiceCBM implements HttpAction {
                     prop.put("subscriberStatus", "Active");
                     prop.put("subscriberUserName", request.getUserName());
                     prop.put("address", request.getSubsAddress());
+                    prop.put("houseHoldId", request.getHhid());
                     prop.put("subscriberType", "Regular");
                     prop.put("createdBy",
                             request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
