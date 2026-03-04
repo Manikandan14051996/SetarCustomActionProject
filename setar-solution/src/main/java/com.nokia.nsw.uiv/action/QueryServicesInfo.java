@@ -257,9 +257,8 @@ public class QueryServicesInfo implements HttpAction {
                             ontSno = ssn.toString();
                         }
 
-                        Object cbm = setarSubscription.getProperties() == null ? null : setarSubscription.getProperties().get("subscriberId_CableModem");
-                        if (cbm != null && (serviceLink == null || !serviceLink.equalsIgnoreCase("ONT"))) {
-                            cbmSubscriberID = cbm.toString();
+                        cbmSubscriberID= setarSubscription.getProperties().get("subscriberID_CableModem").toString();
+                        if (cbmSubscriberID!=null || !serviceLink.equalsIgnoreCase("ONT")) {
                             // setarSubscribername then from subscription's subscriber
                             if (setarSubscription.getCustomer() != null) {
                                 setarSubscribername = setarSubscription.getCustomer().getDiscoveredName();
