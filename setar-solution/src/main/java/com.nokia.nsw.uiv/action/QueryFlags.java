@@ -711,6 +711,17 @@ public class QueryFlags implements HttpAction {
                             flags.put("SERVICE_VOIP_NUMBER1", n1 == null ? "" : n1);
                             flags.put("SERVICE_VOIP_NUMBER2", n2 == null ? "" : n2);
                             flags.put("ONT_MODEL", (String) cbmProps.getOrDefault("deviceModel", ""));
+                            if(!n1.equals("Available")){
+
+                                flags.put("SERVICE_VOIP_NUMBER1", "Exist");
+
+                            }
+
+                            if(!n2.equals("Available")){
+
+                                flags.put("SERVICE_VOIP_NUMBER1", "Exist");
+
+                            }
                             if (!"Available".equalsIgnoreCase(n1) || !"Available".equalsIgnoreCase(n2)) {
                                 flags.put("SERVICE_TEMPLATE_VOIP", "Exist");
                             } else {

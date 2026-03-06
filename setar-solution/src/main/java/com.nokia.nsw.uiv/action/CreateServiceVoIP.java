@@ -195,14 +195,29 @@ public class CreateServiceVoIP implements HttpAction {
             subscriber.setProperties(subProps);
 
             Map<String, Object> subsProps = subscription.getProperties();
-            subsProps.put("voipNumber1", req.getVoipNumber1());
-            subsProps.put("simaCustId", req.getSimaCustID());
-            subsProps.put("simaSubsId", req.getSimaSubsID());
-            subsProps.put("simaEndpointId", req.getSimaEndpointID());
-            if (req.getVoipPackage() != null && !req.getVoipPackage().isEmpty()) {
-                subsProps.put("voipPackage", req.getVoipPackage());
+            if (req.getOntPort().equals("2"))  {
+                subsProps.put("voipNumber2", req.getVoipNumber1());
+                if (req.getSimaSubsID() != null && req.getSimaEndpointID() != null ) {
+                    subsProps.put("simaSubsId2", req.getSimaSubsID());
+                    subsProps.put("simaEndpointId2", req.getSimaEndpointID());
+                }
+
+                if (req.getVoipPackage() != null && req.getVoipServiceCode() != null)
+                {
+                    subsProps.put("voipPackage2", req.getVoipPackage());
+                    subsProps.put("voipServiceCode2", req.getVoipServiceCode());
+                }
+
+            }else {
+                subsProps.put("voipNumber1", req.getVoipNumber1());
+                subsProps.put("simaCustId", req.getSimaCustID());
+                subsProps.put("simaSubsId", req.getSimaSubsID());
+                subsProps.put("simaEndpointId", req.getSimaEndpointID());
+                if (req.getVoipPackage() != null && !req.getVoipPackage().isEmpty()) {
+                    subsProps.put("voipPackage", req.getVoipPackage());
+                }
+                subsProps.put("voipServiceCode", req.getVoipServiceCode());
             }
-            subsProps.put("voipServiceCode", req.getVoipServiceCode());
 
             subsProps.put("serviceLink", (req.getOntSN() != null && req.getOntSN().startsWith("ALCL")) ? "ONT" : "Cable_Modem");
             if (!isSubscriberExist.get() && !isSubscriptionExist.get()) {

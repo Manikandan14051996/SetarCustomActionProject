@@ -257,11 +257,13 @@ public class QueryServicesInfo implements HttpAction {
                             ontSno = ssn.toString();
                         }
 
-                        cbmSubscriberID= setarSubscription.getProperties().get("subscriberID_CableModem").toString();
-                        if (cbmSubscriberID!=null || !serviceLink.equalsIgnoreCase("ONT")) {
-                            // setarSubscribername then from subscription's subscriber
-                            if (setarSubscription.getCustomer() != null) {
-                                setarSubscribername = setarSubscription.getCustomer().getDiscoveredName();
+                        if(setarSubscription.getProperties().get("subscriberID_CableModem")!=null) {
+                            cbmSubscriberID = setarSubscription.getProperties().get("subscriberID_CableModem").toString();
+                            if (cbmSubscriberID != null || !serviceLink.equalsIgnoreCase("ONT")) {
+                                // setarSubscribername then from subscription's subscriber
+                                if (setarSubscription.getCustomer() != null) {
+                                    setarSubscribername = setarSubscription.getCustomer().getDiscoveredName();
+                                }
                             }
                         }
                     } else {

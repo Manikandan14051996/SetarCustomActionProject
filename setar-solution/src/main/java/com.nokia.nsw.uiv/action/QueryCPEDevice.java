@@ -81,14 +81,18 @@ public class QueryCPEDevice implements HttpAction {
         response.setResourceMacMTA((String) device.getProperties().get("macAddressMta"));
         response.setResourceManufacturer((String) device.getProperties().get("manufacturer"));
         response.setResourceStatus((String) device.getProperties().get("OperationalState"));
-        response.setResourceDescription((String) device.getProperties().get("description"));
+        response.setResourceDescription(device.getProperties().getOrDefault("description", "").toString());
 
         // Map resourceSN from localName (remove prefix)
         response.setResourceSN(device.getDiscoveredName().replaceFirst(resourceType + Constants.UNDER_SCORE , ""));
 
         // Map voice ports
-        response.setResourceVoicePort1((String) device.getProperties().get("voipPort1"));
-        response.setResourceVoicePort2((String) device.getProperties().get("voipPort2"));
+        response.setResourceVoicePort1(
+                device.getProperties().getOrDefault("voipPort1", "Available").toString()
+        );
+        response.setResourceVoicePort2(
+                device.getProperties().getOrDefault("voipPort2", "Available").toString()
+        );
         // Device type specific adjustments
         if ("CBM".equalsIgnoreCase(resourceType)) {
             response.setResourceMacMTA((String) device.getProperties().get("macAddressMta"));
