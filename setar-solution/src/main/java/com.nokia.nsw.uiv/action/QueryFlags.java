@@ -128,7 +128,7 @@ public class QueryFlags implements HttpAction {
                 serviceIdFlag = rfsList.isEmpty() ? "New" : "Exist";
             }
 
-            flags.put("SERVICE_ID_FLAG", serviceIdFlag);
+            flags.put("SERVICE_ID", serviceIdFlag);
 // --------------------------------------------------------
 
             log.error("------------Test Trace # 4---------------");
@@ -152,7 +152,7 @@ public class QueryFlags implements HttpAction {
                     && !"Configure".equalsIgnoreCase(actionType)) {
                 if (ontSN == null || ontSN.trim().isEmpty() || "NA".equalsIgnoreCase(ontSN)) {
                     try {
-                        String rfsName = "RFS" + Constants.UNDER_SCORE + subscriber + Constants.UNDER_SCORE  + (serviceID == null ? "" : serviceID);
+                        String rfsName = "RFS" + Constants.UNDER_SCORE + subscriber + Constants.UNDER_SCORE + (serviceID == null ? "" : serviceID);
                         List<Service> rfsServices =
                                 StreamSupport.stream(serviceCustomRepository.findAll().spliterator(), false)
                                         .filter(sc -> sc.getKind().equalsIgnoreCase(Constants.SETAR_KIND_SETAR_RFS))
@@ -166,22 +166,22 @@ public class QueryFlags implements HttpAction {
                                 continue;
                             }
                             if (rfs.getDiscoveredName() != null && rfs.getDiscoveredName().contains(rfsName)) {
-                                Service rfs1=serviceCustomRepository.findByDiscoveredName(rfs.getDiscoveredName()).get();
-                                Service cfs=rfs1.getUsedService().stream().findFirst().get();
+                                Service rfs1 = serviceCustomRepository.findByDiscoveredName(rfs.getDiscoveredName()).get();
+                                Service cfs = rfs1.getUsedService().stream().findFirst().get();
                                 cfs = serviceCustomRepository.findByDiscoveredName(cfs.getDiscoveredName()).get();
-                                String productName = cfs.getUsingService().stream().filter(ser->ser.getKind().equalsIgnoreCase(Constants.SETAR_KIND_SETAR_PRODUCT)).findFirst().get().getDiscoveredName();
+                                String productName = cfs.getUsingService().stream().filter(ser -> ser.getKind().equalsIgnoreCase(Constants.SETAR_KIND_SETAR_PRODUCT)).findFirst().get().getDiscoveredName();
                                 Product product = productRepository.findByDiscoveredName(productName).get();
-                                product=productRepository.findByDiscoveredName(product.getDiscoveredName()).get();
-                                Subscription subscription=product.getSubscription().stream().findFirst().get();
+                                product = productRepository.findByDiscoveredName(product.getDiscoveredName()).get();
+                                Subscription subscription = product.getSubscription().stream().findFirst().get();
 
-                                if (subscription!= null) {
+                                if (subscription != null) {
 
 
                                     String subServiceId = (String) safeProps(subscription.getProperties())
                                             .getOrDefault("serviceID", "");
 
                                     if (serviceID != null && serviceID.equals(subServiceId)) {
-                                        Set<LogicalDevice> used = rfs1.getUsedResource().stream().map(r->(LogicalDevice)r).collect(Collectors.toSet());
+                                        Set<LogicalDevice> used = rfs1.getUsedResource().stream().map(r -> (LogicalDevice) r).collect(Collectors.toSet());
                                         if (used != null) {
                                             for (Resource res : used) {
                                                 if (res.getDiscoveredName() != null &&
@@ -203,7 +203,7 @@ public class QueryFlags implements HttpAction {
 
                                                     flags.put("SERVICE_LINK", "Cable_Modem");
 
-                                                    String mac = safeProps(res.getProperties()).get("macAddress").toString();
+                                                    String mac = res.getProperties().get("macAddress").toString();
                                                     if (mac != null) {
                                                         flags.put("SERVICE_SN", mac.toString());   // ✅ REQUIRED
                                                         flags.put("CBM_MAC", mac.toString());      // ✅ REQUIRED
@@ -242,7 +242,7 @@ public class QueryFlags implements HttpAction {
             log.error("------------Test Trace # 6---------------");
             if (equalsIgnoreCase(productType, "VOIP") && equalsIgnoreCase(actionType, "Configure") && serviceID != null) {
                 log.error("Trace: VOIP Configure flow - checking voip device mapping");
-                String voipDeviceName = subscriber + Constants.UNDER_SCORE  + serviceID;
+                String voipDeviceName = subscriber + Constants.UNDER_SCORE + serviceID;
                 Optional<LogicalDevice> optVoip = deviceRepository.findByDiscoveredName(voipDeviceName);
 
                 if (optVoip.isPresent()) {
@@ -500,7 +500,7 @@ public class QueryFlags implements HttpAction {
             log.error("------------Test Trace # 8---------------");
             if (ontSN != null && !"".equals(ontSN) && equalsIgnoreCase(productSubtype, "IPTV") && equalsIgnoreCase(actionType, "Unconfigure")) {
                 log.error("Trace: IPTV Unconfigure path - searching subscription");
-                String subGdn = subscriber + Constants.UNDER_SCORE  + (serviceID == null ? "" : serviceID);
+                String subGdn = subscriber + Constants.UNDER_SCORE + (serviceID == null ? "" : serviceID);
                 Optional<Subscription> optSub = subscriptionRepository.findByDiscoveredName(subGdn);
                 String ontSNO = "NA";
                 if (optSub.isPresent()) {
@@ -639,10 +639,10 @@ public class QueryFlags implements HttpAction {
                     Subscription found = optFound.get();
                     Map<String, Object> p = safeProps(found.getProperties());
 
-                    Object link  = p.get("serviceLink");
-                    Object sSN   = p.get("serviceSN");
-                    Object sMAC  = p.get("serviceMac");
-                    Object qos   = p.get("veipQosSessionProfile");
+                    Object link = p.get("serviceLink");
+                    Object sSN = p.get("serviceSN");
+                    Object sMAC = p.get("serviceMac");
+                    Object qos = p.get("veipQosSessionProfile");
                     Object kenan = p.get("kenanSubscriberId");
 
                     if (link != null) {
@@ -675,14 +675,12 @@ public class QueryFlags implements HttpAction {
                         log.error("Trace: ontSN derived from serviceSN = {}", ontSN);
                     }
                 }
-            }
-
-            else if (!equalsIgnoreCase(actionType, "Configure")) {
+            } else if (!equalsIgnoreCase(actionType, "Configure")) {
                 String subscriptionToSearch;
                 if (ontSN != null && ontSN.contains("ALCL")) {
-                    subscriptionToSearch = subscriber + Constants.UNDER_SCORE  + (serviceID == null ? "" : serviceID) + Constants.UNDER_SCORE  + ontSN;
+                    subscriptionToSearch = subscriber + Constants.UNDER_SCORE + (serviceID == null ? "" : serviceID) + Constants.UNDER_SCORE + ontSN;
                 } else {
-                    subscriptionToSearch = subscriber + Constants.UNDER_SCORE  + (serviceID == null ? "" : serviceID);
+                    subscriptionToSearch = subscriber + Constants.UNDER_SCORE + (serviceID == null ? "" : serviceID);
                 }
                 log.error("Trace: Searching subscription by DN: " + subscriptionToSearch);
                 Optional<Subscription> optFound = subscriptionRepository.findByDiscoveredName(subscriptionToSearch);
@@ -702,7 +700,7 @@ public class QueryFlags implements HttpAction {
                     if (kenan != null) flags.put("KENAN_UIDNO", kenan.toString());
 
                     if ("Cable_Modem".equalsIgnoreCase(String.valueOf(link))) {
-                        String cbmName = "CBM" + Constants.UNDER_SCORE +(sMAC == null ? "" : sMAC.toString());
+                        String cbmName = "CBM" + Constants.UNDER_SCORE + (sMAC == null ? "" : sMAC.toString());
                         Optional<LogicalDevice> optCbm = deviceRepository.findByDiscoveredName(cbmName);
                         if (optCbm.isPresent()) {
                             LogicalDevice cbm = optCbm.get();
@@ -720,7 +718,7 @@ public class QueryFlags implements HttpAction {
                             }
                             log.error("Trace: CBM inspected: mac=" + flags.get("CBM_MAC") + " voip1=" + flags.get("SERVICE_VOIP_NUMBER1"));
                         } else {
-                            String alt = "CBM" +(serviceID == null ? "" : serviceID);
+                            String alt = "CBM" + (serviceID == null ? "" : serviceID);
                             deviceRepository.findByDiscoveredName(alt).ifPresent(dev -> {
                                 Map<String, Object> dp = safeProps(dev.getProperties());
                                 flags.put("ONT_MODEL", (String) dp.getOrDefault("deviceModel", ""));
@@ -740,7 +738,7 @@ public class QueryFlags implements HttpAction {
 
             log.error("------------Test Trace # 12---------------");
             if ("ONT".equalsIgnoreCase(serviceLink) || "SRX".equalsIgnoreCase(serviceLink) || (ontSN != null && ontSN.contains("ALCL"))) {
-                String ontGdn = ontSN == null ? "" :"ONT" + ontSN;
+                String ontGdn = ontSN == null ? "" : "ONT" + ontSN;
                 if (ontGdn.length() > 100) {
                     return new QueryFlagsResponse("400", ERROR_PREFIX + "ONT name too long", getCurrentTimestamp(), Collections.emptyMap());
                 }
@@ -771,7 +769,7 @@ public class QueryFlags implements HttpAction {
 
                         log.error("Trace: ENTERPRISE flow - deriving ontPort from RFS");
 
-                        for (Service rfs : StreamSupport.stream(serviceCustomRepository.findAll().spliterator(),false).filter(service -> service.getDiscoveredName().contains(Constants.RFS)).toList()) {
+                        for (Service rfs : StreamSupport.stream(serviceCustomRepository.findAll().spliterator(), false).filter(service -> service.getDiscoveredName().contains(Constants.RFS)).toList()) {
 
                             if (rfs.getDiscoveredName() == null
                                     || !rfs.getDiscoveredName().contains(serviceID)) {
@@ -788,7 +786,7 @@ public class QueryFlags implements HttpAction {
                                 Service cfs =
                                         serviceCustomRepository.findByDiscoveredName(
                                                 rfs1.getUsedService().stream().findFirst().get().getDiscoveredName()).orElse(null);
-                                String productName = cfs.getUsingService().stream().filter(ser->ser.getKind().equalsIgnoreCase(Constants.SETAR_KIND_SETAR_PRODUCT)).findFirst().get().getDiscoveredName();
+                                String productName = cfs.getUsingService().stream().filter(ser -> ser.getKind().equalsIgnoreCase(Constants.SETAR_KIND_SETAR_PRODUCT)).findFirst().get().getDiscoveredName();
                                 if (cfs == null || productName.isBlank()) continue;
 
                                 Product product =
@@ -816,6 +814,9 @@ public class QueryFlags implements HttpAction {
                     flags.put("ONT_MODEL", (String) ontProps.getOrDefault("deviceModel", ""));
                     flags.put("SERVICE_SN", (String) ontProps.getOrDefault("serialNo", ""));
                     flags.put("SERVICE_MAC", (String) ontProps.getOrDefault("macAddress", ""));
+                    flags.put("ONT_TEMPLATE", (String) ontProps.getOrDefault("ontTemplate", ""));
+                    flags.put("SERVICE_VOIP_NUMBER1", (String) ontProps.getOrDefault("potsPort1Number", ""));
+                    flags.put("SERVICE_VOIP_NUMBER2", (String) ontProps.getOrDefault("potsPort2Number", ""));
                     log.error("Trace: ONT found: model=" + flags.get("ONT_MODEL") + " sn=" + flags.get("SERVICE_SN"));
 
                     Object parentOltObj = ontProps.get("oltPosition");
@@ -823,7 +824,7 @@ public class QueryFlags implements HttpAction {
                         String oltDiscoveredName = parentOltObj.toString();
                         deviceRepository.findByDiscoveredName(oltDiscoveredName).ifPresent(olt -> {
                             Map<String, Object> oltProps = safeProps(olt.getProperties());
-                            flags.put("SERVICE_OLT_POSITION", oltProps.get("oltPosition")!=null?oltProps.get("oltPosition").toString():"");
+                            flags.put("OLT_POSITION", oltProps.get("oltPosition") != null ? oltProps.get("oltPosition").toString() : "");
                             flags.put("SERVICE_TEMPLATE_ONT", existsString(oltProps.get("ontTemplate")));
                             flags.put("SERVICE_TEMPLATE_IPTV", existsString(oltProps.get("iptvServiceTemplate")));
 
@@ -832,6 +833,72 @@ public class QueryFlags implements HttpAction {
                             flags.put("SERVICE_TEMPLATE_VOIP", existsString(oltProps.get("voipServiceTemplate")));
                             flags.put("SERVICE_TEMPLATE_POTS1", existsString(oltProps.get("voipPots1Template")));
                             flags.put("SERVICE_TEMPLATE_POTS2", existsString(oltProps.get("voipPots2Template")));
+
+                            String templateNameOnt = existsString(oltProps.get("ontTemplate"));
+
+                            if (templateNameOnt != "New" && templateNameOnt != null && templateNameOnt != "") {
+                                flags.put("SERVICE_EXIST", "Exist");
+                            } else {
+                                flags.put("SERVICE_EXIST", "New");
+                            }
+
+                            String templateNameCard = existsString(oltProps.get("evpnOntCardTemplate"));
+
+                            if (templateNameCard != "" && templateNameCard != null) {
+                                flags.put("SERVICE_EVPN_EXIST", "Exist");
+                            } else {
+                                flags.put("SERVICE_EVPN_EXIST", "Exist");
+                            }
+                            String templateNameVeip = existsString(oltProps.get("veipServiceTemplate"));
+                            //tempVEIP = templateNameVeip;
+                            if (templateNameVeip != "" && templateNameVeip != null) {
+                                flags.put("SERVICE_VEIP_EXIST", "Exist");
+                            } else {
+                                flags.put("SERVICE_VEIP_EXIST", "New");
+                            }
+
+                            String templateNameHSI = existsString(oltProps.get("veipHsiTemplate"));
+                            //tempHSI = templateNameHSI;
+                            if (templateNameHSI != "" && templateNameHSI != null) {
+                                flags.put("SERVICE_HSI_EXIST", "Exist");
+                            } else {
+                                flags.put("SERVICE_HSI_EXIST", "New");
+                            }
+
+                            String templateNameVoip = existsString(oltProps.get("voipServiceTemplate"));
+                            //tempVOIP = templateNameVoip;
+                            if (templateNameVoip != "" && templateNameVoip != null) {
+                                flags.put("SERVICE_VOIP_EXIST", "Exist");
+                            } else {
+                                flags.put("SERVICE_VOIP_EXIST", "New");
+                            }
+
+                            String templateNamePots1 = existsString(oltProps.get("voipPots1Template"));
+                            //tempPOTS1 = templateNamePots1;
+                            if (templateNamePots1 != "" && templateNamePots1 != null) {
+                                flags.put("SERVICE_POTS1_EXIST", "Exist");
+                            } else {
+                                flags.put("SERVICE_POTS1_EXIST", "New");
+                            }
+
+                            String templateNamePots2 = existsString(oltProps.get("voipPots2Template"));
+                            //tempPOTS2 = templateNamePots2;
+                            if (templateNamePots2 != "" && templateNamePots2 != null) {
+                                flags.put("SERVICE_POTS2_EXIST", "Exist");
+                            } else {
+                                flags.put("SERVICE_POTS2_EXIST", "New");
+                            }
+
+
+                            String templateNameIPTV = existsString(oltProps.get("iptvServiceTemplate"));
+                            //tempIPTV = templateNameIPTV;
+                            if (templateNameIPTV != "" && templateNameIPTV != null) {
+                                flags.put("SERVICE_IPTV_EXIST", "Exist");
+                            } else {
+                                flags.put("SERVICE_IPTV_EXIST", "New");
+                            }
+
+
                             log.error("Trace: OLT templates checked for OLT=" + oltDiscoveredName);
                         });
                     }
@@ -931,8 +998,7 @@ public class QueryFlags implements HttpAction {
                             log.error("Trace: IPTV ID added (ONT path) = {}", sid);
                         }
                     }
-                }
-                else {
+                } else {
                     String cbmMac = flags.getOrDefault("CBM_MAC", "");
 
                     if (cbmMac != null && !cbmMac.isEmpty()) {
@@ -1020,14 +1086,14 @@ public class QueryFlags implements HttpAction {
                 flags.put("SERVICE_RFS_SINGLE", rfsCountForOnt == 1 ? "YES" : "NO");
 
 // ---------- CASE A : WIFI Maintenance check for port 3/4/5 ----------
-                if (equalsAnyIgnoreCase(ontPort,"3","4","5")) {
+                if (equalsAnyIgnoreCase(ontPort, "3", "4", "5")) {
                     String wifiFlag = "NO";
 
                     for (Subscription s : subscriptionRepository.findAll()) {
-                        Map<String,Object> sp = safeProps(s.getProperties());
+                        Map<String, Object> sp = safeProps(s.getProperties());
                         if ("WIFI Maintenance".equalsIgnoreCase(
-                                (String) sp.getOrDefault("serviceSubType","")) &&
-                                ontSN.equals(sp.getOrDefault("serviceSN","").toString())) {
+                                (String) sp.getOrDefault("serviceSubType", "")) &&
+                                ontSN.equals(sp.getOrDefault("serviceSN", "").toString())) {
 
                             wifiFlag = "YES";
                             break;
@@ -1045,7 +1111,7 @@ public class QueryFlags implements HttpAction {
 
                     if (optOnt.isPresent()) {
 
-                        Map<String,Object> ontProps = safeProps(optOnt.get().getProperties());
+                        Map<String, Object> ontProps = safeProps(optOnt.get().getProperties());
                         Object parentOlt = ontProps.get("oltPosition");
 
                         if (parentOlt != null) {
@@ -1054,7 +1120,7 @@ public class QueryFlags implements HttpAction {
 
                             if (optOlt.isPresent()) {
 
-                                Map<String,Object> oltProps = safeProps(optOlt.get().getProperties());
+                                Map<String, Object> oltProps = safeProps(optOlt.get().getProperties());
 
                                 String evpnOntPort = (ontPort == null ? "" : ontPort.trim());
 
@@ -1087,7 +1153,7 @@ public class QueryFlags implements HttpAction {
                     if (optRfs.isPresent()) {
 
                         Service rfs = optRfs.get();
-                        Set<LogicalDevice> usedRes = rfs.getUsedResource().stream().map(r->(LogicalDevice)r).collect(Collectors.toSet());
+                        Set<LogicalDevice> usedRes = rfs.getUsedResource().stream().map(r -> (LogicalDevice) r).collect(Collectors.toSet());
 
                         if (usedRes != null) {
                             for (Resource res : usedRes) {
@@ -1114,11 +1180,11 @@ public class QueryFlags implements HttpAction {
                             flags.put("SERVICE_LINK", (String) sp.getOrDefault("serviceLink", ""));
                             Customer cust = sub.getCustomer();
                             if (cust != null) {
-                                Map<String,Object> cp = safeProps(cust.getProperties());
-                                flags.put("FIRST_NAME", (String) cp.getOrDefault("subscriberFirstName",""));
-                                flags.put("LAST_NAME", (String) cp.getOrDefault("subscriberLastName",""));
+                                Map<String, Object> cp = safeProps(cust.getProperties());
+                                flags.put("FIRST_NAME", (String) cp.getOrDefault("subscriberFirstName", ""));
+                                flags.put("LAST_NAME", (String) cp.getOrDefault("subscriberLastName", ""));
                             }
-                            });
+                        });
                     }
                 } catch (Exception e) {
                     log.error("Trace: Case-B failed {}", e.getMessage());
@@ -1191,7 +1257,7 @@ public class QueryFlags implements HttpAction {
                         } else {
 
                             Subscription currentEvpn = evpnSubs.get(0);
-                            Subscription currentEvpn1=evpnSubs.get(1);
+                            Subscription currentEvpn1 = evpnSubs.get(1);
                             Map<String, Object> evpnProps = safeProps(currentEvpn.getProperties());
                             Map<String, Object> evpnProp = safeProps(currentEvpn.getProperties());
 
@@ -1277,12 +1343,7 @@ public class QueryFlags implements HttpAction {
                 } catch (Exception e) {
                     log.error("Trace: Case-C failed {}", e.getMessage());
                 }
-            }
-
-
-            // ---------------------- Case D : Non EVPN + Not Configure -----------------------
-            // ---------------------- Case D : Non-EVPN / Non-Enterprise + Not Configure ------------------
-            else if (!(equalsIgnoreCase(productType, "EVPN") ||
+            } else if (!(equalsIgnoreCase(productType, "EVPN") ||
                     equalsIgnoreCase(productType, "ENTERPRISE"))
                     && (actionType == null || !actionType.contains("Configure"))
                     && subscriber != null && serviceID != null && ontSN != null) {
@@ -1296,11 +1357,14 @@ public class QueryFlags implements HttpAction {
                     String finalOntSN = ontSN;
                     subscriptionRepository.findByDiscoveredName(subName1).ifPresent(sub -> {
 
-                        Map<String, Object> sp = safeProps(sub.getProperties());
+                        Map<String, Object> sp = sub.getProperties();
 
                         // ---------------- BASIC ASSIGNMENTS ----------------
                         String evpnPort = (String) sp.getOrDefault("evpnPort", "");
                         flags.put("SERVICE_ONT_PORT", evpnPort);
+
+                        String serviceOltPosition = (String) sp.getOrDefault("oltPosition", "");
+                        flags.put("SERVICE_OLT_POSITION", serviceOltPosition);
 
                         String vlan = (String) sp.getOrDefault("evpnQosSessionProfile", "");
                         flags.put("QOS_PROFILE", vlan);
@@ -1312,7 +1376,7 @@ public class QueryFlags implements HttpAction {
 
                         deviceRepository.findByDiscoveredName(ontGdn).ifPresent(ont -> {
 
-                            Map<String, Object> ontProps = safeProps(ont.getProperties());
+                            Map<String, Object> ontProps = ont.getProperties();
                             Object parentOltObj = ontProps.get("oltPosition");
 
                             if (parentOltObj == null) {
@@ -1322,7 +1386,7 @@ public class QueryFlags implements HttpAction {
 
                             deviceRepository.findByDiscoveredName(parentOltObj.toString()).ifPresent(olt -> {
 
-                                Map<String, Object> oltProps = safeProps(olt.getProperties());
+                                Map<String, Object> oltProps = olt.getProperties();
 
                                 // ---------------- READ OLT PORT TEMPLATES ----------------
                                 String port2 = existsString(oltProps.get("port2Template"));
@@ -1390,9 +1454,6 @@ public class QueryFlags implements HttpAction {
                     log.error("Trace: Case-D failed {}", e.getMessage());
                 }
             }
-
-            // ---------------------- Case E : Fallback Logic ---------------------------------
-            // ---------------------- Case E : Fallback Logic ---------------------------------
             else {
                 log.error("Trace: Case-E Fallback executed");
 
@@ -1401,6 +1462,7 @@ public class QueryFlags implements HttpAction {
 
                         String ontGdn = "ONT" + ontSN;
 
+                        String finalOntSN1 = ontSN;
                         deviceRepository.findByDiscoveredName(ontGdn).ifPresent(ont -> {
 
                             Map<String, Object> ontProps = safeProps(ont.getProperties());
@@ -1440,6 +1502,23 @@ public class QueryFlags implements HttpAction {
                                                 existsString(oltProps.get("iptvServiceTemplate")));
                                     }
 
+                                    Subscription setarSubscribtion = new Subscription();
+
+                                    String subscriptionname = subscriber + Constants.UNDER_SCORE + serviceID + Constants.UNDER_SCORE + finalOntSN1;
+
+
+                                    Optional<Subscription> setarSubscribtion1 = subscriptionRepository.findByDiscoveredName(subscriptionname);
+
+                                    if (setarSubscribtion1.isPresent()) {
+                                        setarSubscribtion = setarSubscribtion1.get();
+                                        if (setarSubscribtion.getProperties().get("oltPosition") != null && setarSubscribtion.getProperties().get("oltPosition") != "") {
+
+                                            String serviceOltPosition = setarSubscribtion.getProperties().get("oltPosition").toString();
+                                            flags.put("SERVICE_OLT_POSITION", serviceOltPosition);
+
+                                        }
+                                    }
+
                                     log.error("Trace: Case-E fallback OLT template evaluation completed");
                                 });
                             }
@@ -1471,16 +1550,16 @@ public class QueryFlags implements HttpAction {
 
     private void initializeFlags(Map<String, String> flags) {
         String[] keys = {
-                "SERVICE_EXIST","SERVICE_EVPN_EXIST","SERVICE_PORT_EXIST","SERVICE_VEIP_EXIST","SERVICE_VOIP_EXIST",
-                "SERVICE_VOIP_NUMBER1","SERVICE_VOIP_NUMBER2","SERVICE_PORT2_EXIST","SERVICE_PORT3_EXIST","SERVICE_PORT4_EXIST",
-                "SERVICE_POTS1_EXIST","SERVICE_POTS2_EXIST","SERVICE_TEMPLATE_VLAN","SERVICE_VLAN_ID","SERVICE_TEMPLATE_CREATE",
-                "SERVICE_TEMPLATE_CARD","SERVICE_TEMPLATE_PORT","SERVICE_TEMPLATE_MGMT","SERVICE_TEMPLATE_MGMT_CREATE",
-                "SERVICE_TEMPLATE_VEIP","SERVICE_TEMPLATE_HSI","SERVICE_TEMPLATE_ONT","SERVICE_TEMPLATE_VOIP","SERVICE_TEMPLATE_POTS1",
-                "SERVICE_TEMPLATE_POTS2","SERVICE_HSI_EXIST","SERVICE_LINK","SERVICE_SN","SERVICE_MAC","ONT_MODEL","SERVICE_PORT5_EXIST",
-                "SERVICE_TEMPLATE_VPLS","SERVICE_TEMPLATE_IPTV","SERVICE_IPTV_EXIST","SERVICE_ID","SERVICE_EVPN_WIFIM_FIRST",
-                "SERVICE_OLT_POSITION","ONT_TEMPLATE","SERVICE_OLT_POSITION","CBM_MAC","IPTV_COUNT","FIBERNET_COUNT","QOS_PROFILE",
-                "FIRST_NAME","LAST_NAME","ACCOUNT_EXIST","SERVICE_FLAG","SERVICE_ONT_PORT","KENAN_UIDNO","SIMA_CUST_ID",
-                "CBM_ACCOUNT_EXIST","VOICE_POTS_PORT","RESOURCE_MAC_MTA_OLD","RESOURCE_MODEL_MTA_OLD","BRIDGE_SERVICE",
+                "SERVICE_EXIST", "SERVICE_EVPN_EXIST", "SERVICE_PORT_EXIST", "SERVICE_VEIP_EXIST", "SERVICE_VOIP_EXIST",
+                "SERVICE_VOIP_NUMBER1", "SERVICE_VOIP_NUMBER2", "SERVICE_PORT2_EXIST", "SERVICE_PORT3_EXIST", "SERVICE_PORT4_EXIST",
+                "SERVICE_POTS1_EXIST", "SERVICE_POTS2_EXIST", "SERVICE_TEMPLATE_VLAN", "SERVICE_VLAN_ID", "SERVICE_TEMPLATE_CREATE",
+                "SERVICE_TEMPLATE_CARD", "SERVICE_TEMPLATE_PORT", "SERVICE_TEMPLATE_MGMT", "SERVICE_TEMPLATE_MGMT_CREATE",
+                "SERVICE_TEMPLATE_VEIP", "SERVICE_TEMPLATE_HSI", "SERVICE_TEMPLATE_ONT", "SERVICE_TEMPLATE_VOIP", "SERVICE_TEMPLATE_POTS1",
+                "SERVICE_TEMPLATE_POTS2", "SERVICE_HSI_EXIST", "SERVICE_LINK", "SERVICE_SN", "SERVICE_MAC", "ONT_MODEL", "SERVICE_PORT5_EXIST",
+                "SERVICE_TEMPLATE_VPLS", "SERVICE_TEMPLATE_IPTV", "SERVICE_IPTV_EXIST", "SERVICE_ID", "SERVICE_EVPN_WIFIM_FIRST",
+                "SERVICE_OLT_POSITION", "ONT_TEMPLATE", "OLT_POSITION", "CBM_MAC", "IPTV_COUNT", "FIBERNET_COUNT", "QOS_PROFILE",
+                "FIRST_NAME", "LAST_NAME", "ACCOUNT_EXIST", "SERVICE_FLAG", "SERVICE_ONT_PORT", "KENAN_UIDNO", "SIMA_CUST_ID",
+                "CBM_ACCOUNT_EXIST", "VOICE_POTS_PORT", "RESOURCE_MAC_MTA_OLD", "RESOURCE_MODEL_MTA_OLD", "BRIDGE_SERVICE",
                 "QOS_PROFILE_BRIDGE"
         };
         for (String k : keys) flags.put(k, "");
@@ -1525,12 +1604,12 @@ public class QueryFlags implements HttpAction {
 
         for (Service rfs : allRfs) {
             try {
-                Service rfs1=serviceCustomRepository.findByDiscoveredName(rfs.getDiscoveredName()).get();
-                Service cfs=rfs1.getUsedService().stream().findFirst().get();
+                Service rfs1 = serviceCustomRepository.findByDiscoveredName(rfs.getDiscoveredName()).get();
+                Service cfs = rfs1.getUsedService().stream().findFirst().get();
                 cfs = serviceCustomRepository.findByDiscoveredName(cfs.getDiscoveredName()).get();
-                String productName = cfs.getUsingService().stream().filter(ser->ser.getKind().equalsIgnoreCase(Constants.SETAR_KIND_SETAR_PRODUCT)).findFirst().get().getDiscoveredName();
-                Product product=productRepository.findByDiscoveredName(productName).get();
-                Subscription sub=product.getSubscription().stream().findFirst().get();
+                String productName = cfs.getUsingService().stream().filter(ser -> ser.getKind().equalsIgnoreCase(Constants.SETAR_KIND_SETAR_PRODUCT)).findFirst().get().getDiscoveredName();
+                Product product = productRepository.findByDiscoveredName(productName).get();
+                Subscription sub = product.getSubscription().stream().findFirst().get();
 
                 if (sub == null || sub.getDiscoveredName() == null) {
                     continue;
@@ -1553,11 +1632,11 @@ public class QueryFlags implements HttpAction {
     }
 
     private Map<String, String> executeStep6Flags(
-                                                          String ontSN,
-                                                  String serviceID,
-                                                  String subscriber,
-                                                  String actionType,
-                                                  String productSubtype) {
+            String ontSN,
+            String serviceID,
+            String subscriber,
+            String actionType,
+            String productSubtype) {
 
         Map<String, String> result = new HashMap<>();
 

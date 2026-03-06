@@ -312,21 +312,21 @@ public class DeleteSPR implements HttpAction {
                 Customer sub = optSubscriber.get();
                 boolean deleteSubscriber = false;
 
-                int remaining = 0;
-                try {
-                    remaining = countSubscriptionsByCustomer(sub);
-                } catch (Exception ignore) {}
-
-                if (remaining <= 0 && !"Exist".equalsIgnoreCase(nullSafe(req.getServiceFlag()))) {
-                    deleteSubscriber = true;
+                int remaining = countSubscriptionsByCustomer(sub);
+                if(remaining>0)
+                {
+                    lastServiceForSubscriber=false;
                 }
-                if (lastServiceForSubscriber) {
+
+                if ((remaining <= 0 && !"Exist".equalsIgnoreCase(req.getServiceFlag()))
+                        || lastServiceForSubscriber) {
                     deleteSubscriber = true;
                 }
 
                 if (deleteSubscriber) {
                     customerRepository.delete(sub);
                 }
+
             }
             log.error(Constants.ACTION_COMPLETED);
             // -----------------------------
