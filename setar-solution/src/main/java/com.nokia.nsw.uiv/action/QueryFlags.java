@@ -203,7 +203,7 @@ public class QueryFlags implements HttpAction {
 
                                                     flags.put("SERVICE_LINK", "Cable_Modem");
 
-                                                    Object mac = safeProps(res.getProperties()).get("macAddress");
+                                                    String mac = safeProps(res.getProperties()).get("macAddress").toString();
                                                     if (mac != null) {
                                                         flags.put("SERVICE_SN", mac.toString());   // ✅ REQUIRED
                                                         flags.put("CBM_MAC", mac.toString());      // ✅ REQUIRED
