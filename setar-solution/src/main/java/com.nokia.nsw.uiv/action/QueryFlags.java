@@ -943,8 +943,15 @@ public class QueryFlags implements HttpAction {
 
                 if ("Available".equalsIgnoreCase(p1) || "Available".equalsIgnoreCase(p2)) {
 
-                    flags.put("SERVICE_VOIP_NUMBER1", "");
-                    flags.put("SERVICE_VOIP_NUMBER2", "");
+                    if(p1 != null && p1.equalsIgnoreCase("Available")){
+
+                        flags.put("SERVICE_VOIP_NUMBER1", "");
+                    }
+
+                    if(p2 != null && p2.equalsIgnoreCase("Available")){
+
+                        flags.put("SERVICE_VOIP_NUMBER2", "");
+                    }
 
                     log.error("Trace: VOIP/Voice ports reset to null as per spec (Available detected)");
                 }
