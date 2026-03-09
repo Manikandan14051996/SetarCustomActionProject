@@ -80,7 +80,7 @@ public class QueryCPEDevice implements HttpAction {
         response.setResourceMac((String) device.getProperties().get("macAddress"));
         response.setResourceMacMTA((String) device.getProperties().get("macAddressMta"));
         response.setResourceManufacturer((String) device.getProperties().get("manufacturer"));
-        response.setResourceStatus((String) device.getProperties().get("OperationalState"));
+        response.setResourceStatus((String) device.getProperties().get("AdministrativeState"));
         response.setResourceDescription(device.getProperties().getOrDefault("description", "").toString());
 
         // Map resourceSN from localName (remove prefix)
