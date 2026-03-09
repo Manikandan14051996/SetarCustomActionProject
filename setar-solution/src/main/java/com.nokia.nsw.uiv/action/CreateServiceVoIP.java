@@ -90,6 +90,13 @@ public class CreateServiceVoIP implements HttpAction {
                         null
                 );
             }
+            LogicalDevice cpeDevice = null;
+            Optional<LogicalDevice> optCpeDevice = logicalDeviceRepo.findByDiscoveredName("ONT" + Constants.UNDER_SCORE + req.getOntSN());
+            if (optCpeDevice.isPresent()) {
+                cpeDevice = optCpeDevice.get();
+            } else {
+                throw new RuntimeException("Could not found CPE device: " + "ONT" + Constants.UNDER_SCORE + req.getOntSN());
+            }
             AtomicBoolean isSubscriberExist = new AtomicBoolean(true);
             AtomicBoolean isSubscriptionExist = new AtomicBoolean(true);
             AtomicBoolean isProductExist = new AtomicBoolean(true);
@@ -413,13 +420,7 @@ public class CreateServiceVoIP implements HttpAction {
             // Step 12: Configure VoIP ports
             Map<String, Object> ontProps = ont.getProperties();
             Map<String, Object> oltProps = olt.getProperties();
-            LogicalDevice cpeDevice = null;
-            Optional<LogicalDevice> optCpeDevice = logicalDeviceRepo.findByDiscoveredName("ONT" + Constants.UNDER_SCORE + req.getOntSN());
-            if (optCpeDevice.isPresent()) {
-                cpeDevice = optCpeDevice.get();
-            } else {
-                throw new RuntimeException("Could not found CPE device: " + "ONT" + Constants.UNDER_SCORE + req.getOntSN());
-            }
+
 
 
             if ("1".equals(req.getOntPort())) {
