@@ -684,10 +684,13 @@ public class QueryFlagsFinal implements HttpAction {
 
         if (!"Configure".equalsIgnoreCase(actionType)) {
             String subToFind;
-            if (ontSN != null && ontSN.contains("ALCL")) {
+            String subNamefoFind;
+            if (ontSN != null && ontSN.startsWith("ALCL")) {
                 subToFind = subscriber + UNDER_SCORE + serviceID + UNDER_SCORE + ontSN;
+                subNamefoFind = subscriber + UNDER_SCORE + ontSN;
             } else {
                 subToFind = subscriber + UNDER_SCORE + serviceID;
+                subNamefoFind = subscriber + UNDER_SCORE;
             }
 
             Optional<Subscription> subOpt = subscriptionRepository.findByDiscoveredName(subToFind);
@@ -750,14 +753,17 @@ public class QueryFlagsFinal implements HttpAction {
             }
 
             // Subscriber names
-            Optional<Customer> customer = customerRepository.findByDiscoveredName(subToFind);
-            if (customer.isPresent()) {
-                Customer cust = customer.get();
-                Map<String, Object> cp = safeProps(cust.getProperties());
-                subscriberFirstName = safeString(cp.get("subscriberFirstName"));
-                subscriberLastName = safeString(cp.get("subscriberLastName"));
-                flags.put("FIRST_NAME", subscriberFirstName);
-                flags.put("LAST_NAME", subscriberLastName);
+            List<Customer>customers= (List<Customer>) customerRepository.findAll();
+            for(Customer cust:customers)
+            {
+                if(cust.getDiscoveredName().equalsIgnoreCase(subToFind) || cust.getDiscoveredName().contains(subNamefoFind))
+                {
+                    Map<String, Object> cp = safeProps(cust.getProperties());
+                    subscriberFirstName = safeString(cp.get("subscriberFirstName"));
+                    subscriberLastName = safeString(cp.get("subscriberLastName"));
+                    flags.put("FIRST_NAME", subscriberFirstName);
+                    flags.put("LAST_NAME", subscriberLastName);
+                }
             }
         }
 
