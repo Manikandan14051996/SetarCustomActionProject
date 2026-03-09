@@ -132,16 +132,18 @@ public class ModifySPR implements HttpAction {
                 String msg = ERROR_PREFIX + bre.getMessage();
                 return new ModifySPRResponse("400", msg, getCurrentTimestamp(), "", "");
             }
-
+            Subscription updatedSubscription = subscriptionRepository.findById(subscription.getUuid())
+                    .orElse(subscription); // fallback to original if somehow missing
+            String updatedSubscriptionName = updatedSubscription.getDiscoveredName();
 
             // 5. Response
             if (success) {
                 log.error(Constants.ACTION_COMPLETED);
                 return new ModifySPRResponse("200", "UIV action ModifySPR executed successfully.", getCurrentTimestamp(),
-                        ontName, subscriptionName);
+                        ontName, updatedSubscriptionName);
             } else {
                 return new ModifySPRResponse("200", "UIV action ModifySPR executed successfully.Modification not done", getCurrentTimestamp(),
-                        ontName, subscriptionName);
+                        ontName, updatedSubscriptionName);
             }
 
         } catch (BadRequestException bre) {

@@ -92,6 +92,12 @@ public class CreateServiceCbmVoice implements HttpAction {
         AtomicBoolean isSubscriptionExist = new AtomicBoolean(true);
         AtomicBoolean isProductExist = new AtomicBoolean(true);
 
+        String cpeDeviceName = "CBM" + Constants.UNDER_SCORE +request.getCbmMac();
+        Optional<LogicalDevice> cpeOpt = cpeDeviceRepository.findByDiscoveredName(cpeDeviceName);
+        if (!cpeOpt.isPresent()) {
+            return createErrorResponse(CODE_CPE_NOT_FOUND, "CPE device not found with cbmName: "+cpeDeviceName);
+        }
+
         // 2. Construct names
         String subscriberNameString;
         String productSubtype = request.getProductSubtype();
@@ -398,14 +404,15 @@ public class CreateServiceCbmVoice implements HttpAction {
 
             // 9. CPE Voice Port Update (only when productSubtype == "Voice")
             if ("Voice".equalsIgnoreCase(request.getProductSubtype())) {
-                String cpeDeviceName = "CBM" + Constants.UNDER_SCORE +request.getCbmMac();
-                Optional<LogicalDevice> cpeOpt = cpeDeviceRepository.findByDiscoveredName(cpeDeviceName);
-                if (!cpeOpt.isPresent()) {
+                String cpeDevice = "CBM" + Constants.UNDER_SCORE +request.getCbmMac();
+                Optional<LogicalDevice> cpeOpts = cpeDeviceRepository.findByDiscoveredName(cpeDevice);
+                if (!cpeOpts.isPresent()) {
                     return createErrorResponse(CODE_CPE_NOT_FOUND, "CPE device not found with cbmName: "+cpeDeviceName);
                 }
 
                 try {
-                    LogicalDevice cpe = cpeOpt.get();
+                    LogicalDevice cpe = cpeOpts.get();
+
                     Map<String, Object> props = cpe.getProperties() == null ? new HashMap<>() : cpe.getProperties();
 
                     if (request.getCpeMacAddressMTA() != null && !request.getCpeMacAddressMTA().trim().isEmpty()) {
