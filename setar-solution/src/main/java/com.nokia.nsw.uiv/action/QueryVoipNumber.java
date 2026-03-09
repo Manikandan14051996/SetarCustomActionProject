@@ -109,8 +109,8 @@ public class QueryVoipNumber implements HttpAction {
                     voipCode1      = (String) subs.getProperties().get("voipServiceCode");
                     voipPackage    = (String) subs.getProperties().get("voipPackage");
                     Customer subscriber = subsOpt.get().getCustomer();
-                    firstName      = (String) subscriber.getProperties().get("firstName");
-                    lastName       = (String) subscriber.getProperties().get("lastName");
+                    firstName      = (String) subscriber.getProperties().get("subscriberFirstName");
+                    lastName       = (String) subscriber.getProperties().get("subscriberLastName");
 
                     if ("CBM".equals(linkType)) {
                         voipNumber1 = (String) subs.getProperties().get("voipNumber1");
