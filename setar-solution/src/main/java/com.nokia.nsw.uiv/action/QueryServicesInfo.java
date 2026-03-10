@@ -608,10 +608,16 @@ public class QueryServicesInfo implements HttpAction {
                     String hhid = (setarSubscriber == null) ? "" : String.valueOf(setarSubscriber.getProperties() == null ? "" : setarSubscriber.getProperties().getOrDefault("houseHoldId", ""));
                     String address = (setarSubscriber == null) ? "" : String.valueOf(setarSubscriber.getProperties() == null ? "" : setarSubscriber.getProperties().getOrDefault("subscriberAddress", ""));
                     String acct = (setarSubscriber == null) ? "" : String.valueOf(setarSubscriber.getProperties() == null ? "" : setarSubscriber.getProperties().getOrDefault("accountNumber", ""));
+                    String firstName = (setarSubscriber == null) ? "" : String.valueOf(setarSubscriber.getProperties() == null ? "" : setarSubscriber.getProperties().getOrDefault("subscriberFirstName", ""));
+                    String lastName = (setarSubscriber == null) ? "" : String.valueOf(setarSubscriber.getProperties() == null ? "" : setarSubscriber.getProperties().getOrDefault("subscriberLastName", ""));
+                    String email = (setarSubscriber == null) ? "" : String.valueOf(setarSubscriber.getProperties() == null ? "" : setarSubscriber.getProperties().getOrDefault("email", ""));
                     allvalues.put(prefix + "SUBSCRIPTION_STAUS", subscriptionStatus == null ? "" : subscriptionStatus);
                     allvalues.put(prefix + "HHID", hhid == null ? "" : hhid);
                     allvalues.put(prefix + "ADDRESS", address == null ? "" : address);
                     allvalues.put(prefix + "ACCOUNT_NUMBER", acct == null ? "" : acct);
+                    allvalues.put(prefix + "FIRST_NAME", firstName == null ? "" : String.valueOf(firstName));
+                    allvalues.put(prefix + "LAST_NAME", lastName == null ? "" : String.valueOf(lastName));
+                    allvalues.put(prefix + "EMAIL", email == null ? "" : String.valueOf(email));
                     if (setarProduct != null) allvalues.put(prefix + "PRODUCT", setarProduct.getDiscoveredName());
                     else allvalues.put(prefix + "PRODUCT", "");
 

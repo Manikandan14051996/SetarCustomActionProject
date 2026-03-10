@@ -203,6 +203,7 @@ public class CreateServiceVoIP implements HttpAction {
 
             Map<String, Object> subsProps = subscription.getProperties();
             if (req.getOntPort().equals("2"))  {
+                subsProps.put("simaCustId2", req.getSimaCustID());
                 subsProps.put("voipNumber2", req.getVoipNumber1());
                 if (req.getSimaSubsID() != null && req.getSimaEndpointID() != null ) {
                     subsProps.put("simaSubsId2", req.getSimaSubsID());
