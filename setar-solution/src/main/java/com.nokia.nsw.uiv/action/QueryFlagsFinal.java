@@ -462,13 +462,13 @@ public class QueryFlagsFinal implements HttpAction {
                         flags.put("SERVICE_POTS2_EXIST", templateNamePots2);
                         flags.put("SERVICE_IPTV_EXIST", templateNameIPTV);
 
-                        flags.put("SERVICE_TEMPLATE_ONT", templateNameOnt);
-                        flags.put("SERVICE_TEMPLATE_VEIP", templateNameVeip);
-                        flags.put("SERVICE_TEMPLATE_HSI", templateNameHSI);
-                        flags.put("SERVICE_TEMPLATE_VOIP", templateNameVoip);
-                        flags.put("SERVICE_TEMPLATE_POTS1", templateNamePots1);
-                        flags.put("SERVICE_TEMPLATE_POTS2", templateNamePots2);
-                        flags.put("SERVICE_TEMPLATE_IPTV", templateNameIPTV);
+                        flags.put("SERVICE_TEMPLATE_ONT", oltP.get("ontTemplate").toString());
+                        flags.put("SERVICE_TEMPLATE_VEIP", oltP.get("veipServiceTemplate").toString());
+                        flags.put("SERVICE_TEMPLATE_HSI", oltP.get("veipHsiTemplate").toString());
+                        flags.put("SERVICE_TEMPLATE_VOIP", oltP.get("voipServiceTemplate").toString());
+                        flags.put("SERVICE_TEMPLATE_POTS1", oltP.get("voipPots1Template").toString());
+                        flags.put("SERVICE_TEMPLATE_POTS2", oltP.get("voipPots2Template").toString());
+                        flags.put("SERVICE_TEMPLATE_IPTV", oltP.get("veipIptvTemplate").toString());
                     }
                 }
 
