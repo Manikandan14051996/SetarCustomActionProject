@@ -410,9 +410,17 @@ public class QueryFlagsFinal implements HttpAction {
                 serviceSN = safeString(ontP.get("serialNo"));
 
                 ontTemplate= safeString(ontP.get("ontTemplate"));
-                flags.put("ONT_TEMPLATE", ontTemplate);
-                flags.put("ONT_MODEL", ontModel);
-                flags.put("SERVICE_SN", serviceSN);
+                if (ontTemplate != null && !ontTemplate.isEmpty()) {
+                    flags.put("ONT_TEMPLATE", ontTemplate);
+                }
+
+                if (ontModel != null && !ontModel.isEmpty()) {
+                    flags.put("ONT_MODEL", ontModel);
+                }
+
+                if (serviceSN != null && !serviceSN.isEmpty()) {
+                    flags.put("SERVICE_SN", serviceSN);
+                }
 
                 // POTS ports from ONT
                 number1 = safeString(ontP.get("potsPort1Number"));
@@ -724,12 +732,31 @@ public class QueryFlagsFinal implements HttpAction {
                 cbmmac = safeString(p.get("serviceMac"));
                 qosProfile = safeString(p.get("veipQosSessionProfile"));
                 kenanUidNumber = safeString(p.get("kenanSubscriberId"));
-                flags.put("SERVICE_LINK", serviceLink);
-                flags.put("SERVICE_SN", serviceSN);
-                flags.put("SERVICE_MAC", serviceMAC);
-                flags.put("CBM_MAC", cbmmac);
-                flags.put("QOS_PROFILE", qosProfile);
-                flags.put("KENAN_UIDNO", kenanUidNumber);
+                if (!serviceLink.isEmpty()) {
+                    flags.put("SERVICE_LINK", serviceLink);
+                }
+
+                if (!serviceSN.isEmpty()) {
+                    flags.put("SERVICE_SN", serviceSN);
+                }
+
+                if (!serviceMAC.isEmpty()) {
+                    flags.put("SERVICE_MAC", serviceMAC);
+                }
+
+                if (!cbmmac.isEmpty()) {
+                    flags.put("CBM_MAC", cbmmac);
+                }
+
+                if (!qosProfile.isEmpty()) {
+                    flags.put("QOS_PROFILE", qosProfile);
+                }
+
+                if (!kenanUidNumber.isEmpty()) {
+                    flags.put("KENAN_UIDNO", kenanUidNumber);
+                }
+
+
 
                 if (p.containsKey("oltPosition") && !safeString(p.get("oltPosition")).isEmpty()) {
                     serviceOltPosition = safeString(p.get("oltPosition"));
@@ -1104,10 +1131,6 @@ public class QueryFlagsFinal implements HttpAction {
 
                 flags.put("SERVICE_EVPN_EXIST", exists(cardTpl));
             }
-
-            // ───────────────────────────────────────────────
-            // CASE B: Unconfigure (non WIFI Maintenance) + UnconfigureIPBH
-            // ───────────────────────────────────────────────
             else if (!actionType.contains("Configure")) {
 
                 String tempPort = "";
@@ -1430,23 +1453,24 @@ public class QueryFlagsFinal implements HttpAction {
             flags.put("QOS_PROFILE", qosProfile);
         }
 
-        flags.put("SERVICE_LINK", serviceLink);
-        flags.put("SERVICE_SN", serviceSN);
-        flags.put("SERVICE_MAC", serviceMAC);
-        flags.put("CBM_MAC", cbmmac);
-        flags.put("ONT_MODEL", ontModel);
-        flags.put("OLT_POSITION", oltPosition);
-        flags.put("ONT_TEMPLATE", ontTemplate);
-        flags.put("SERVICE_OLT_POSITION", serviceOltPosition);
-        flags.put("SERVICE_EVPN_WIFIM_FIRST", serviceevpnwififlag);
-        flags.put("VOICE_POTS_PORT", voicePotsPort);
-        flags.put("KENAN_UIDNO", kenanUidNumber);
-        flags.put("SIMA_CUST_ID", simaCustId);
-        flags.put("IPTV_COUNT", iptvCount);
-        flags.put("FIBERNET_COUNT", fibernetCount);
-        flags.put("ACCOUNT_EXIST", accountExistFlag);
-        flags.put("SERVICE_FLAG", serviceFlag);
-        flags.put("CBM_ACCOUNT_EXIST", cbmAccountExistFlag);
+        flags.putIfAbsent("SERVICE_LINK", serviceLink);
+        flags.putIfAbsent("SERVICE_SN", serviceSN);
+        flags.putIfAbsent("SERVICE_MAC", serviceMAC);
+        flags.putIfAbsent("CBM_MAC", cbmmac);
+        flags.putIfAbsent("ONT_MODEL", ontModel);
+        flags.putIfAbsent("OLT_POSITION", oltPosition);
+        flags.putIfAbsent("ONT_TEMPLATE", ontTemplate);
+        flags.putIfAbsent("SERVICE_OLT_POSITION", serviceOltPosition);
+        flags.putIfAbsent("SERVICE_EVPN_WIFIM_FIRST", serviceevpnwififlag);
+        flags.putIfAbsent("VOICE_POTS_PORT", voicePotsPort);
+        flags.putIfAbsent("KENAN_UIDNO", kenanUidNumber);
+        flags.putIfAbsent("SIMA_CUST_ID", simaCustId);
+        flags.putIfAbsent("IPTV_COUNT", iptvCount);
+        flags.putIfAbsent("FIBERNET_COUNT", fibernetCount);
+        flags.putIfAbsent("ACCOUNT_EXIST", accountExistFlag);
+        flags.putIfAbsent("SERVICE_FLAG", serviceFlag);
+
+        flags.putIfAbsent("CBM_ACCOUNT_EXIST", cbmAccountExistFlag);
 
         // VOIP reset rule (original logic)
         if (equalsAnyIgnoreCase(productName, "VOIP", "Voice")) {
