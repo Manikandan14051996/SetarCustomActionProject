@@ -462,13 +462,33 @@ public class QueryFlagsFinal implements HttpAction {
                         flags.put("SERVICE_POTS2_EXIST", templateNamePots2);
                         flags.put("SERVICE_IPTV_EXIST", templateNameIPTV);
 
-                        flags.put("SERVICE_TEMPLATE_ONT", oltP.get("ontTemplate").toString());
-                        flags.put("SERVICE_TEMPLATE_VEIP", oltP.get("veipServiceTemplate").toString());
-                        flags.put("SERVICE_TEMPLATE_HSI", oltP.get("veipHsiTemplate").toString());
-                        flags.put("SERVICE_TEMPLATE_VOIP", oltP.get("voipServiceTemplate").toString());
-                        flags.put("SERVICE_TEMPLATE_POTS1", oltP.get("voipPots1Template").toString());
-                        flags.put("SERVICE_TEMPLATE_POTS2", oltP.get("voipPots2Template").toString());
-                        flags.put("SERVICE_TEMPLATE_IPTV", oltP.get("veipIptvTemplate").toString());
+                        if (oltP.get("ontTemplate") != null && !oltP.get("ontTemplate").toString().isEmpty()) {
+                            flags.put("SERVICE_TEMPLATE_ONT", oltP.get("ontTemplate").toString());
+                        }
+
+                        if (oltP.get("veipServiceTemplate") != null && !oltP.get("veipServiceTemplate").toString().isEmpty()) {
+                            flags.put("SERVICE_TEMPLATE_VEIP", oltP.get("veipServiceTemplate").toString());
+                        }
+
+                        if (oltP.get("veipHsiTemplate") != null && !oltP.get("veipHsiTemplate").toString().isEmpty()) {
+                            flags.put("SERVICE_TEMPLATE_HSI", oltP.get("veipHsiTemplate").toString());
+                        }
+
+                        if (oltP.get("voipServiceTemplate") != null && !oltP.get("voipServiceTemplate").toString().isEmpty()) {
+                            flags.put("SERVICE_TEMPLATE_VOIP", oltP.get("voipServiceTemplate").toString());
+                        }
+
+                        if (oltP.get("voipPots1Template") != null && !oltP.get("voipPots1Template").toString().isEmpty()) {
+                            flags.put("SERVICE_TEMPLATE_POTS1", oltP.get("voipPots1Template").toString());
+                        }
+
+                        if (oltP.get("voipPots2Template") != null && !oltP.get("voipPots2Template").toString().isEmpty()) {
+                            flags.put("SERVICE_TEMPLATE_POTS2", oltP.get("voipPots2Template").toString());
+                        }
+
+                        if (oltP.get("veipIptvTemplate") != null && !oltP.get("veipIptvTemplate").toString().isEmpty()) {
+                            flags.put("SERVICE_TEMPLATE_IPTV", oltP.get("veipIptvTemplate").toString());
+                        }
                     }
                 }
 
