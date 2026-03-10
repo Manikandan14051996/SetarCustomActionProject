@@ -408,8 +408,9 @@ public class QueryFlagsFinal implements HttpAction {
                 Map<String, Object> ontP = safeProps(ontDev.getProperties());
                 ontModel = safeString(ontP.get("deviceModel"));
                 serviceSN = safeString(ontP.get("serialNo"));
-                flags.put("ONT_TEMPLATE", safeString(ontP.get("ontTemplate")));
 
+                ontTemplate= safeString(ontP.get("ontTemplate"));
+                flags.put("ONT_TEMPLATE", ontTemplate);
                 flags.put("ONT_MODEL", ontModel);
                 flags.put("SERVICE_SN", serviceSN);
 
