@@ -98,6 +98,9 @@ public class QueryCPEDevice implements HttpAction {
             response.setResourceMacMTA((String) device.getProperties().get("macAddressMta"));
             response.setResourceModelMTA((String) device.getProperties().get("deviceModelMta"));
             response.setResourceModelSubtype("HFC");
+            for (int portNumber = 1; portNumber <= 5; portNumber++) {
+                response.setDataPortStatus(portNumber, "Available");
+            }
         } else if ("ONT".equalsIgnoreCase(resourceType)) {
             response.setResourceModelSubtype("GPON");
 
