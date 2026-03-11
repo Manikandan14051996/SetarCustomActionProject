@@ -289,7 +289,7 @@ public class ModifySPR implements HttpAction {
                 return true;
             } catch (BadRequestException e) {
                 throw new BadRequestException(e.getMessage());
-            }catch (Exception e) {
+            } catch (Exception e) {
                 throw new ModificationNotAllowedException("Failed to modify VOIP number: " + e.getMessage());
             }
         }
@@ -299,12 +299,14 @@ public class ModifySPR implements HttpAction {
     private boolean handleModifyONT(ModifySPRRequest request, String ontName, String flag) throws BadRequestException, AccessForbiddenException {
         LogicalDevice ont = logicalCustomDeviceRepository.findByDiscoveredName(ontName)
                 .orElseThrow(() -> new BadRequestException("No entry found to modify ONT: " + ontName));
-        Customer iptvSubscriber = customerRepository.findByDiscoveredName(request.getSubscriberName()).get();
-        Set<Subscription> iptvSubscriptions = iptvSubscriber.getSubscription();
-        for (Subscription subscription : iptvSubscriptions) {
-            subscription = subscriptionRepository.findByDiscoveredName(subscription.getDiscoveredName()).get();
-            subscription.getProperties().put("serviceSN", request.getModifyParam1());
-            subscriptionRepository.save(subscription, 2);
+        if (ont != null) {
+            Customer iptvSubscriber = customerRepository.findByDiscoveredName(request.getSubscriberName()).get();
+            Set<Subscription> iptvSubscriptions = getiptvSubscriptions(request.getSubscriberName());
+            for (Subscription subscription : iptvSubscriptions) {
+                subscription = subscriptionRepository.findByDiscoveredName(subscription.getDiscoveredName()).get();
+                subscription.getProperties().put("serviceSN", request.getModifyParam1());
+                subscriptionRepository.save(subscription, 2);
+            }
         }
         Set<Service> services = ont.getUsingService();
         for (Service s : services) {
@@ -449,7 +451,7 @@ public class ModifySPR implements HttpAction {
                 }
             } catch (BadRequestException e) {
                 throw new BadRequestException(e.getMessage());
-            }catch (Exception e) {
+            } catch (Exception e) {
                 log.error("Exception occure while processing RFS: " + e.getMessage());
                 return false;
             }
@@ -461,6 +463,17 @@ public class ModifySPR implements HttpAction {
             return true;
         }
         return false;
+    }
+
+    private Set<Subscription> getiptvSubscriptions(String subscriberName) {
+        List<Subscription> subsList = (List<Subscription>) subscriptionRepository.findAll();
+        Set<Subscription> iptvSubscriptions = new HashSet<>();
+        for (Subscription sub : subsList) {
+            if (sub.getDiscoveredName().contains(subscriberName) && !sub.getDiscoveredName().contains("ALCL")) {
+                iptvSubscriptions.add(sub);
+            }
+        }
+        return iptvSubscriptions;
     }
 
     // ------------------ HELPERS ------------------
