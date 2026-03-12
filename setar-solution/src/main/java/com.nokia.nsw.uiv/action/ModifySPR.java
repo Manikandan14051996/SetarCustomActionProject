@@ -359,7 +359,7 @@ public class ModifySPR implements HttpAction {
                     } catch (BadRequestException bre) {
                         throw new BadRequestException(bre.getMessage());
                     }
-                    subs.setDiscoveredName(subscriberNewName);
+                    subs.setDiscoveredName(subscriptionNameNew);
                     subs.getProperties().put("serviceSN", request.getModifyParam1());
                     subs.getProperties().put("gatewayMacAddress", request.getModifyParam2());
                     subscriptionRepository.save(subs, 2);
