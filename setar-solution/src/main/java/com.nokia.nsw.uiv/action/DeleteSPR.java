@@ -308,10 +308,10 @@ public class DeleteSPR implements HttpAction {
             // -----------------------------
             // 10) Delete Subscriber if no more subscriptions
             // -----------------------------
-            if (optSubscriber.isPresent()) {
-                Customer sub = optSubscriber.get();
+            Optional<Customer>subs=customerRepository.findByDiscoveredName(subscriberNameWithOnt);
+            if (subs.isPresent()) {
+                Customer sub = subs.get();
                 boolean deleteSubscriber = false;
-
                 int remaining = countSubscriptionsByCustomer(sub);
                 if(remaining>0)
                 {

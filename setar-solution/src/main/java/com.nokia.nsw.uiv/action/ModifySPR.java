@@ -300,12 +300,13 @@ public class ModifySPR implements HttpAction {
         LogicalDevice ont = logicalCustomDeviceRepository.findByDiscoveredName(ontName)
                 .orElseThrow(() -> new BadRequestException("No entry found to modify ONT: " + ontName));
         if (ont != null) {
-            Customer iptvSubscriber = customerRepository.findByDiscoveredName(request.getSubscriberName()).get();
             Set<Subscription> iptvSubscriptions = getiptvSubscriptions(request.getSubscriberName());
-            for (Subscription subscription : iptvSubscriptions) {
-                subscription = subscriptionRepository.findByDiscoveredName(subscription.getDiscoveredName()).get();
-                subscription.getProperties().put("serviceSN", request.getModifyParam1());
-                subscriptionRepository.save(subscription, 2);
+            if(!iptvSubscriptions.isEmpty()) {
+                for (Subscription subscription : iptvSubscriptions) {
+                    subscription = subscriptionRepository.findByDiscoveredName(subscription.getDiscoveredName()).get();
+                    subscription.getProperties().put("serviceSN", request.getModifyParam1());
+                    subscriptionRepository.save(subscription, 2);
+                }
             }
         }
         Set<Service> services = ont.getUsingService();
