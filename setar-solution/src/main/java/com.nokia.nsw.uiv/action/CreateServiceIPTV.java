@@ -312,9 +312,6 @@ public class CreateServiceIPTV implements HttpAction {
                 oltProps.put("oltPosition", request.getOltName());
                 oltProps.put("OperationalState", "Active");
                 oltProps.put("ontTemplate", request.getTemplateNameONT());
-                oltProps.put("veipServiceTemplate", request.getTemplateNameVEIP());
-                oltProps.put("veipIptvTemplate", request.getTemplateNameIPTV());
-                oltProps.put("igmpTemplate", request.getTemplateNameIGMP());
                 oltProps.put("createdBy",
                         request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
                                 ? request.getCreatedBy()
@@ -322,7 +319,6 @@ public class CreateServiceIPTV implements HttpAction {
                 );
                 oltProps.put("actionName", ACTION_LABEL);
                 oltDevice.setProperties(oltProps);
-                oltDevice.setUsingService(new HashSet<>(List.of(rfs)));
                 logicalDeviceRepository.save(oltDevice, 2);
                 log.error("Created OLT Device: {}", request.getOltName());
             }
@@ -340,14 +336,10 @@ public class CreateServiceIPTV implements HttpAction {
                 ontDevice.setKind("ONTDevice");
                 ontDevice.setContext(Constants.SETAR);
                 Map<String, Object> ontProps = new HashMap<>();
-                if (request.getMenm() != "" && request.getMenm() !=null && request.getMenm() != "NA"){
-                    ontProps.put("description",request.getMenm());
-                }
                 ontProps.put("serialNo", request.getOntSN());
                 ontProps.put("deviceModel", request.getOntModel());
                 ontProps.put("oltPosition",request.getOltName());
                 ontProps.put("OperationalState", "Active");
-                ontProps.put("iptvVlan", request.getVlanID());
                 ontProps.put("createdBy",
                         request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
                                 ? request.getCreatedBy()
@@ -355,8 +347,6 @@ public class CreateServiceIPTV implements HttpAction {
                 );
                 ontProps.put("actionName", ACTION_LABEL);
                 ontDevice.setProperties(ontProps);
-                ontDevice.setUsingService(new HashSet<>(List.of(rfs)));
-                ontDevice.setUsedResource(new HashSet<>(List.of(oltDevice)));
                 logicalDeviceRepository.save(ontDevice, 2);
                 log.error("Created ONT Device: {}", ontName);
             }
@@ -387,6 +377,21 @@ public class CreateServiceIPTV implements HttpAction {
                 vlanRepository.save(vlanInterface, 2);
                 log.error("Created VLAN Interface: {}", mgmtVlanName);
             }
+            if (request.getMenm() != "" && request.getMenm() !=null && request.getMenm() != "NA"){
+                ontDevice.getProperties().put("description",request.getMenm());
+            }
+
+            ontDevice.getProperties().put("iptvVlan", request.getVlanID());
+            ontDevice.setUsingService(new HashSet<>(List.of(rfs)));
+            ontDevice.setUsedResource(new HashSet<>(List.of(oltDevice)));
+
+            oltDevice.getProperties().put("veipServiceTemplate", request.getTemplateNameVEIP());
+            oltDevice.getProperties().put("veipIptvTemplate", request.getTemplateNameIPTV());
+            oltDevice.getProperties().put("igmpTemplate", request.getTemplateNameIGMP());
+            oltDevice.setUsingService(new HashSet<>(List.of(rfs)));
+            logicalDeviceRepository.save(oltDevice);
+            logicalDeviceRepository.save(ontDevice);
+
 
             log.error(Constants.ACTION_COMPLETED);
 

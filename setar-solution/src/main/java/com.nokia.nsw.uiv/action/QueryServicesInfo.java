@@ -92,7 +92,7 @@ public class QueryServicesInfo implements HttpAction {
                 if (!resourceFacingServices.isEmpty()) {
                     for (Service rfs : resourceFacingServices) {
                         if (rfs.getDiscoveredName().contains(accno) && rfs.getKind().equalsIgnoreCase(Constants.SETAR_KIND_SETAR_RFS)) {
-                            setarsRFS = Collections.singletonList(rfs);
+                            setarsRFS.add(rfs);
                             isAccno = true;
                         }
                     }

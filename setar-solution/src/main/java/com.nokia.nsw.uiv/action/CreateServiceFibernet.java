@@ -306,7 +306,6 @@ public class CreateServiceFibernet implements HttpAction {
                     );
                     props.put("actionName", ACTION_LABEL);
                     oltDevice.setProperties(props);
-                    oltDevice.setUsingService(new HashSet<>(List.of(rfs)));
                     logicalDeviceRepository.save(oltDevice, 2);
                     log.error("Created OLT device: {}", oltName);
                 }
@@ -331,8 +330,6 @@ public class CreateServiceFibernet implements HttpAction {
                 if (request.getTemplateNameONT() != null) ontProps.put("ontTemplate", request.getTemplateNameONT());
                 if (request.getMenm() != null) ontProps.put("description", request.getMenm());
                 if (request.getVlanID() != null) ontProps.put("mgmtVlan", request.getVlanID());
-//                Set<Service> used = new HashSet<>();
-//                used.add(rfs);
                 ontDevice.setUsingService(new HashSet<>(List.of(rfs)));
                 ontDevice.setProperties(ontProps);
                 logicalDeviceRepository.save(ontDevice, 2);
@@ -357,10 +354,7 @@ public class CreateServiceFibernet implements HttpAction {
                 if (request.getTemplateNameONT() != null) ontProps.put("ontTemplate", request.getTemplateNameONT());
                 if (request.getMenm() != null) ontProps.put("description", request.getMenm());
                 if (request.getVlanID() != null) ontProps.put("mgmtVlan", request.getVlanID());
-
-                ontDevice.setUsingService(new HashSet<>(List.of(rfs)));
                 ontDevice.setProperties(ontProps);
-                ontDevice.setUsedResource(new HashSet<>(List.of(oltDevice)));
                 logicalDeviceRepository.save(ontDevice, 2);
                 log.error("Created ONT device: {}", ontName);
             }
@@ -400,12 +394,25 @@ public class CreateServiceFibernet implements HttpAction {
             }
 
 
-            // 10. Link RFS -> ONT or OLT (if model supports linking via properties)
-//            Map<String, Object> rfsProps = rfs.getProperties() == null ? new HashMap<>() : rfs.getProperties();
-//            rfsProps.put("serviceSN", request.getOntSN());
-//            if (oltDevice != null) rfsProps.put("oltPosition", oltDevice.getDiscoveredName());
-//            rfs.setProperties(rfsProps);
-//            rfsRepository.save(rfs, 2);
+            if(ontDevice!=null && oltDevice!=null) {
+                if (request.getTemplateNameVEIP() != null) {
+                    oltDevice.getProperties().put("veipServiceTemplate", request.getTemplateNameVEIP());
+                }
+                if (request.getTemplateNameHSI() != null) {
+                    oltDevice.getProperties().put("veipHsiTemplate", request.getTemplateNameHSI());
+                }
+                if (request.getMenm() != "" && request.getMenm() !=null){
+                    ontDevice.getProperties().put("description", request.getMenm());
+                }
+                ontDevice.getProperties().put("oltPosition", request.getOltName());
+                if (request.getTemplateNameONT() != null) ontDevice.getProperties().put("ontTemplate", request.getTemplateNameONT());
+                ontDevice.setUsingService(new HashSet<>(List.of(rfs)));
+                ontDevice.setUsedResource(new HashSet<>(List.of(oltDevice)));
+                oltDevice.setUsingService(new HashSet<>(List.of(rfs)));
+                logicalDeviceRepository.save(ontDevice,3);
+                logicalDeviceRepository.save(oltDevice,3);
+            }
+
             log.error(Constants.ACTION_COMPLETED);
             // 11. Final response
             String ontNameResp = ontDevice != null ? ontDevice.getDiscoveredName() : "";

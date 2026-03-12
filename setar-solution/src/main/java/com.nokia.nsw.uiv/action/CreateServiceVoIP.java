@@ -380,7 +380,6 @@ public class CreateServiceVoIP implements HttpAction {
                 );
                 oltProps.put("actionName", ACTION_LABEL);
                 dev.setProperties(oltProps);
-                dev.setUsingService(new HashSet<>(List.of(rfs)));
                 olt = dev;
                 logicalDeviceRepo.save(dev);
             }
@@ -412,8 +411,6 @@ public class CreateServiceVoIP implements HttpAction {
                 );
                 ontProps.put("actionName", ACTION_LABEL);
                 dev.setProperties(ontProps);
-                dev.setUsedResource(new HashSet<>(List.of(olt)));
-                dev.setUsingService(new HashSet<>(List.of(rfs)));
                 ont = dev;
                 logicalDeviceRepo.save(dev);
             }
@@ -437,7 +434,9 @@ public class CreateServiceVoIP implements HttpAction {
 
             ont.setProperties(ontProps);
             olt.setProperties(oltProps);
-
+            ont.setUsedResource(new HashSet<>(List.of(olt)));
+            ont.setUsingService(new HashSet<>(List.of(rfs)));
+            olt.setUsingService(new HashSet<>(List.of(rfs)));
             logicalDeviceRepo.save(cpeDevice);
             ont = logicalDeviceRepo.findByDiscoveredName(ont.getDiscoveredName()).orElseThrow(() -> new RuntimeException("OLTDevice not found: " + ontName));
             ont.setProperties(ontProps);
