@@ -430,7 +430,7 @@ public class CreateServiceVoIP implements HttpAction {
                 olt.getProperties().put("voipPots2Template", req.getTemplateNamePots2());
                 cpeDevice.getProperties().put("voipPort2", req.getVoipNumber1());
             }
-
+            olt.getProperties().put("ontTemplate", req.getTemplateNameOnt());
             olt.getProperties().put("voipServiceTemplate", req.getVoipServiceTemplate());
 
             ont.setUsingService(new HashSet<>(List.of(rfs)));
