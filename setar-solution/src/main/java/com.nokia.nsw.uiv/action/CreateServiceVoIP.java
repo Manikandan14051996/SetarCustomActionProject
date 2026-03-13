@@ -433,20 +433,9 @@ public class CreateServiceVoIP implements HttpAction {
 
             olt.getProperties().put("voipServiceTemplate", req.getVoipServiceTemplate());
 
-            if (olt.getUsingService() == null) {
-                olt.setUsingService(new HashSet<>());
-            }
-            olt.getUsingService().add(rfs);
-
-            if (ont.getUsedResource() == null) {
-                ont.setUsedResource(new HashSet<>());
-            }
-            ont.getUsedResource().add(olt);
-
-            if (ont.getUsingService() == null) {
-                ont.setUsingService(new HashSet<>());
-            }
-            ont.getUsingService().add(rfs);
+            ont.setUsingService(new HashSet<>(List.of(rfs)));
+            ont.setUsedResource(new HashSet<>(List.of(olt)));
+            olt.setUsingService(new HashSet<>(List.of(rfs)));
 
             logicalDeviceRepo.save(cpeDevice);
             logicalDeviceRepo.save(ont,3);
