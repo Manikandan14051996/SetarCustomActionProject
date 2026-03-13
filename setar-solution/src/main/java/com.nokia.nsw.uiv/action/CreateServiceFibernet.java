@@ -395,6 +395,12 @@ public class CreateServiceFibernet implements HttpAction {
 
 
             if(ontDevice!=null && oltDevice!=null) {
+                oltDevice = logicalDeviceRepository
+                        .findByDiscoveredName(oltDevice.getDiscoveredName())
+                        .get();
+                ontDevice = logicalDeviceRepository
+                        .findByDiscoveredName(ontDevice.getDiscoveredName())
+                        .get();
                 if (request.getTemplateNameVEIP() != null) {
                     oltDevice.getProperties().put("veipServiceTemplate", request.getTemplateNameVEIP());
                 }

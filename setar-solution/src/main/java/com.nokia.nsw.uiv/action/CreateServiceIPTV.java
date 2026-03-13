@@ -380,6 +380,12 @@ public class CreateServiceIPTV implements HttpAction {
             if (request.getMenm() != "" && request.getMenm() !=null && request.getMenm() != "NA"){
                 ontDevice.getProperties().put("description",request.getMenm());
             }
+            oltDevice = logicalDeviceRepository
+                    .findByDiscoveredName(oltDevice.getDiscoveredName())
+                    .get();
+            ontDevice = logicalDeviceRepository
+                    .findByDiscoveredName(ontDevice.getDiscoveredName())
+                    .get();
 
             ontDevice.getProperties().put("iptvVlan", request.getVlanID());
             ontDevice.setUsingService(new HashSet<>(List.of(rfs)));

@@ -360,12 +360,12 @@ public class CreateServiceVoIP implements HttpAction {
                 olt = oltOpt.get();
                 log.error("OLTDevice is already present with oltName: " + oltName);
             } else {
-                LogicalDevice dev = new LogicalDevice();
+                olt = new LogicalDevice();
                 try {
-                    dev.setLocalName(Validations.encryptName(req.getOltName()));
-                    dev.setDiscoveredName(req.getOltName());
-                    dev.setContext("Setar");
-                    dev.setKind("OLTDevice");
+                    olt.setLocalName(Validations.encryptName(req.getOltName()));
+                    olt.setDiscoveredName(req.getOltName());
+                    olt.setContext("Setar");
+                    olt.setKind("OLTDevice");
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -379,9 +379,8 @@ public class CreateServiceVoIP implements HttpAction {
                                 : "CA"
                 );
                 oltProps.put("actionName", ACTION_LABEL);
-                dev.setProperties(oltProps);
-                olt = dev;
-                logicalDeviceRepo.save(dev);
+                olt.setProperties(oltProps);
+                logicalDeviceRepo.save(olt);
             }
             LogicalDevice ont = null;
             Optional<LogicalDevice> ontOpt = logicalDeviceRepo.findByDiscoveredName(ontName);
@@ -389,12 +388,12 @@ public class CreateServiceVoIP implements HttpAction {
                 ont = ontOpt.get();
                 log.error("ONTDevice is already exist with ontName: " + ontName);
             } else {
-                LogicalDevice dev = new LogicalDevice();
+                ont = new LogicalDevice();
                 try {
-                    dev.setLocalName(Validations.encryptName(ontName));
-                    dev.setDiscoveredName(ontName);
-                    dev.setContext("Setar");
-                    dev.setKind("ONTDevice");
+                    ont.setLocalName(Validations.encryptName(ontName));
+                    ont.setDiscoveredName(ontName);
+                    ont.setContext("Setar");
+                    ont.setKind("ONTDevice");
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -410,40 +409,49 @@ public class CreateServiceVoIP implements HttpAction {
                                 : "CA"
                 );
                 ontProps.put("actionName", ACTION_LABEL);
-                dev.setProperties(ontProps);
-                ont = dev;
-                logicalDeviceRepo.save(dev);
+                ont.setProperties(ontProps);
+                logicalDeviceRepo.save(ont);
             }
 
             // Step 12: Configure VoIP ports
-            Map<String, Object> ontProps = ont.getProperties();
-            Map<String, Object> oltProps = olt.getProperties();
 
+            olt = logicalDeviceRepo
+                    .findByDiscoveredName(olt.getDiscoveredName()).get();
 
+            ont = logicalDeviceRepo
+                    .findByDiscoveredName(ont.getDiscoveredName()).get();
 
             if ("1".equals(req.getOntPort())) {
-                ontProps.put("potsPort1Number", req.getVoipNumber1());
-                oltProps.put("voipPots1Template", req.getTemplateNamePots1());
+                ont.getProperties().put("potsPort1Number", req.getVoipNumber1());
+                olt.getProperties().put("voipPots1Template", req.getTemplateNamePots1());
                 cpeDevice.getProperties().put("voipPort1", req.getVoipNumber1());
             } else {
-                ontProps.put("potsPort2Number", req.getVoipNumber1());
-                oltProps.put("voipPots2Template", req.getTemplateNamePots2());
+                ont.getProperties().put("potsPort2Number", req.getVoipNumber1());
+                olt.getProperties().put("voipPots2Template", req.getTemplateNamePots2());
                 cpeDevice.getProperties().put("voipPort2", req.getVoipNumber1());
             }
-            oltProps.put("voipServiceTemplate", req.getVoipServiceTemplate());
 
-            ont.setProperties(ontProps);
-            olt.setProperties(oltProps);
-            ont.setUsedResource(new HashSet<>(List.of(olt)));
-            ont.setUsingService(new HashSet<>(List.of(rfs)));
-            olt.setUsingService(new HashSet<>(List.of(rfs)));
+            olt.getProperties().put("voipServiceTemplate", req.getVoipServiceTemplate());
+
+            if (olt.getUsingService() == null) {
+                olt.setUsingService(new HashSet<>());
+            }
+            olt.getUsingService().add(rfs);
+
+            if (ont.getUsedResource() == null) {
+                ont.setUsedResource(new HashSet<>());
+            }
+            ont.getUsedResource().add(olt);
+
+            if (ont.getUsingService() == null) {
+                ont.setUsingService(new HashSet<>());
+            }
+            ont.getUsingService().add(rfs);
+
             logicalDeviceRepo.save(cpeDevice);
-            ont = logicalDeviceRepo.findByDiscoveredName(ont.getDiscoveredName()).orElseThrow(() -> new RuntimeException("OLTDevice not found: " + ontName));
-            ont.setProperties(ontProps);
-            logicalDeviceRepo.save(ont);
-            olt = logicalDeviceRepo.findByDiscoveredName(olt.getDiscoveredName()).orElseThrow(() -> new RuntimeException("OLTDevice not found: " + oltName));
-            olt.setProperties(oltProps);
-            logicalDeviceRepo.save(olt);
+            logicalDeviceRepo.save(ont,3);
+            logicalDeviceRepo.save(olt,3);
+
             log.error(Constants.ACTION_COMPLETED);
             return new CreateServiceVoIPResponse(
                     "201",
