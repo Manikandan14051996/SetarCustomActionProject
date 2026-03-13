@@ -473,6 +473,10 @@ public class QueryFlags implements HttpAction {
                         if (oltP.get("ontTemplate") != null && !oltP.get("ontTemplate").toString().isEmpty()) {
                             flags.put("SERVICE_TEMPLATE_ONT", oltP.get("ontTemplate").toString());
                         }
+                        // in SRI servicetemplate value only taken form olt device
+//                        if (ontTemplate!=null && !ontTemplate.isEmpty()) {
+//                            flags.put("SERVICE_TEMPLATE_ONT", ontTemplate);
+//                        }
 
                         if (oltP.get("veipServiceTemplate") != null && !oltP.get("veipServiceTemplate").toString().isEmpty()) {
                             flags.put("SERVICE_TEMPLATE_VEIP", oltP.get("veipServiceTemplate").toString());
