@@ -122,10 +122,8 @@ public class ModifySPR implements HttpAction {
                     success = handleVOIP(request, subscription, ontName);
                 }
 
-                if (!success) {
-                    if (isOntModification(request)) {
-                        success = handleModifyONT(request, ontName, flag);
-                    }
+                if (isOntModification(request)) {
+                    success = handleModifyONT(request, ontName, flag);
                 }
             } catch (BadRequestException bre) {
                 log.error("Validation or not found error: {}", bre.getMessage(), bre);
