@@ -135,8 +135,11 @@ public class QueryFlags implements HttpAction {
         String number1 = null;
         String number2 = null;
         String oltGdn = "";
-
+        List<Service> rfscounts;
+        List<Service> rfslist = new ArrayList<>();
         String[] iptvServiceID = new String[15];
+        LogicalDevice ontdevice=new LogicalDevice();
+        LogicalDevice oltdevice=new LogicalDevice();
 
         String serviceidflag = "New";
         String iptvCount = "0";
@@ -151,7 +154,6 @@ public class QueryFlags implements HttpAction {
             if (ontSN.startsWith("ALC")) serviceLink = "ONT";
             else if (ontSN.startsWith("CW")) serviceLink = "SRX";
         }
-
 
         if ((equalsAnyIgnoreCase(productSubType, "Broadband", "Voice", "Cloudstarter", "Bridged") ||
                 equalsIgnoreCase(productName, "ENTERPRISE")) &&
@@ -211,14 +213,15 @@ public class QueryFlags implements HttpAction {
         }
 
 
+        List<Service> rfsList = null;
         if (serviceID != null && !serviceID.trim().isEmpty()) {
             List<Service> rfsLists = (List<Service>) serviceCustomRepository.findAll();
-            List<Service> rfsList = rfsLists.stream()
-                    .filter(s -> SETAR_KIND_SETAR_RFS.equalsIgnoreCase(s.getKind()))
+            rfsList = rfsLists.stream()
+                    .filter(s -> Constants.SETAR_KIND_SETAR_RFS.equalsIgnoreCase(s.getKind()))
                     .filter(s -> {
                         String name = s.getDiscoveredName();
                         if (name == null) return false;
-                        String[] parts = name.split(UNDER_SCORE);
+                        String[] parts = name.split(Constants.UNDER_SCORE);
                         return parts.length > 2 && serviceID.equals(parts[2]);
                     })
                     .collect(Collectors.toList());
@@ -241,72 +244,58 @@ public class QueryFlags implements HttpAction {
             if (!simaCustId.isEmpty()) flags.put("SIMA_CUST_ID", simaCustId);
         }
 
-        if(ontSN!=null)
-        {
-            if (equalsIgnoreCase(productSubType, "IPTV") && equalsIgnoreCase(actionType, "Unconfigure")) {
-                String subGdn = subscriber + UNDER_SCORE + serviceID;
-                Optional<Subscription> subOpt = subscriptionRepository.findByDiscoveredName(subGdn);
+        if (ontSN != null) {
+            if (equalsIgnoreCase(productSubType, "IPTV")) {
+                String effectiveOntSN = "";
+                if (equalsIgnoreCase(actionType, "Unconfigure")) {
+                    String subGdn = subscriber + UNDER_SCORE + serviceID;
+                    Optional<Subscription> subOpt = subscriptionRepository.findByDiscoveredName(subGdn);
+                    if (subOpt.isPresent()) {
+                        Map<String, Object> p = safeProps(subOpt.get().getProperties());
+                        String sLink = safeString(p.get("serviceLink"));
+                        String sSN = safeString(p.get("serviceSN"));
+                        String sMAC = safeString(p.get("serviceMac"));
 
-                String effectiveOntSN;
-                if (subOpt.isPresent()) {
-                    Map<String, Object> p = safeProps(subOpt.get().getProperties());
-                    String sLink = safeString(p.get("serviceLink"));
-                    String sSN = safeString(p.get("serviceSN"));
-                    String sMAC = safeString(p.get("serviceMac"));
-
-                    if (sSN != null && !sSN.isEmpty()) {
-                        if ("ONT".equalsIgnoreCase(sLink) || "SRX".equalsIgnoreCase(sLink)) {
-                            effectiveOntSN = sSN;
-                        } else if ("Cable_Modem".equalsIgnoreCase(sLink)) {
-                            effectiveOntSN = sMAC;
+                        if (sSN != null && !sSN.isEmpty()) {
+                            if ("ONT".equalsIgnoreCase(sLink) || "SRX".equalsIgnoreCase(sLink)) {
+                                effectiveOntSN = sSN;
+                            } else if ("Cable_Modem".equalsIgnoreCase(sLink)) {
+                                effectiveOntSN = sMAC;
+                            } else {
+                                effectiveOntSN = ontSN;
+                            }
                         } else {
                             effectiveOntSN = ontSN;
                         }
-                    } else {
-                        effectiveOntSN = ontSN;
                     }
                 } else {
                     effectiveOntSN = ontSN;
                 }
-
+                String ontsn = effectiveOntSN;
                 if (!"NA".equalsIgnoreCase(effectiveOntSN) && effectiveOntSN != null && !effectiveOntSN.isEmpty()) {
                     List<Subscription> subscriptions = (List<Subscription>) subscriptionRepository.findAll();
                     long count = subscriptions.stream()
                             .filter(s -> {
                                 Map<String, Object> p = safeProps(s.getProperties());
                                 return "IPTV".equalsIgnoreCase(safeString(p.get("serviceSubType"))) &&
-                                        (effectiveOntSN.equals(safeString(p.get("serviceSN"))) ||
-                                                effectiveOntSN.equals(safeString(p.get("macAddress"))));
+                                        (ontsn.equals(safeString(p.get("serviceSN"))) ||
+                                                ontsn.equals(safeString(p.get("macAddress"))));
                             })
                             .count();
                     iptvCount = String.valueOf(count);
                     flags.put("IPTV_COUNT", iptvCount);
                 }
-            }
-            else if (equalsAnyIgnoreCase(productSubType, "Fibernet", "Broadband", "Voice", "Bridged") ||
-                    (equalsIgnoreCase(productName, "Broadband") && equalsIgnoreCase(productSubType, "Bridged"))) {
+            } else if (equalsAnyIgnoreCase(productSubType, "Fibernet", "Broadband", "Voice", "Bridged") ||
+                    (equalsIgnoreCase(productName, "Broadband") && equalsIgnoreCase(productSubType, "Bridged") || equalsIgnoreCase(productSubType, "Cloudstarter"))) {
 
-                List<Service> rfscounts;
-                List<Service> rfslist = new ArrayList<>();
+                rfslist = (List<Service>) serviceCustomRepository.findAll();
                 if (ontSN != null && !ontSN.equals("NA") && ontSN.contains("ALCL")) {
-                    rfslist = (List<Service>) serviceCustomRepository.findAll();
-
-                    rfscounts = new ArrayList<>();
-
-                    for (Service s : rfslist) {
-
-                        if (!SETAR_KIND_SETAR_RFS.equalsIgnoreCase(s.getKind())) {
-                            continue;
-                        }
-
-                        if (s.getDiscoveredName() == null || !s.getDiscoveredName().contains(ontSN)) {
-                            continue;
-                        }
-
-                        rfscounts.add(s);
-                    }
+                    String containsontsn = ontSN;
+                    rfscounts = rfslist.stream()
+                            .filter(s -> SETAR_KIND_SETAR_RFS.equalsIgnoreCase(s.getKind()))
+                            .filter(s -> s.getDiscoveredName() != null && s.getDiscoveredName().contains(containsontsn))
+                            .collect(Collectors.toList());
                 } else {
-                    rfslist = (List<Service>) serviceCustomRepository.findAll();
                     rfscounts = rfslist.stream()
                             .filter(s -> SETAR_KIND_SETAR_RFS.equalsIgnoreCase(s.getKind()))
                             .filter(s -> s.getDiscoveredName() != null && s.getDiscoveredName().contains(subscriber))
@@ -350,8 +339,113 @@ public class QueryFlags implements HttpAction {
                         }
                     }
                 }
+                if (!"Configure".equalsIgnoreCase(actionType)) {
+                    String subToFind;
+                    String subNamefoFind;
+                    if (ontSN != null && ontSN.startsWith("ALCL")) {
+                        subToFind = subscriber + UNDER_SCORE + serviceID + UNDER_SCORE + ontSN;
+                        subNamefoFind = subscriber + UNDER_SCORE + ontSN;
+                    } else {
+                        subToFind = subscriber + UNDER_SCORE + serviceID;
+                        subNamefoFind = subscriber + UNDER_SCORE;
+                    }
+
+                    Optional<Subscription> subOpt = subscriptionRepository.findByDiscoveredName(subToFind);
+                    if (subOpt.isPresent()) {
+                        Map<String, Object> p = safeProps(subOpt.get().getProperties());
+                        serviceLink = safeString(p.get("serviceLink"));
+                        serviceSN = safeString(p.get("serviceSN"));
+                        serviceMAC = safeString(p.get("serviceMac"));
+                        cbmmac = safeString(p.get("serviceMac"));
+                        qosProfile = safeString(p.get("veipQosSessionProfile"));
+                        kenanUidNumber = safeString(p.get("kenanSubscriberId"));
+                        if (!serviceLink.isEmpty()) {
+                            flags.put("SERVICE_LINK", serviceLink);
+                        }
+
+                        if (!serviceSN.isEmpty()) {
+                            flags.put("SERVICE_SN", serviceSN);
+                        }
+
+                        if (!serviceMAC.isEmpty()) {
+                            flags.put("SERVICE_MAC", serviceMAC);
+                        }
+
+                        if (!cbmmac.isEmpty()) {
+                            flags.put("CBM_MAC", cbmmac);
+                        }
+
+                        if (!qosProfile.isEmpty()) {
+                            flags.put("QOS_PROFILE", qosProfile);
+                        }
+
+                        if (!kenanUidNumber.isEmpty()) {
+                            flags.put("KENAN_UIDNO", kenanUidNumber);
+                        }
+
+
+                        if (p.containsKey("oltPosition") && !safeString(p.get("oltPosition")).isEmpty()) {
+                            serviceOltPosition = safeString(p.get("oltPosition"));
+                            flags.put("SERVICE_OLT_POSITION", serviceOltPosition);
+                        }
+
+                        if ("Cable_Modem".equalsIgnoreCase(serviceLink)) {
+                            flags.put("SERVICE_VOIP_EXIST", "New");
+                            String cbmName = "CBM_" + cbmmac;
+                            Optional<LogicalDevice> cbmOpt = deviceRepository.findByDiscoveredName(cbmName);
+                            if (cbmOpt.isEmpty() && serviceID != null) {
+                                // Original fallback
+                                cbmName = "CBM" + serviceID;
+                                cbmOpt = deviceRepository.findByDiscoveredName(cbmName);
+                            }
+                            if (cbmOpt.isPresent()) {
+                                LogicalDevice cbm = cbmOpt.get();
+                                Map<String, Object> cp = safeProps(cbm.getProperties());
+                                number1 = safeString(cp.get("voipPort1"));
+                                number2 = safeString(cp.get("voipPort2"));
+                                ontModel = safeString(cp.get("deviceModel"));
+                                flags.put("SERVICE_VOIP_NUMBER1", number1);
+                                flags.put("SERVICE_VOIP_NUMBER2", number2);
+                                flags.put("ONT_MODEL", ontModel);
+
+                                if (!"Available".equalsIgnoreCase(number1)) templateNameVoip = "Exist";
+                                if (!"Available".equalsIgnoreCase(number2)) templateNameVoip = "Exist";
+                                flags.put("SERVICE_VOIP_EXIST", templateNameVoip);
+
+                                if (serviceID != null) {
+                                    if (number1 != null && serviceID.equals(number1)) {
+                                        voicePotsPort = "1";
+                                        flags.put("VOICE_POTS_PORT", "1");
+                                    }
+                                    if (number2 != null && serviceID.equals(number2)) {
+                                        voicePotsPort = "2";
+                                        flags.put("VOICE_POTS_PORT", "2");
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+
+                    // Subscriber names
+                    List<Customer> customers = (List<Customer>) customerRepository.findAll();
+                    for (Customer cust : customers) {
+                        if (cust.getDiscoveredName().equalsIgnoreCase(subToFind) || cust.getDiscoveredName().contains(subNamefoFind)) {
+                            Map<String, Object> cp = safeProps(cust.getProperties());
+                            subscriberFirstName = safeString(cp.get("subscriberFirstName"));
+                            subscriberLastName = safeString(cp.get("subscriberLastName"));
+                            flags.put("FIRST_NAME", subscriberFirstName);
+                            flags.put("LAST_NAME", subscriberLastName);
+                        }
+                    }
+                }
             }
 
+        }
+        if (rfsList.size() == 0) {
+            flags.put("SERVICE_ID", "New");
+        } else {
+            flags.put("SERVICE_ID", "Exist");
         }
 
 
@@ -394,7 +488,7 @@ public class QueryFlags implements HttpAction {
             }
         }
 
-        if (equalsAnyIgnoreCase(serviceLink, "ONT", "SRX") && ontSN != null && !ontSN.isEmpty()) {
+        if (serviceLink != null && equalsAnyIgnoreCase(serviceLink, "ONT", "SRX")) {
             String ontGdn = "ONT" + ontSN;
             if (ontGdn.length() > 100) {
                 return new QueryFlagsResponse("400", ERROR_PREFIX + "ONT name too long", getCurrentTimestamp(), flags);
@@ -404,12 +498,13 @@ public class QueryFlags implements HttpAction {
 
             if (ontOpt.isPresent()) {
                 LogicalDevice ontDev = ontOpt.get();
+                ontdevice=ontDev;
 
                 Map<String, Object> ontP = safeProps(ontDev.getProperties());
                 ontModel = safeString(ontP.get("deviceModel"));
                 serviceSN = safeString(ontP.get("serialNo"));
 
-                ontTemplate= safeString(ontP.get("ontTemplate"));
+                ontTemplate = safeString(ontP.get("ontTemplate"));
                 if (ontTemplate != null && !ontTemplate.isEmpty()) {
                     flags.put("ONT_TEMPLATE", ontTemplate);
                 }
@@ -504,13 +599,69 @@ public class QueryFlags implements HttpAction {
                     }
                 }
 
+                if ("ENTERPRISE".equalsIgnoreCase(productName) && ontOpt.isPresent()) {
+
+                    Set<Service> tmpRfss = ontOpt.get().getUsingService();
+Service finalRfs;
+                    if (tmpRfss != null) {
+
+                        for (Service tmpRfs : tmpRfss) {
+                            Optional<Service> rfs=serviceCustomRepository.findByDiscoveredName(tmpRfs.getDiscoveredName());
+                            if(rfs.isPresent())
+                            {
+                              finalRfs=rfs.get();
+                                if (finalRfs.getDiscoveredName() != null &&
+                                        finalRfs.getDiscoveredName().contains(serviceID)) {
+
+                                    Service cfs = finalRfs.getUsedService()
+                                            .stream()
+                                            .findFirst()
+                                            .orElse(null);
+
+                                    if (cfs == null) continue;
+
+                                    Service productService = cfs.getUsingService()
+                                            .stream()
+                                            .filter(s -> Constants.SETAR_KIND_SETAR_PRODUCT.equalsIgnoreCase(s.getKind()))
+                                            .findFirst()
+                                            .orElse(null);
+
+                                    if (productService == null) continue;
+
+                                    Product product = productRepository
+                                            .findByDiscoveredName(productService.getDiscoveredName())
+                                            .orElse(null);
+
+                                    if (product == null) continue;
+
+                                    Subscription subscription = product.getSubscription()
+                                            .stream()
+                                            .findFirst()
+                                            .orElse(null);
+
+                                    if (subscription != null && subscription.getProperties() != null) {
+
+                                        ontPort = Objects.toString(
+                                                subscription.getProperties().get("evpnPort"),
+                                                ""
+                                        );
+
+                                        break;
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+
                 // VLAN MGMT template check
                 Set<String> countVlan = new TreeSet<>();
-
+                String vlanont = ontPort;
                 logicalInterfaceRepository.findAll().forEach(vif -> {
                     String vname = vif.getDiscoveredName();
 
-                    if (vname != null && vname.contains("_P" + ontPort + "_")) {
+                    if (vname != null && vname.contains("_P" + vlanont + "_")) {
                         countVlan.add(vname);
                     }
                 });
@@ -541,8 +692,7 @@ public class QueryFlags implements HttpAction {
                     flags.put("SERVICE_TEMPLATE_MGMT", tempTemplateMGMT);
                 }
             }
-        }
-        else {
+        } else {
             if (equalsIgnoreCase(productSubType, "Voice")) {
                 List<Subscription> voiceSubscriptions = (List<Subscription>) subscriptionRepository.findAll();
                 List<Subscription> voiceSubs = voiceSubscriptions.stream()
@@ -712,119 +862,14 @@ public class QueryFlags implements HttpAction {
             }
 
             for (int i = 0; i < Math.min(5, iptvIds.size()); i++) {
-                flags.put("IPTV_SERVICE_ID_PREFIX" + UNDER_SCORE + (i + 1), iptvIds.get(i));
+                flags.put("Service_IPTV_Service_ID" + UNDER_SCORE + (i + 1), iptvIds.get(i));
             }
         }
 
-        if (!"Configure".equalsIgnoreCase(actionType)) {
-            String subToFind;
-            String subNamefoFind;
-            if (ontSN != null && ontSN.startsWith("ALCL")) {
-                subToFind = subscriber + UNDER_SCORE + serviceID + UNDER_SCORE + ontSN;
-                subNamefoFind = subscriber + UNDER_SCORE + ontSN;
-            } else {
-                subToFind = subscriber + UNDER_SCORE + serviceID;
-                subNamefoFind = subscriber + UNDER_SCORE;
-            }
-
-            Optional<Subscription> subOpt = subscriptionRepository.findByDiscoveredName(subToFind);
-            if (subOpt.isPresent()) {
-                Map<String, Object> p = safeProps(subOpt.get().getProperties());
-                serviceLink = safeString(p.get("serviceLink"));
-                serviceSN = safeString(p.get("serviceSN"));
-                serviceMAC = safeString(p.get("serviceMac"));
-                cbmmac = safeString(p.get("serviceMac"));
-                qosProfile = safeString(p.get("veipQosSessionProfile"));
-                kenanUidNumber = safeString(p.get("kenanSubscriberId"));
-                if (!serviceLink.isEmpty()) {
-                    flags.put("SERVICE_LINK", serviceLink);
-                }
-
-                if (!serviceSN.isEmpty()) {
-                    flags.put("SERVICE_SN", serviceSN);
-                }
-
-                if (!serviceMAC.isEmpty()) {
-                    flags.put("SERVICE_MAC", serviceMAC);
-                }
-
-                if (!cbmmac.isEmpty()) {
-                    flags.put("CBM_MAC", cbmmac);
-                }
-
-                if (!qosProfile.isEmpty()) {
-                    flags.put("QOS_PROFILE", qosProfile);
-                }
-
-                if (!kenanUidNumber.isEmpty()) {
-                    flags.put("KENAN_UIDNO", kenanUidNumber);
-                }
-
-
-
-                if (p.containsKey("oltPosition") && !safeString(p.get("oltPosition")).isEmpty()) {
-                    serviceOltPosition = safeString(p.get("oltPosition"));
-                    flags.put("SERVICE_OLT_POSITION", serviceOltPosition);
-                }
-
-                if ("Cable_Modem".equalsIgnoreCase(serviceLink)) {
-                    flags.put("SERVICE_VOIP_EXIST","New");
-                    String cbmName = "CBM_" + cbmmac;
-                    Optional<LogicalDevice> cbmOpt = deviceRepository.findByDiscoveredName(cbmName);
-                    if (cbmOpt.isEmpty() && serviceID != null) {
-                        // Original fallback
-                        cbmName = "CBM" + serviceID;
-                        cbmOpt = deviceRepository.findByDiscoveredName(cbmName);
-                    }
-                    if (cbmOpt.isPresent()) {
-                        LogicalDevice cbm = cbmOpt.get();
-                        Map<String, Object> cp = safeProps(cbm.getProperties());
-                        number1 = safeString(cp.get("voipPort1"));
-                        number2 = safeString(cp.get("voipPort2"));
-                        ontModel = safeString(cp.get("deviceModel"));
-                        flags.put("SERVICE_VOIP_NUMBER1", number1);
-                        flags.put("SERVICE_VOIP_NUMBER2", number2);
-                        flags.put("ONT_MODEL", ontModel);
-
-                        if (!"Available".equalsIgnoreCase(number1)) templateNameVoip = "Exist";
-                        if (!"Available".equalsIgnoreCase(number2)) templateNameVoip = "Exist";
-                        flags.put("SERVICE_VOIP_EXIST", templateNameVoip);
-
-                        if (serviceID != null) {
-                            if (number1 != null && serviceID.equals(number1)) {
-                                voicePotsPort = "1";
-                                flags.put("VOICE_POTS_PORT", "1");
-                            }
-                            if (number2 != null && serviceID.equals(number2)) {
-                                voicePotsPort = "2";
-                                flags.put("VOICE_POTS_PORT", "2");
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            // Subscriber names
-            List<Customer>customers= (List<Customer>) customerRepository.findAll();
-            for(Customer cust:customers)
-            {
-                if(cust.getDiscoveredName().equalsIgnoreCase(subToFind) || cust.getDiscoveredName().contains(subNamefoFind))
-                {
-                    Map<String, Object> cp = safeProps(cust.getProperties());
-                    subscriberFirstName = safeString(cp.get("subscriberFirstName"));
-                    subscriberLastName = safeString(cp.get("subscriberLastName"));
-                    flags.put("FIRST_NAME", subscriberFirstName);
-                    flags.put("LAST_NAME", subscriberLastName);
-                }
-            }
-        }
 
         if (productName.contains("EVPN") || productName.contains("ENTERPRISE") ||
                 productSubType.contains("Cloudstarter") || productSubType.contains("Bridged")) {
-
             log.debug("Entering detailed EVPN/Enterprise logic block");
-
             // CASE A: Configure or Migrate
             if (actionType.contains("Configure") || actionType.contains("Migrate")) {
 
@@ -921,8 +966,7 @@ public class QueryFlags implements HttpAction {
                         templateNamePort = "New";
                     }
                     flags.put("SERVICE_PORT_EXIST", templateNamePort);
-                }
-                else if ("5".equals(ontPort)) {
+                } else if ("5".equals(ontPort)) {
 
                     String portTpl = getOltProperty(oltGdn, "evpnEthPort5Template");
 
@@ -1018,8 +1062,7 @@ public class QueryFlags implements HttpAction {
                     }
 
                     flags.put("SERVICE_PORT_EXIST", templateNamePort);
-                }
-                else if ("3".equals(ontPort)) {
+                } else if ("3".equals(ontPort)) {
 
                     String portTpl = getOltProperty(oltGdn, "evpnEthPort3Template");
 
@@ -1030,7 +1073,7 @@ public class QueryFlags implements HttpAction {
                         String iswifiMain = "false";
 
                         List<Service> listRFS = (List<Service>) serviceCustomRepository.findAll();
-                        String tmpontsn=ontSN;
+                        String tmpontsn = ontSN;
                         List<Service> attachedRfs = listRFS.stream()
                                 .filter(s -> SETAR_KIND_SETAR_RFS.equalsIgnoreCase(s.getKind()))
                                 .filter(s -> s.getDiscoveredName() != null && s.getDiscoveredName().contains(tmpontsn))
@@ -1113,8 +1156,7 @@ public class QueryFlags implements HttpAction {
                     }
 
                     flags.put("SERVICE_PORT_EXIST", templateNamePort);
-                }
-                else if ("2".equals(ontPort)) {
+                } else if ("2".equals(ontPort)) {
 
                     String portTpl = getOltProperty(oltGdn, "evpnEthPort2Template");
 
@@ -1134,8 +1176,9 @@ public class QueryFlags implements HttpAction {
                         getOltProperty(oltGdn, "evpnOntCardTemplate");
 
                 flags.put("SERVICE_EVPN_EXIST", exists(cardTpl));
+
             }
-            else if (!actionType.contains("Configure")) {
+            else if (((productName.contains("EVPN")) || (productName.contains("ENTERPRISE")) || (productSubType.contains("Cloudstarter"))) &&!actionType.contains("Configure")) {
 
                 String tempPort = "";
                 Set<String> setarsubset = new TreeSet<>();
@@ -1156,6 +1199,7 @@ public class QueryFlags implements HttpAction {
                         Service rfsTemp = rfsTempList.get(0);
                         for (Resource res : rfsTemp.getUsedResource()) {
                             if (res instanceof LogicalDevice ld && ld.getDiscoveredName().contains("ALCL")) {
+                                ontdevice=ld;
                                 Map<String, Object> p = safeProps(ld.getProperties());
                                 ontSN = safeString(p.get("serialNo"));
                                 serviceSN = ontSN;
@@ -1240,12 +1284,12 @@ public class QueryFlags implements HttpAction {
                             tempCreate = safeString(sp.get("evpnTemplateCreateVLAN"));
                             tempVlanID = safeString(sp.get("evpnVLAN"));
 
-                            flags.put("SERVICE_LINK", serviceLink);
-                            flags.put("SERVICE_ONT_PORT", evpnPort);
-                            flags.put("SERVICE_TEMPLATE_VLAN", tempVLAN);
-                            flags.put("SERVICE_TEMPLATE_VPLS", tempVPLS);
-                            flags.put("SERVICE_TEMPLATE_CREATE", tempCreate);
-                            flags.put("SERVICE_VLAN_ID", tempVlanID);
+//                            flags.put("SERVICE_LINK", serviceLink);
+//                            flags.put("SERVICE_ONT_PORT", evpnPort);
+//                            flags.put("SERVICE_TEMPLATE_VLAN", tempVLAN);
+//                            flags.put("SERVICE_TEMPLATE_VPLS", tempVPLS);
+//                            flags.put("SERVICE_TEMPLATE_CREATE", tempCreate);
+//                            flags.put("SERVICE_VLAN_ID", tempVlanID);
 
                             // OLT Position
                             if (sp.containsKey("oltPosition") && !safeString(sp.get("oltPosition")).isEmpty()) {
@@ -1295,6 +1339,49 @@ public class QueryFlags implements HttpAction {
                     }
                 }
 
+                tempTemplateCreate = getOntProperty(ontSN, "createTemplate");
+
+                tempTemplateMGMT = getOntProperty(ontSN, "mgmtTemplate");
+                //tempTemplateBase = tempTemplateMGMT + " 2";
+
+                Subscription setarSubscribtion = new Subscription();
+
+                subscriptionName = subscriber + UNDER_SCORE + serviceID + UNDER_SCORE + ontSN;
+
+                Optional<Subscription> subOpt = subscriptionRepository.findByDiscoveredName(subscriptionName);
+
+                if (subOpt.isPresent()) {
+
+                    Subscription sub = subOpt.get();
+
+                    Map<String, Object> p = safeProps(sub.getProperties());
+
+                    serviceLink = safeString(p.get("serviceLink"));
+
+                    evpnPort = safeString(p.get("evpnPort"));
+
+                    tempPort = safeString(p.get("evpnPort"));
+                    tempVLAN = safeString(p.get("evpnTemplateVLAN"));
+                    tempVPLS = safeString(p.get("evpnTemplateVPLS"));
+                    tempCreate = safeString(p.get("evpnTemplateCreateVLAN"));
+                    tempVlanID = safeString(p.get("evpnVLAN"));
+                    ontPort = safeString(p.get("evpnPort"));
+                    String oltposition = safeString(p.get("oltPosition"));
+
+
+                    if (oltposition != null && oltposition != "") {
+
+                        serviceOltPosition = oltposition;
+                    }
+                    if (ontPort.equals("5")) {
+                        tempCard = getOltProperty(oltGdn, "evpnOntCard5Template");
+                    } else {
+                        tempCard = getOltProperty(oltGdn, "evpnOntCardTemplate");
+                    }
+
+                }
+
+
                 // Port-specific reset logic for Unconfigure
                 if ("4".equals(tempPort)) {
 
@@ -1317,7 +1404,6 @@ public class QueryFlags implements HttpAction {
                     templateNamePort2 = exists(getOltProperty(oltGdn, "evpnEthPort2Template"));
                     templateNamePort3 = exists(getOltProperty(oltGdn, "evpnEthPort3Template"));
                 }
-
                 else if ("5".equals(tempPort)) {
 
                     serviceevpnwififlag = (!setarsubset.isEmpty() && setarsubset.size() == 1) ? "YES" : "NO";
@@ -1339,7 +1425,6 @@ public class QueryFlags implements HttpAction {
                     templateNamePort2 = exists(getOltProperty(oltGdn, "evpnEthPort2Template"));
                     templateNamePort3 = exists(getOltProperty(oltGdn, "evpnEthPort3Template"));
                 }
-
                 else if ("3".equals(tempPort)) {
 
                     serviceevpnwififlag = (!setarsubset.isEmpty() && setarsubset.size() == 1) ? "YES" : "NO";
@@ -1361,7 +1446,6 @@ public class QueryFlags implements HttpAction {
                     templateNamePort2 = exists(getOltProperty(oltGdn, "evpnEthPort2Template"));
                     templateNamePort4 = exists(getOltProperty(oltGdn, "evpnEthPort4Template"));
                 }
-
                 else if ("2".equals(tempPort)) {
 
                     String portTpl = getOntProperty(ontSN, "evpnEthPort2Template");
@@ -1390,9 +1474,126 @@ public class QueryFlags implements HttpAction {
                 }
                 flags.put("SERVICE_EVPN_EXIST", templateNameCard);
             }
+            else if (!(productName.contains("EVPN") || productName.contains("ENTERPRISE")) && !actionType.contains("Configure")) {
 
-        }
-        else {
+
+                //String tempTemplateBase = "";
+                String tempPort = "";
+
+                System.out.println("------------Test Trace # 24---------------");
+                //tempTemplateCreate = ontDevice.getCreateTemplate();
+                //tempTemplateMGMT =	ontDevice.getMgmtTemplate();
+                //tempTemplateBase = tempTemplateMGMT + " 2";
+
+                Subscription setarSubscribtion = new Subscription();
+
+                subscriptionName = subscriber + UNDER_SCORE + serviceID + UNDER_SCORE + ontSN;
+
+                Optional<Subscription> subOpt = subscriptionRepository.findByDiscoveredName(subscriptionName);
+
+                if (subOpt.isPresent()) {
+
+                    Subscription sub = subOpt.get();
+
+                    Map<String, Object> p = safeProps(sub.getProperties());
+                    tempPort = safeString(p.get("evpnPort"));
+                    tempVLAN = safeString(p.get("evpnTemplateVLAN"));
+                    //tempVPLS = safeString(p.get("evpnTemplateVPLS"));
+                    //tempCreate = safeString(p.get("evpnTemplateCreateVLAN"));
+                    tempCard = oltdevice.getProperties().get("EvpnOntCardTemplate").toString();
+                    evpnPort = safeString(p.get("evpnPort"));
+
+                }
+
+
+
+
+                if (tempPort.equals("4")) {
+
+                    templateNamePort = getOntProperty(ontSN, "evpnEthPort4Template");
+                    tempPortTemp = getOltProperty(oltGdn, "evpnEthPort4Template");
+
+
+                    templateNamePort = "New";
+                    templateNamePort4 = "New";
+
+
+                    templateNamePort2 = getOltProperty(oltGdn, "evpnEthPort2Template");
+
+                    if (templateNamePort2 != "" && templateNamePort2 != null) {
+                        templateNamePort2 = "Exist";
+                    } else {
+                        templateNamePort2 = "New";
+                    }
+
+                    templateNamePort3 = getOltProperty(oltGdn, "evpnEthPort3Template");
+
+                    if (templateNamePort3 != "" && templateNamePort3 != null) {
+                        templateNamePort3 = "Exist";
+                    } else {
+                        templateNamePort3 = "New";
+                    }
+
+                }
+                else if (tempPort.equals("3")) {
+
+                    templateNamePort = getOntProperty(ontSN, "evpnEthPort3Template");
+                    tempPortTemp = getOltProperty(oltGdn, "evpnEthPort3Template");
+
+                    templateNamePort = "New";
+                    templateNamePort3 = "New";
+
+                    templateNamePort2 = getOltProperty(oltGdn, "evpnEthPort2Template");
+
+                    if (templateNamePort2 != "" && templateNamePort2 != null) {
+                        templateNamePort2 = "Exist";
+                    } else {
+                        templateNamePort2 = "New";
+                    }
+
+                    templateNamePort4 = getOltProperty(oltGdn, "evpnEthPort4Template");
+
+                    if (templateNamePort4 != "" && templateNamePort4 != null) {
+                        templateNamePort4 = "Exist";
+                    } else {
+                        templateNamePort4 = "New";
+                    }
+
+                }
+                else if (tempPort.equals("2")) {
+
+                    templateNamePort = getOntProperty(ontSN, "evpnEthPort2Template");
+                    tempPortTemp = getOltProperty(oltGdn, "evpnEthPort2Template");
+
+                    templateNamePort = "New";
+                    templateNamePort2 = "New";
+
+
+                    templateNamePort3 = getOltProperty(oltGdn, "evpnEthPort3Template");
+
+                    if (templateNamePort3 != "" && templateNamePort3 != null) {
+                        templateNamePort3 = "Exist";
+                    } else {
+                        templateNamePort3 = "New";
+                    }
+
+                    templateNamePort4 = getOltProperty(oltGdn, "evpnEthPort4Template");
+
+                    if (templateNamePort4 != "" && templateNamePort4 != null) {
+                        templateNamePort4 = "Exist";
+                    } else {
+                        templateNamePort4 = "New";
+                    }
+                }
+
+                if (templateNamePort4 != "New" || templateNamePort3 != "New" || templateNamePort2 != "New") {
+                    templateNameCard = "Exist";
+                } else {
+                    templateNameCard = "New";
+                }
+
+            }
+        } else {
 
             // Fallback card template (non-EVPN path)
             String cardTpl = getOltProperty(oltGdn, "evpnOntCardTemplate");
@@ -1431,25 +1632,25 @@ public class QueryFlags implements HttpAction {
                 }
             }
         }
+        flags.put("SERVICE_TEMPLATE_VLAN", tempVLAN);
+        flags.put("SERVICE_TEMPLATE_VPLS", tempVPLS);
+        flags.put("SERVICE_EXIST", templateNameOnt);
+        flags.put("SERVICE_EVPN_EXIST", templateNameCard);
+        flags.put("SERVICE_PORT_EXIST", templateNamePort);
+        flags.put("SERVICE_VEIP_EXIST", templateNameVeip);
+        flags.put("SERVICE_VOIP_EXIST", templateNameVoip);
+        flags.put("SERVICE_HSI_EXIST", templateNameHSI);
+        flags.put("SERVICE_IPTV_EXIST", templateNameIPTV);
+        flags.put("SERVICE_POTS1_EXIST", templateNamePots1);
+        flags.put("SERVICE_POTS2_EXIST", templateNamePots2);
 
-        flags.putIfAbsent("SERVICE_EXIST", templateNameOnt);
-        flags.putIfAbsent("SERVICE_EVPN_EXIST", templateNameCard);
-        flags.putIfAbsent("SERVICE_PORT_EXIST", templateNamePort);
-        flags.putIfAbsent("SERVICE_VEIP_EXIST", templateNameVeip);
-        flags.putIfAbsent("SERVICE_VOIP_EXIST", templateNameVoip);
-        flags.putIfAbsent("SERVICE_HSI_EXIST", templateNameHSI);
-        flags.putIfAbsent("SERVICE_IPTV_EXIST", templateNameIPTV);
-        flags.putIfAbsent("SERVICE_POTS1_EXIST", templateNamePots1);
-        flags.putIfAbsent("SERVICE_POTS2_EXIST", templateNamePots2);
-
-        flags.putIfAbsent("SERVICE_TEMPLATE_VEIP", tempVEIP);
-        flags.putIfAbsent("SERVICE_TEMPLATE_HSI", tempHSI);
-        flags.putIfAbsent("SERVICE_TEMPLATE_ONT", tempONT);
-        flags.putIfAbsent("SERVICE_TEMPLATE_VOIP", tempVOIP);
-        flags.putIfAbsent("SERVICE_TEMPLATE_POTS1", tempPOTS1);
-        flags.putIfAbsent("SERVICE_TEMPLATE_POTS2", tempPOTS2);
-        flags.putIfAbsent("SERVICE_TEMPLATE_IPTV", tempIPTV);
-        flags.putIfAbsent("SERVICE_TEMPLATE_VPLS", tempVPLS);
+        flags.put("SERVICE_TEMPLATE_VEIP", tempVEIP);
+        flags.put("SERVICE_TEMPLATE_HSI", tempHSI);
+        flags.put("SERVICE_TEMPLATE_ONT", tempONT);
+        flags.put("SERVICE_TEMPLATE_VOIP", tempVOIP);
+        flags.put("SERVICE_TEMPLATE_POTS1", tempPOTS1);
+        flags.put("SERVICE_TEMPLATE_POTS2", tempPOTS2);
+        flags.put("SERVICE_TEMPLATE_IPTV", tempIPTV);
 
         if (!qosProfileBridge.isEmpty()) {
             flags.put("QOS_PROFILE", qosProfileBridge);
@@ -1463,16 +1664,23 @@ public class QueryFlags implements HttpAction {
         flags.putIfAbsent("CBM_MAC", cbmmac);
         flags.putIfAbsent("ONT_MODEL", ontModel);
         flags.putIfAbsent("OLT_POSITION", oltPosition);
-        flags.putIfAbsent("ONT_TEMPLATE", ontTemplate);
-        flags.putIfAbsent("SERVICE_OLT_POSITION", serviceOltPosition);
-        flags.putIfAbsent("SERVICE_EVPN_WIFIM_FIRST", serviceevpnwififlag);
-        flags.putIfAbsent("VOICE_POTS_PORT", voicePotsPort);
-        flags.putIfAbsent("KENAN_UIDNO", kenanUidNumber);
-        flags.putIfAbsent("SIMA_CUST_ID", simaCustId);
-        flags.putIfAbsent("IPTV_COUNT", iptvCount);
-        flags.putIfAbsent("FIBERNET_COUNT", fibernetCount);
-        flags.putIfAbsent("ACCOUNT_EXIST", accountExistFlag);
-        flags.putIfAbsent("SERVICE_FLAG", serviceFlag);
+        flags.put("ONT_TEMPLATE", ontTemplate);
+        flags.put("SERVICE_OLT_POSITION", serviceOltPosition);
+        flags.put("SERVICE_EVPN_WIFIM_FIRST", serviceevpnwififlag);
+        flags.put("VOICE_POTS_PORT", voicePotsPort);
+        flags.put("KENAN_UIDNO", kenanUidNumber);
+        flags.put("SIMA_CUST_ID", simaCustId);
+        flags.put("IPTV_COUNT", iptvCount);
+        flags.put("FIBERNET_COUNT", fibernetCount);
+        flags.put("ACCOUNT_EXIST", accountExistFlag);
+        flags.put("SERVICE_FLAG", serviceFlag);
+        flags.put("SERVICE_TEMPLATE_VLAN", tempVLAN);
+        flags.put("SERVICE_TEMPLATE_VPLS", tempVPLS);
+        flags.put("SERVICE_VLAN_ID", tempVlanID);
+        flags.put("SERVICE_TEMPLATE_CARD", tempCard);
+        flags.put("SERVICE_TEMPLATE_PORT", tempPortTemp);
+        flags.put("SERVICE_TEMPLATE_MGMT_CREATE", tempTemplateCreate);
+        flags.put("SERVICE_TEMPLATE_CREATE", tempCreate);
 
         flags.putIfAbsent("CBM_ACCOUNT_EXIST", cbmAccountExistFlag);
 
@@ -1553,9 +1761,11 @@ public class QueryFlags implements HttpAction {
                     if ((subscriber + UNDER_SCORE + serviceID).equalsIgnoreCase(s.getDiscoveredName())) {
                         result.put("ACCOUNT_EXIST", "Exist");
                     }
-                    String sima = safeString(safeProps(s.getProperties()).get("simaCustomerId"));
+                    String sima = safeString(safeProps(s.getProperties()).get("simaCustId"));
                     if (sima != null && !sima.isEmpty()) {
                         result.put("SIMA_CUST_ID", sima);
+                    }else if(s.getProperties().get("simaCustId2")!=null) {
+                        result.put("SIMA_CUST_ID", s.getProperties().get("simaCustId2").toString());
                     }
                 }
             }
@@ -1709,17 +1919,47 @@ public class QueryFlags implements HttpAction {
     }
 
     private String getOltProperty(String oltGdn, String propertyKey) {
-        if (oltGdn == null || oltGdn.isEmpty()) return "";
-        return deviceRepository.findByDiscoveredName(oltGdn)
-                .map(dev -> safeString(safeProps(dev.getProperties()).get(propertyKey)))
-                .orElse("");
+
+        if (oltGdn == null || oltGdn.isEmpty()) {
+            return "";
+        }
+
+        Optional<LogicalDevice> oltOpt = deviceRepository.findByDiscoveredName(oltGdn);
+
+        if (oltOpt.isPresent()) {
+            LogicalDevice olt = oltOpt.get();
+
+            if (olt.getProperties() != null) {
+                Object value = olt.getProperties().get(propertyKey);
+                return value != null ? value.toString() : "";
+            }
+        }
+
+        return "";
     }
 
     private String getOntProperty(String ontSN, String propertyKey) {
-        if (ontSN == null || ontSN.isEmpty()) return "";
+
+        String value = "";
+        if (ontSN == null || ontSN.isEmpty()) {
+            return "";
+        }
+
         String ontGdn = "ONT" + ontSN;
-        return deviceRepository.findByDiscoveredName(ontGdn)
-                .map(dev -> safeString(safeProps(dev.getProperties()).get(propertyKey)))
-                .orElse("");
+
+        Optional<LogicalDevice> ont = deviceRepository.findByDiscoveredName(ontGdn);
+        LogicalDevice ontDevice = null;
+
+        if (ont.isPresent()) {
+            ontDevice = ont.get();
+
+            if (ontDevice.getProperties() != null &&
+                    ontDevice.getProperties().get(propertyKey) != null) {
+
+                value = ontDevice.getProperties().get(propertyKey).toString();
+            }
+        }
+
+        return value;
     }
 }
