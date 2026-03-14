@@ -138,8 +138,8 @@ public class QueryFlags implements HttpAction {
         List<Service> rfscounts;
         List<Service> rfslist = new ArrayList<>();
         String[] iptvServiceID = new String[15];
-        LogicalDevice ontdevice=new LogicalDevice();
-        LogicalDevice oltdevice=new LogicalDevice();
+        LogicalDevice ontdevice = new LogicalDevice();
+        LogicalDevice oltdevice = new LogicalDevice();
 
         String serviceidflag = "New";
         String iptvCount = "0";
@@ -498,7 +498,7 @@ public class QueryFlags implements HttpAction {
 
             if (ontOpt.isPresent()) {
                 LogicalDevice ontDev = ontOpt.get();
-                ontdevice=ontDev;
+                ontdevice = ontDev;
 
                 Map<String, Object> ontP = safeProps(ontDev.getProperties());
                 ontModel = safeString(ontP.get("deviceModel"));
@@ -602,14 +602,13 @@ public class QueryFlags implements HttpAction {
                 if ("ENTERPRISE".equalsIgnoreCase(productName) && ontOpt.isPresent()) {
 
                     Set<Service> tmpRfss = ontOpt.get().getUsingService();
-Service finalRfs;
+                    Service finalRfs;
                     if (tmpRfss != null) {
 
                         for (Service tmpRfs : tmpRfss) {
-                            Optional<Service> rfs=serviceCustomRepository.findByDiscoveredName(tmpRfs.getDiscoveredName());
-                            if(rfs.isPresent())
-                            {
-                              finalRfs=rfs.get();
+                            Optional<Service> rfs = serviceCustomRepository.findByDiscoveredName(tmpRfs.getDiscoveredName());
+                            if (rfs.isPresent()) {
+                                finalRfs = rfs.get();
                                 if (finalRfs.getDiscoveredName() != null &&
                                         finalRfs.getDiscoveredName().contains(serviceID)) {
 
@@ -1177,8 +1176,7 @@ Service finalRfs;
 
                 flags.put("SERVICE_EVPN_EXIST", exists(cardTpl));
 
-            }
-            else if (((productName.contains("EVPN")) || (productName.contains("ENTERPRISE")) || (productSubType.contains("Cloudstarter"))) &&!actionType.contains("Configure")) {
+            } else if (((productName.contains("EVPN")) || (productName.contains("ENTERPRISE")) || (productSubType.contains("Cloudstarter"))) && !actionType.contains("Configure")) {
 
                 String tempPort = "";
                 Set<String> setarsubset = new TreeSet<>();
@@ -1199,7 +1197,7 @@ Service finalRfs;
                         Service rfsTemp = rfsTempList.get(0);
                         for (Resource res : rfsTemp.getUsedResource()) {
                             if (res instanceof LogicalDevice ld && ld.getDiscoveredName().contains("ALCL")) {
-                                ontdevice=ld;
+                                ontdevice = ld;
                                 Map<String, Object> p = safeProps(ld.getProperties());
                                 ontSN = safeString(p.get("serialNo"));
                                 serviceSN = ontSN;
@@ -1403,8 +1401,7 @@ Service finalRfs;
 
                     templateNamePort2 = exists(getOltProperty(oltGdn, "evpnEthPort2Template"));
                     templateNamePort3 = exists(getOltProperty(oltGdn, "evpnEthPort3Template"));
-                }
-                else if ("5".equals(tempPort)) {
+                } else if ("5".equals(tempPort)) {
 
                     serviceevpnwififlag = (!setarsubset.isEmpty() && setarsubset.size() == 1) ? "YES" : "NO";
 
@@ -1424,8 +1421,7 @@ Service finalRfs;
 
                     templateNamePort2 = exists(getOltProperty(oltGdn, "evpnEthPort2Template"));
                     templateNamePort3 = exists(getOltProperty(oltGdn, "evpnEthPort3Template"));
-                }
-                else if ("3".equals(tempPort)) {
+                } else if ("3".equals(tempPort)) {
 
                     serviceevpnwififlag = (!setarsubset.isEmpty() && setarsubset.size() == 1) ? "YES" : "NO";
 
@@ -1445,8 +1441,7 @@ Service finalRfs;
 
                     templateNamePort2 = exists(getOltProperty(oltGdn, "evpnEthPort2Template"));
                     templateNamePort4 = exists(getOltProperty(oltGdn, "evpnEthPort4Template"));
-                }
-                else if ("2".equals(tempPort)) {
+                } else if ("2".equals(tempPort)) {
 
                     String portTpl = getOntProperty(ontSN, "evpnEthPort2Template");
                     tempPortTemp = getOltProperty(oltGdn, "evpnEthPort2Template");
@@ -1473,8 +1468,7 @@ Service finalRfs;
                     templateNameCard = "New";
                 }
                 flags.put("SERVICE_EVPN_EXIST", templateNameCard);
-            }
-            else if (!(productName.contains("EVPN") || productName.contains("ENTERPRISE")) && !actionType.contains("Configure")) {
+            } else if (!(productName.contains("EVPN") || productName.contains("ENTERPRISE")) && !actionType.contains("Configure")) {
 
 
                 //String tempTemplateBase = "";
@@ -1506,8 +1500,6 @@ Service finalRfs;
                 }
 
 
-
-
                 if (tempPort.equals("4")) {
 
                     templateNamePort = getOntProperty(ontSN, "evpnEthPort4Template");
@@ -1534,8 +1526,7 @@ Service finalRfs;
                         templateNamePort3 = "New";
                     }
 
-                }
-                else if (tempPort.equals("3")) {
+                } else if (tempPort.equals("3")) {
 
                     templateNamePort = getOntProperty(ontSN, "evpnEthPort3Template");
                     tempPortTemp = getOltProperty(oltGdn, "evpnEthPort3Template");
@@ -1559,8 +1550,7 @@ Service finalRfs;
                         templateNamePort4 = "New";
                     }
 
-                }
-                else if (tempPort.equals("2")) {
+                } else if (tempPort.equals("2")) {
 
                     templateNamePort = getOntProperty(ontSN, "evpnEthPort2Template");
                     tempPortTemp = getOltProperty(oltGdn, "evpnEthPort2Template");
@@ -1764,7 +1754,7 @@ Service finalRfs;
                     String sima = safeString(safeProps(s.getProperties()).get("simaCustId"));
                     if (sima != null && !sima.isEmpty()) {
                         result.put("SIMA_CUST_ID", sima);
-                    }else if(s.getProperties().get("simaCustId2")!=null) {
+                    } else if (s.getProperties().get("simaCustId2") != null) {
                         result.put("SIMA_CUST_ID", s.getProperties().get("simaCustId2").toString());
                     }
                 }
