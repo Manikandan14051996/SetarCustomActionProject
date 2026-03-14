@@ -616,7 +616,7 @@ public class QueryServicesInfo implements HttpAction {
                     String firstName = (setarSubscriber == null) ? "" : String.valueOf(setarSubscriber.getProperties() == null ? "" : setarSubscriber.getProperties().getOrDefault("subscriberFirstName", ""));
                     String lastName = (setarSubscriber == null) ? "" : String.valueOf(setarSubscriber.getProperties() == null ? "" : setarSubscriber.getProperties().getOrDefault("subscriberLastName", ""));
                     String email = (setarSubscriber == null) ? "" : String.valueOf(setarSubscriber.getProperties() == null ? "" : setarSubscriber.getProperties().getOrDefault("email", ""));
-                    allvalues.put(prefix + "SUBSCRIPTION_STAUS", subscriptionStatus == null ? "" : subscriptionStatus);
+                    allvalues.put(prefix + "SUBSCRIPTION_STATUS", subscriptionStatus == null ? "" : subscriptionStatus);
                     allvalues.put(prefix + "HHID", hhid == null ? "" : hhid);
                     allvalues.put(prefix + "ADDRESS", address == null ? "" : address);
                     allvalues.put(prefix + "ACCOUNT_NUMBER", acct == null ? "" : acct);
