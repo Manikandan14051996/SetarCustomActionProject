@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -63,18 +65,16 @@ public class QueryResource implements HttpAction {
             }
 
             LogicalDevice device = optDev.get();
-            String devModel = (String) device.getProperties().getOrDefault("deviceModel", "");
-            String devMan = (String) device.getProperties().getOrDefault("manufacturer", "");
-            String devSN = (String) device.getProperties().getOrDefault("serialNo", resourceSN);
-            String devMAC = (String) device.getProperties().getOrDefault("macAddress", "");
-            String gatewayMac = (String) device.getProperties().getOrDefault("gatewayMacAddress", "");
-            String devStatus = (String) device.getProperties().getOrDefault("AdministrativeState", "");
-            String devKEY = (String) device.getProperties().getOrDefault("presharedKey", "");
-            String devDesc = (String) device.getProperties().getOrDefault("description", "");
-            if(devDesc.isEmpty() && !device.getDescription().isEmpty())
-            {
-                devDesc=device.getDescription();
-            }
+            Map<String, Object> props = device.getProperties();
+            String devModel = Objects.toString(props.get("deviceModel"), "");
+            String devMan = Objects.toString(props.get("manufacturer"), "");
+            String devSN = Objects.toString(props.get("serialNo"), resourceSN);
+            String devMAC = Objects.toString(props.get("macAddress"), "");
+            String gatewayMac = Objects.toString(props.get("gatewayMacAddress"), "");
+            String devStatus = Objects.toString(props.get("AdministrativeState"), "");
+            String devKEY = Objects.toString(props.get("presharedKey"), "");
+            String devDesc = Objects.toString(props.get("description"), "");
+
 
             String devGroupID = "NA";
             String devSubTYPE = "";
