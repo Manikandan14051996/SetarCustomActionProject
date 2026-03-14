@@ -259,8 +259,8 @@ public class ModifyIPTV implements HttpAction {
                     "200",
                     "UIV action ModifyIPTV executed successfully.",
                     java.time.Instant.now().toString(),
-                    subscriber.getName(),
-                    subscription.getName()
+                    subscriber.getDiscoveredName(),
+                    subscription.getDiscoveredName()
             );
 
         } catch (IllegalArgumentException ex) {
