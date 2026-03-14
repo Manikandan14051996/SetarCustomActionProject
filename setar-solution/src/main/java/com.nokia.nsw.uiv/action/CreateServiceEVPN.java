@@ -420,7 +420,7 @@ public class CreateServiceEVPN implements HttpAction {
                     throw new RuntimeException(e);
                 }
                 Map<String, Object> ontProps = new HashMap<>();
-                ontProps.put("serialNumber", req.getOntSN());
+                ontProps.put("serialNo", req.getOntSN());
                 ontProps.put("deviceModel", req.getOntModel());
                 ontProps.put("OperationalState", "Active");
                 if (req.getTemplateNameOnt() != null) ontProps.put("ontTemplate", req.getTemplateNameOnt());
