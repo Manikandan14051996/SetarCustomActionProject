@@ -104,6 +104,9 @@ public class ModifySPR implements HttpAction {
             // 3. Fetch Entities
             Optional<Customer> subscriberOpt = customerRepository.findByDiscoveredName(subscriberName);
             Customer subscriber = null;
+
+            LogicalDevice ontDevice=logicalCustomDeviceRepository.findByDiscoveredName(ontName).orElseThrow(() -> new BadRequestException("No entry found to modify ONTDevice: " + ontName));
+
             if (!subscriberOpt.isPresent()) {
                 flag = "partly";
             } else {
@@ -134,14 +137,18 @@ public class ModifySPR implements HttpAction {
                     .orElse(subscription); // fallback to original if somehow missing
             String updatedSubscriptionName = updatedSubscription.getDiscoveredName();
 
+            LogicalDevice updatedOnt = logicalCustomDeviceRepository.findById(ontDevice.getUuid())
+                    .orElse(ontDevice); // fallback to original if somehow missing
+            String updatedOntName = updatedOnt.getDiscoveredName();
+
             // 5. Response
             if (success) {
                 log.error(Constants.ACTION_COMPLETED);
                 return new ModifySPRResponse("200", "UIV action ModifySPR executed successfully.", getCurrentTimestamp(),
-                        ontName, updatedSubscriptionName);
+                        updatedOntName, updatedSubscriptionName);
             } else {
                 return new ModifySPRResponse("200", "UIV action ModifySPR executed successfully.Modification not done", getCurrentTimestamp(),
-                        ontName, updatedSubscriptionName);
+                        updatedOntName, updatedSubscriptionName);
             }
 
         } catch (BadRequestException bre) {
@@ -372,6 +379,7 @@ public class ModifySPR implements HttpAction {
                         rfsOld.getProperties().put("transactionId", request.getFxOrderId());
                     }
                     rfsOld.getProperties().put("transactionType", request.getModifyType());
+                    serviceCustomRepository.save(rfsOld, 2);
                     if (ontExist != "fail") {
                         ontDevice = logicalCustomDeviceRepository.findByDiscoveredName(ontDevice.get().getDiscoveredName());
                         if (!ontDevice.isPresent()) {
