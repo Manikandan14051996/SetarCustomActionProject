@@ -567,6 +567,7 @@ public class QueryFlags implements HttpAction {
 
                         if (oltP.get("ontTemplate") != null && !oltP.get("ontTemplate").toString().isEmpty()) {
                             flags.put("SERVICE_TEMPLATE_ONT", oltP.get("ontTemplate").toString());
+                            tempONT=oltP.get("ontTemplate").toString();
                         }
                         // in SRI servicetemplate value only taken form olt device
 //                        if (ontTemplate!=null && !ontTemplate.isEmpty()) {
@@ -1634,13 +1635,13 @@ public class QueryFlags implements HttpAction {
         flags.put("SERVICE_POTS1_EXIST", templateNamePots1);
         flags.put("SERVICE_POTS2_EXIST", templateNamePots2);
 
-        flags.put("SERVICE_TEMPLATE_VEIP", tempVEIP);
-        flags.put("SERVICE_TEMPLATE_HSI", tempHSI);
-        flags.put("SERVICE_TEMPLATE_ONT", tempONT);
-        flags.put("SERVICE_TEMPLATE_VOIP", tempVOIP);
-        flags.put("SERVICE_TEMPLATE_POTS1", tempPOTS1);
-        flags.put("SERVICE_TEMPLATE_POTS2", tempPOTS2);
-        flags.put("SERVICE_TEMPLATE_IPTV", tempIPTV);
+        flags.putIfAbsent("SERVICE_TEMPLATE_VEIP", tempVEIP);
+        flags.putIfAbsent("SERVICE_TEMPLATE_HSI", tempHSI);
+        flags.putIfAbsent("SERVICE_TEMPLATE_ONT", tempONT);
+        flags.putIfAbsent("SERVICE_TEMPLATE_VOIP", tempVOIP);
+        flags.putIfAbsent("SERVICE_TEMPLATE_POTS1", tempPOTS1);
+        flags.putIfAbsent("SERVICE_TEMPLATE_POTS2", tempPOTS2);
+        flags.putIfAbsent("SERVICE_TEMPLATE_IPTV", tempIPTV);
 
         if (!qosProfileBridge.isEmpty()) {
             flags.put("QOS_PROFILE", qosProfileBridge);
