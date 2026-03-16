@@ -209,7 +209,7 @@ public class QueryFlags implements HttpAction {
             }
 
             bridgeService = deriveBridgeService(rfsTempList, ontSN);
-            flags.put("BRIDGE_SERVICE", bridgeService);
+            flags.put("BRIDGE_SERVICE_ID", bridgeService);
         }
 
 
@@ -285,8 +285,8 @@ public class QueryFlags implements HttpAction {
                     iptvCount = String.valueOf(count);
                     flags.put("IPTV_COUNT", iptvCount);
                 }
-            } else if (equalsAnyIgnoreCase(productSubType, "Fibernet", "Broadband", "Voice", "Bridged") ||
-                    (equalsIgnoreCase(productName, "Broadband") && equalsIgnoreCase(productSubType, "Bridged") || equalsIgnoreCase(productSubType, "Cloudstarter"))) {
+            } else if (equalsAnyIgnoreCase(productSubType, "Fibernet", "Broadband", "Voice") ||
+                    (equalsIgnoreCase(productName, "Broadband") && equalsAnyIgnoreCase(productSubType, "Bridged","Cloudstarter"))) {
 
                 rfslist = (List<Service>) serviceCustomRepository.findAll();
                 if (ontSN != null && !ontSN.equals("NA") && ontSN.contains("ALCL")) {
@@ -318,7 +318,7 @@ public class QueryFlags implements HttpAction {
                 // Bridge service & qosProfileBridge for Modify_CPE
                 if (ontSN != null && !ontSN.equals("NA") && ontSN.contains("ALCL")) {
                     bridgeService = deriveBridgeService(rfscounts, ontSN);
-                    flags.put("BRIDGE_SERVICE", bridgeService);
+                    flags.put("BRIDGE_SERVICE_ID", bridgeService);
                 }
 
                 if (!"NA".equalsIgnoreCase(bridgeService) && actionType != null && actionType.contains("Modify_CPE")) {
@@ -331,7 +331,7 @@ public class QueryFlags implements HttpAction {
                         if (sub == null) continue;
 
                         Map<String, Object> p = safeProps(sub.getProperties());
-                        if ("Bridged".equalsIgnoreCase(safeString(p.get("serviceSubType"))) &&
+                        if ("Bridged".equalsIgnoreCase(safeString(p.get("serviceSubType"))) ||"Cloudstarter".equalsIgnoreCase(safeString(p.get("serviceSubType"))) &&
                                 sub.getDiscoveredName().contains(ontSN)) {
                             qosProfileBridge = safeString(p.get("evpnQosSessionProfile"));
                             flags.put("QOS_PROFILE_BRIDGE", qosProfileBridge);
@@ -574,28 +574,35 @@ public class QueryFlags implements HttpAction {
 //                            flags.put("SERVICE_TEMPLATE_ONT", ontTemplate);
 //                        }
 
+
                         if (oltP.get("veipServiceTemplate") != null && !oltP.get("veipServiceTemplate").toString().isEmpty()) {
                             flags.put("SERVICE_TEMPLATE_VEIP", oltP.get("veipServiceTemplate").toString());
+                            tempVEIP=oltP.get("veipServiceTemplate").toString();
                         }
 
                         if (oltP.get("veipHsiTemplate") != null && !oltP.get("veipHsiTemplate").toString().isEmpty()) {
                             flags.put("SERVICE_TEMPLATE_HSI", oltP.get("veipHsiTemplate").toString());
+                            tempHSI=oltP.get("veipHsiTemplate").toString();
                         }
 
                         if (oltP.get("voipServiceTemplate") != null && !oltP.get("voipServiceTemplate").toString().isEmpty()) {
                             flags.put("SERVICE_TEMPLATE_VOIP", oltP.get("voipServiceTemplate").toString());
+                            tempVOIP=oltP.get("voipServiceTemplate").toString();
                         }
 
                         if (oltP.get("voipPots1Template") != null && !oltP.get("voipPots1Template").toString().isEmpty()) {
                             flags.put("SERVICE_TEMPLATE_POTS1", oltP.get("voipPots1Template").toString());
+                            tempPOTS1=oltP.get("voipPots1Template").toString();
                         }
 
                         if (oltP.get("voipPots2Template") != null && !oltP.get("voipPots2Template").toString().isEmpty()) {
                             flags.put("SERVICE_TEMPLATE_POTS2", oltP.get("voipPots2Template").toString());
+                            tempPOTS2=oltP.get("voipPots2Template").toString();
                         }
 
                         if (oltP.get("veipIptvTemplate") != null && !oltP.get("veipIptvTemplate").toString().isEmpty()) {
                             flags.put("SERVICE_TEMPLATE_IPTV", oltP.get("veipIptvTemplate").toString());
+                            tempIPTV=oltP.get("veipIptvTemplate").toString();
                         }
                     }
                 }
@@ -1176,6 +1183,7 @@ public class QueryFlags implements HttpAction {
                         getOltProperty(oltGdn, "evpnOntCardTemplate");
 
                 flags.put("SERVICE_EVPN_EXIST", exists(cardTpl));
+                flags.put("SERVICE_TEMPLATE_CARD", cardTpl);
 
             } else if (((productName.contains("EVPN")) || (productName.contains("ENTERPRISE")) || (productSubType.contains("Cloudstarter"))) && !actionType.contains("Configure")) {
 
@@ -1635,13 +1643,14 @@ public class QueryFlags implements HttpAction {
         flags.put("SERVICE_POTS1_EXIST", templateNamePots1);
         flags.put("SERVICE_POTS2_EXIST", templateNamePots2);
 
-        flags.putIfAbsent("SERVICE_TEMPLATE_VEIP", tempVEIP);
-        flags.putIfAbsent("SERVICE_TEMPLATE_HSI", tempHSI);
-        flags.putIfAbsent("SERVICE_TEMPLATE_ONT", tempONT);
-        flags.putIfAbsent("SERVICE_TEMPLATE_VOIP", tempVOIP);
-        flags.putIfAbsent("SERVICE_TEMPLATE_POTS1", tempPOTS1);
-        flags.putIfAbsent("SERVICE_TEMPLATE_POTS2", tempPOTS2);
-        flags.putIfAbsent("SERVICE_TEMPLATE_IPTV", tempIPTV);
+
+        putIfNotBlank(flags, "SERVICE_TEMPLATE_ONT", tempONT);
+        putIfNotBlank(flags, "SERVICE_TEMPLATE_VEIP", tempVEIP);
+        putIfNotBlank(flags, "SERVICE_TEMPLATE_HSI", tempHSI);
+        putIfNotBlank(flags, "SERVICE_TEMPLATE_VOIP", tempVOIP);
+        putIfNotBlank(flags, "SERVICE_TEMPLATE_POTS1", tempPOTS1);
+        putIfNotBlank(flags, "SERVICE_TEMPLATE_POTS2", tempPOTS2);
+        putIfNotBlank(flags, "SERVICE_TEMPLATE_IPTV", tempIPTV);
 
         if (!qosProfileBridge.isEmpty()) {
             flags.put("QOS_PROFILE", qosProfileBridge);
@@ -1672,6 +1681,7 @@ public class QueryFlags implements HttpAction {
         flags.put("SERVICE_TEMPLATE_PORT", tempPortTemp);
         flags.put("SERVICE_TEMPLATE_MGMT_CREATE", tempTemplateCreate);
         flags.put("SERVICE_TEMPLATE_CREATE", tempCreate);
+        flags.put("SERVICE_ONT_PORT", evpnPort);
 
         flags.putIfAbsent("CBM_ACCOUNT_EXIST", cbmAccountExistFlag);
 
@@ -1785,7 +1795,7 @@ public class QueryFlags implements HttpAction {
             if (sub == null) continue;
 
             Map<String, Object> p = safeProps(sub.getProperties());
-            if ("Bridged".equalsIgnoreCase(safeString(p.get("serviceSubType"))) &&
+            if ("Bridged".equalsIgnoreCase(safeString(p.get("serviceSubType"))) || "CloudStarter".equalsIgnoreCase(safeString(p.get("serviceSubType")))&&
                     sub.getDiscoveredName().contains(ontSN)) {
                 return safeString(p.get("serviceID"));
             }
@@ -1884,7 +1894,7 @@ public class QueryFlags implements HttpAction {
                 "VOICE_POTS_PORT",
                 "RESOURCE_MAC_MTA_OLD",
                 "RESOURCE_MODEL_MTA_OLD",
-                "BRIDGE_SERVICE",
+                "BRIDGE_SERVICE_ID",
                 "QOS_PROFILE_BRIDGE"
         };
         for (String k : keys) flags.put(k, "");
@@ -1952,5 +1962,9 @@ public class QueryFlags implements HttpAction {
         }
 
         return value;
+    }
+
+    private void putIfNotBlank(Map<String,String> flags, String k, String v) {
+        if (v != null && !v.isEmpty()) flags.put(k, v);
     }
 }
