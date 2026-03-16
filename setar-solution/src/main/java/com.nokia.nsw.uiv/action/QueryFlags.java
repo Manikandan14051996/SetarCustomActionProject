@@ -1495,7 +1495,7 @@ public class QueryFlags implements HttpAction {
                     tempVLAN = safeString(p.get("evpnTemplateVLAN"));
                     //tempVPLS = safeString(p.get("evpnTemplateVPLS"));
                     //tempCreate = safeString(p.get("evpnTemplateCreateVLAN"));
-                    tempCard = oltdevice.getProperties().get("EvpnOntCardTemplate").toString();
+                    tempCard = getOltProperty(oltGdn, "evpnOntCardTemplate");
                     evpnPort = safeString(p.get("evpnPort"));
 
                 }
