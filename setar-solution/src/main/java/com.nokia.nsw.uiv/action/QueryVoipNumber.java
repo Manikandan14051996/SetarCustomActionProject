@@ -186,14 +186,14 @@ public class QueryVoipNumber implements HttpAction {
                         voipCode1      = (String) s1.getProperties().getOrDefault("voipServiceCode", "");
                         voipPackage    = (String) s1.getProperties().getOrDefault("voipPackage", "");
 
-                        simaCustId2     = (String) s2.getProperties().getOrDefault("simaCustId", "");
-                        simaSubsId2     = (String) s2.getProperties().getOrDefault("simaSubsId", "");
-                        simaEndpointId2 = (String) s2.getProperties().getOrDefault("simaEndpointId", "");
-                        voipCode2       = (String) s2.getProperties().getOrDefault("voipServiceCode", "");
+                        simaCustId2     = (String) s2.getProperties().getOrDefault("simaCustId2", "");
+                        simaSubsId2     = (String) s2.getProperties().getOrDefault("simaSubsId2", "");
+                        simaEndpointId2 = (String) s2.getProperties().getOrDefault("simaEndpointId2", "");
+                        voipCode2       = (String) s2.getProperties().getOrDefault("voipServiceCode2", "");
 
                         if ("CBM".equals(linkType)) {
                             voipNumber1 = (String) s1.getProperties().getOrDefault("voipNumber1", "");
-                            voipNumber2 = (String) s2.getProperties().getOrDefault("voipNumber1", "");
+                            voipNumber2 = (String) s2.getProperties().getOrDefault("voipNumber2", "");
                         }
                     } else {
                         // If more than 2 → take only first two
