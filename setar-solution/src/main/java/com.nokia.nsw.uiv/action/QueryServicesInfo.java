@@ -531,6 +531,7 @@ public class QueryServicesInfo implements HttpAction {
                         if (setarSubscription != null && setarSubscription.getProperties() != null) {
                             Map<String, Object> sprops = setarSubscription.getProperties();
                             allvalues.put(prefix + "SIMA_CUST_ID", sprops.getOrDefault("simaCustId", ""));
+                            allvalues.put(prefix + "SIMA_CUST_ID2", sprops.getOrDefault("simaCustId2", ""));
                             allvalues.put(prefix + "SIMA_ENDPOINT_ID", sprops.getOrDefault("simaEndpointId", ""));
                             allvalues.put(prefix + "SIMA_ENDPOINT_ID2", sprops.getOrDefault("simaEndpointId2", ""));
                             allvalues.put(prefix + "SIMA_SUBS_ID", sprops.getOrDefault("simaSubsId", ""));
@@ -547,7 +548,7 @@ public class QueryServicesInfo implements HttpAction {
                     }
 
                     // EVPN / Enterprise / Cloudstarter
-                    if (serviceTypeLower.contains("evpn") || serviceTypeLower.contains("enterprise") || serviceSubTypeLower.contains("cloudstarter")) {
+                    if (serviceTypeLower.contains("evpn") || serviceTypeLower.contains("enterprise") && serviceSubTypeLower.contains("cloudstarter")) {
                         if (setarServiceLink != null && setarServiceLink.equalsIgnoreCase("ONT")) {
                             // Evpn templates on oltDevice
                             if (oltDevice != null && oltDevice.getProperties() != null) {

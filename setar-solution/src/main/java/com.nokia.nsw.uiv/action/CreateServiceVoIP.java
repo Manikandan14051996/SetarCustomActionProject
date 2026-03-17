@@ -420,13 +420,17 @@ public class CreateServiceVoIP implements HttpAction {
 
             ont = logicalDeviceRepo
                     .findByDiscoveredName(ont.getDiscoveredName()).get();
-
+            Map<String, Object> ontProp = new HashMap<>();
+            Map<String, Object> existing = ont.getProperties();
+            if (existing != null) {
+                ontProp.putAll(existing);
+            }
             if ("1".equals(req.getOntPort())) {
-                ont.getProperties().put("potsPort1Number", req.getVoipNumber1());
+                ontProp.put("potsPort1Number", req.getVoipNumber1());
                 olt.getProperties().put("voipPots1Template", req.getTemplateNamePots1());
                 cpeDevice.getProperties().put("voipPort1", req.getVoipNumber1());
             } else {
-                ont.getProperties().put("potsPort2Number", req.getVoipNumber1());
+                ontProp.put("potsPort2Number", req.getVoipNumber1());
                 olt.getProperties().put("voipPots2Template", req.getTemplateNamePots2());
                 cpeDevice.getProperties().put("voipPort2", req.getVoipNumber1());
             }
@@ -437,9 +441,9 @@ public class CreateServiceVoIP implements HttpAction {
             ont.setUsedResource(new HashSet<>(List.of(olt)));
             olt.setUsingService(new HashSet<>(List.of(rfs)));
 
-            logicalDeviceRepo.save(cpeDevice);
-            logicalDeviceRepo.save(ont,3);
             logicalDeviceRepo.save(olt,3);
+            logicalDeviceRepo.save(ont,3);
+            logicalDeviceRepo.save(cpeDevice);
 
             log.error(Constants.ACTION_COMPLETED);
             return new CreateServiceVoIPResponse(

@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -59,7 +61,7 @@ public class QueryVoipNumber implements HttpAction {
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
                         Instant.now().toString(),
                         "",
-                        "","","","","","","","","","","",""
+                        "","","","","","","","","","","","",""
                 );
             }
 
@@ -80,6 +82,7 @@ public class QueryVoipNumber implements HttpAction {
             String voipCode1 = "";
             String voipCode2 = "";
             String voipPackage = "";
+            String voipPackage2 = "";
             String firstName = "";
             String lastName = "";
 
@@ -103,14 +106,26 @@ public class QueryVoipNumber implements HttpAction {
                 Optional<Subscription> subsOpt = subscriptionRepo.findByDiscoveredName(subscriptionName);
                 if (subsOpt.isPresent()) {
                     Subscription subs = subsOpt.get();
-                    simaCustId     = (String) subs.getProperties().get("simaCustId");
-                    simaSubsId     = (String) subs.getProperties().get("simaSubsId");
-                    simaEndpointId = (String) subs.getProperties().get("simaEndpointId");
-                    voipCode1      = (String) subs.getProperties().get("voipServiceCode");
-                    voipPackage    = (String) subs.getProperties().get("voipPackage");
+                    simaCustId     = (String) subs.getProperties().getOrDefault("simaCustId","");
+                    simaSubsId     = (String) subs.getProperties().getOrDefault("simaSubsId","");
+                    simaEndpointId = (String) subs.getProperties().getOrDefault("simaEndpointId","");
+                    voipCode1      = (String) subs.getProperties().getOrDefault("voipServiceCode","");
+                    voipPackage    = (String) subs.getProperties().getOrDefault("voipPackage","");
+                    voipPackage2    = (String) subs.getProperties().getOrDefault("voipPackage2","");
+                    simaCustId2     = (String) subs.getProperties().getOrDefault("simaCustId2","");
+                    simaSubsId2     = (String) subs.getProperties().getOrDefault("simaSubsId2","");
+                    simaEndpointId2 = (String) subs.getProperties().getOrDefault("simaEndpointId2","");
+                    voipCode2      = (String) subs.getProperties().getOrDefault("voipServiceCode2","");
+
                     Customer subscriber = subsOpt.get().getCustomer();
-                    firstName      = (String) subscriber.getProperties().get("subscriberFirstName");
-                    lastName       = (String) subscriber.getProperties().get("subscriberLastName");
+
+                    if (subscriber != null && subscriber.getProperties() != null) {
+                        firstName = Objects.toString(subscriber.getProperties().get("subscriberFirstName"), "");
+                        lastName  = Objects.toString(subscriber.getProperties().get("subscriberLastName"), "");
+                    } else {
+                        firstName = "";
+                        lastName = "";
+                    }
 
                     if ("CBM".equals(linkType)) {
                         voipNumber1 = (String) subs.getProperties().get("voipNumber1");
@@ -175,46 +190,73 @@ public class QueryVoipNumber implements HttpAction {
                             voipNumber1 = (String) s.getProperties().getOrDefault("voipNumber1", "");
                         }
 
-                    } else if (matchedSubs.size() == 2) {
-                        // 2 → Capture both records (primary and secondary)
-                        Subscription s1 = matchedSubs.get(0);
-                        Subscription s2 = matchedSubs.get(1);
-
-                        simaCustId     = (String) s1.getProperties().getOrDefault("simaCustId", "");
-                        simaSubsId     = (String) s1.getProperties().getOrDefault("simaSubsId", "");
-                        simaEndpointId = (String) s1.getProperties().getOrDefault("simaEndpointId", "");
-                        voipCode1      = (String) s1.getProperties().getOrDefault("voipServiceCode", "");
-                        voipPackage    = (String) s1.getProperties().getOrDefault("voipPackage", "");
-
-                        simaCustId2     = (String) s2.getProperties().getOrDefault("simaCustId2", "");
-                        simaSubsId2     = (String) s2.getProperties().getOrDefault("simaSubsId2", "");
-                        simaEndpointId2 = (String) s2.getProperties().getOrDefault("simaEndpointId2", "");
-                        voipCode2       = (String) s2.getProperties().getOrDefault("voipServiceCode2", "");
-
-                        if ("CBM".equals(linkType)) {
-                            voipNumber1 = (String) s1.getProperties().getOrDefault("voipNumber1", "");
-                            voipNumber2 = (String) s2.getProperties().getOrDefault("voipNumber2", "");
-                        }
                     } else {
-                        // If more than 2 → take only first two
-                        log.error("More than two subscriptions found. Only first two will be considered.");
+                        // 2 → Capture both records (primary and secondary)
+                        for (Subscription sub : matchedSubs) {
+                            Map<String, Object> props = sub.getProperties();
+
+                            if (props.containsKey("simaCustId")) {
+                                simaCustId     = (String) props.getOrDefault("simaCustId", "");
+                                simaSubsId     = (String) props.getOrDefault("simaSubsId", "");
+                                simaEndpointId = (String) props.getOrDefault("simaEndpointId", "");
+                                voipCode1      = (String) props.getOrDefault("voipServiceCode", "");
+                                voipPackage    = (String) props.getOrDefault("voipPackage", "");
+                            }
+
+                            else if (props.containsKey("simaCustId2")) {
+                                simaCustId2     = (String) props.getOrDefault("simaCustId2", "");
+                                simaSubsId2     = (String) props.getOrDefault("simaSubsId2", "");
+                                simaEndpointId2 = (String) props.getOrDefault("simaEndpointId2", "");
+                                voipCode2       = (String) props.getOrDefault("voipServiceCode2", "");
+                                voipPackage2    = (String) props.getOrDefault("voipPackage2", "");
+                            }
+                            if ("CBM".equals(linkType)) {
+
+                                if (props.containsKey("voipNumber1")) {
+                                    voipNumber1 = (String) props.getOrDefault("voipNumber1", "");
+                                }
+
+                                if (props.containsKey("voipNumber2")) {
+                                    voipNumber2 = (String) props.getOrDefault("voipNumber2", "");
+                                }
+                            }
+                            Customer subscriber = sub.getCustomer();
+
+                            if (subscriber != null && subscriber.getProperties() != null) {
+                                firstName = Objects.toString(subscriber.getProperties().get("subscriberFirstName"), "");
+                                lastName  = Objects.toString(subscriber.getProperties().get("subscriberLastName"), "");
+                            } else {
+                                firstName = "";
+                                lastName = "";
+                            }
+                        }
+
+
                     }
                 }
 
             }
             log.error(Constants.ACTION_COMPLETED);
             // Step 7: Final response
-            if (simaCustId != null && !simaCustId.isEmpty()) {
+            if (simaCustId != null && !simaCustId.isEmpty() || simaCustId2 != null && !simaCustId2.isEmpty()) {
                 return new QueryVoipNumberResponse(
                         "200",
                         "UIV action QueryVoipNumber executed successfully.",
                         Instant.now().toString(),
-                        voipNumber1, voipNumber2,
-                        simaCustId, simaCustId2,
-                        simaSubsId, simaSubsId2,
-                        simaEndpointId, simaEndpointId2,
-                        voipCode1, voipCode2,
-                        voipPackage, firstName, lastName
+                        Objects.toString(voipNumber1, ""),
+                        Objects.toString(voipNumber2, ""),
+                        Objects.toString(simaCustId, ""),
+                        Objects.toString(simaCustId2, ""),
+                        Objects.toString(simaSubsId, ""),
+                        Objects.toString(simaSubsId2, ""),
+                        Objects.toString(simaEndpointId, ""),
+                        Objects.toString(simaEndpointId2, ""),
+                        Objects.toString(voipCode1, ""),
+                        Objects.toString(voipCode2, ""),
+                        Objects.toString(voipPackage, ""),
+                        Objects.toString(voipPackage2, ""),
+                        Objects.toString(firstName, ""),
+                        Objects.toString(lastName, "")
                 );
             } else {
                 return errorResponse("404", "No SIMA Customer ID found");
@@ -232,7 +274,7 @@ public class QueryVoipNumber implements HttpAction {
                 ERROR_PREFIX + msg,
                 Instant.now().toString(),
                 "", "", "", "", "", "",
-                "", "", "", "", "", "", ""
+                "", "", "", "", "","", "", ""
         );
     }
 }

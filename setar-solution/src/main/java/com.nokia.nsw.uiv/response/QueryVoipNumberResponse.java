@@ -9,7 +9,6 @@ public class QueryVoipNumberResponse {
     private String status;
     private String message;
     private String timestamp;
-
     private String voipNumber1;
     private String voipNumber2;
     private String simaCustId;
@@ -21,6 +20,7 @@ public class QueryVoipNumberResponse {
     private String voipCode1;
     private String voipCode2;
     private String voipPackage;
+    private String voipPackage2;
     private String firstName;
     private String lastName;
 }
