@@ -331,7 +331,7 @@ public class QueryAllServicesByCPE implements HttpAction {
                             putIfNotNull(out, stbPre + "MANUFACTURER_" + stbIndex, devProps.get("manufacturer"));
                             putIfNotNull(out, stbPre + "GID_" + stbIndex, devProps.get("customerGroupId"));
                             putIfNotNull(out, stbPre + "MDLSBTYPE_" + stbIndex, devProps.get("modelSubType"));
-                            putIfNotNull(out, stbPre + "PKEY_" + stbIndex, devProps.get("preSharedKey"));
+                            putIfNotNull(out, stbPre + "PKEY_" + stbIndex, devProps.get("presharedKey"));
                             stbIndex++;
                         } else if ("AP".equalsIgnoreCase(deviceType)) {
                             String apPre = prefix + "AP_";
@@ -341,7 +341,7 @@ public class QueryAllServicesByCPE implements HttpAction {
                             putIfNotNull(out, apPre + "MANUFACTURER_" + apIndex, devProps.get("manufacturer"));
                             putIfNotNull(out, apPre + "GID_" + apIndex, devProps.get("customerGroupId"));
                             putIfNotNull(out, apPre + "MDLSBTYPE_" + apIndex, devProps.get("modelSubType"));
-                            putIfNotNull(out, apPre + "PKEY_" + apIndex, devProps.get("preSharedKey"));
+                            putIfNotNull(out, apPre + "PKEY_" + apIndex, devProps.get("presharedKey"));
                             apIndex++;
                         }
                     }

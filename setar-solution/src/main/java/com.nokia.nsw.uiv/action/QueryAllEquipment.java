@@ -99,7 +99,7 @@ public class QueryAllEquipment implements HttpAction {
                         deviceData.put("STB_SerialNo_" + stbCounter, (String) dev.getProperties().getOrDefault("serialNo", ""));
                         deviceData.put("STB_Model_" + stbCounter, (String) dev.getProperties().getOrDefault("deviceModel", ""));
                         deviceData.put("STB_MacAddr_" + stbCounter, (String) dev.getProperties().getOrDefault("macAddress", ""));
-                        deviceData.put("STB_PreShareKey_" + stbCounter, (String) dev.getProperties().getOrDefault("preSharedKey", ""));
+                        deviceData.put("STB_PreShareKey_" + stbCounter, (String) dev.getProperties().getOrDefault("presharedKey", ""));
                         deviceData.put("STB_CustomerGroupID_" + stbCounter, (String) dev.getProperties().getOrDefault("deviceGroupId", ""));
                         stbCounter++;
                     } else if (name.startsWith("AP")) {
@@ -107,7 +107,7 @@ public class QueryAllEquipment implements HttpAction {
                         deviceData.put("AP_SerialNo_" + apCounter, (String) dev.getProperties().getOrDefault("serialNo", ""));
                         deviceData.put("AP_Model_" + apCounter, (String) dev.getProperties().getOrDefault("deviceModel", ""));
                         deviceData.put("AP_MacAddr_" + apCounter, (String) dev.getProperties().getOrDefault("macAddress", ""));
-                        deviceData.put("AP_PreShareKey_" + apCounter, (String) dev.getProperties().getOrDefault("preSharedKey", ""));
+                        deviceData.put("AP_PreShareKey_" + apCounter, (String) dev.getProperties().getOrDefault("presharedKey", ""));
                         apCounter++;
                     }
                 }
