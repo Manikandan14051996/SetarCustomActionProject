@@ -518,8 +518,13 @@ public class QueryFlags implements HttpAction {
                 }
 
                 // POTS ports from ONT
-                number1 = safeString(ontP.get("potsPort1Number"));
-                number2 = safeString(ontP.get("potsPort2Number"));
+                if(!safeString(ontP.get("potsPort1Number")).isEmpty()) {
+                    number1 = safeString(ontP.get("potsPort1Number"));
+                }
+                if(!safeString(ontP.get("potsPort2Number")).isEmpty()) {
+                    number2 = safeString(ontP.get("potsPort2Number"));
+                }
+
 
                 flags.put("SERVICE_VOIP_NUMBER1", number1);
                 flags.put("SERVICE_VOIP_NUMBER2", number2);
