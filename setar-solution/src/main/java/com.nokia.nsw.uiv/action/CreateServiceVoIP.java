@@ -424,8 +424,7 @@ public class CreateServiceVoIP implements HttpAction {
             Map<String, Object> existing = ont.getProperties();
             if (existing != null) {
                 ontProp.putAll(existing);
-            }
-            if ("1".equals(req.getOntPort())) {
+            }if ("1".equals(req.getOntPort())) {
                 ontProp.put("potsPort1Number", req.getVoipNumber1());
                 olt.getProperties().put("voipPots1Template", req.getTemplateNamePots1());
                 cpeDevice.getProperties().put("voipPort1", req.getVoipNumber1());
@@ -437,6 +436,7 @@ public class CreateServiceVoIP implements HttpAction {
             olt.getProperties().put("ontTemplate", req.getTemplateNameOnt());
             olt.getProperties().put("voipServiceTemplate", req.getVoipServiceTemplate());
 
+            ont.setProperties(ontProp);
             ont.setUsingService(new HashSet<>(List.of(rfs)));
             ont.setUsedResource(new HashSet<>(List.of(olt)));
             olt.setUsingService(new HashSet<>(List.of(rfs)));
