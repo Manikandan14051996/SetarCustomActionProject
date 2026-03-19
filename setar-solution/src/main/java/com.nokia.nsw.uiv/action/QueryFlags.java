@@ -1776,9 +1776,19 @@ public class QueryFlags implements HttpAction {
                 }
             }
         } else {
-            boolean exists = customerRepository.findByDiscoveredName(subscriber).isPresent();
-            result.put("SERVICE_FLAG", exists ? "Exist" : "New");
-            result.put("ACCOUNT_EXIST", exists ? "Exist" : "New");
+            List<Customer>customers= (List<Customer>) customerRepository.findAll();
+            boolean exists=false;
+            for(Customer cust:customers)
+            {
+                if(cust.getDiscoveredName().contains(subscriber))
+                {
+                    exists=true;
+                }
+            }
+            if(exists){
+            result.put("SERVICE_FLAG",  "Exist");
+            result.put("ACCOUNT_EXIST", "Exist");
+            }
 
             boolean hasCbm = subs.stream().anyMatch(s ->
                     "Cable_Modem".equalsIgnoreCase(safeString(safeProps(s.getProperties()).get("serviceLink"))));
