@@ -1656,6 +1656,8 @@ public class QueryFlags implements HttpAction {
         putIfNotBlank(flags, "SERVICE_TEMPLATE_POTS1", tempPOTS1);
         putIfNotBlank(flags, "SERVICE_TEMPLATE_POTS2", tempPOTS2);
         putIfNotBlank(flags, "SERVICE_TEMPLATE_IPTV", tempIPTV);
+        putIfNotBlank(flags, "SERVICE_VOIP_NUMBER1", number1);
+        putIfNotBlank(flags, "SERVICE_VOIP_NUMBER2", number2);
 
         if (!qosProfileBridge.isEmpty()) {
             flags.put("QOS_PROFILE", qosProfileBridge);
@@ -1669,6 +1671,10 @@ public class QueryFlags implements HttpAction {
         flags.putIfAbsent("CBM_MAC", cbmmac);
         flags.putIfAbsent("ONT_MODEL", ontModel);
         flags.putIfAbsent("OLT_POSITION", oltPosition);
+        putIfNotBlank(flags, "SERVICE_PORT2_EXIST", templateNamePort2);
+        putIfNotBlank(flags, "SERVICE_PORT3_EXIST", templateNamePort3);
+        putIfNotBlank(flags, "SERVICE_PORT4_EXIST", templateNamePort4);
+        putIfNotBlank(flags, "SERVICE_PORT5_EXIST", templateNamePort5);
         flags.put("ONT_TEMPLATE", ontTemplate);
         flags.put("SERVICE_OLT_POSITION", serviceOltPosition);
         flags.put("SERVICE_EVPN_WIFIM_FIRST", serviceevpnwififlag);
@@ -1711,6 +1717,7 @@ public class QueryFlags implements HttpAction {
             String ontName, String serviceID) {
 
         Map<String, String> result = new HashMap<>();
+
         result.put("ACCOUNT_EXIST", "New");
         result.put("SERVICE_FLAG", "New");
         result.put("CBM_ACCOUNT_EXIST", "New");
