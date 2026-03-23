@@ -778,14 +778,16 @@ public class QueryFlags implements HttpAction {
 
                 for (Subscription subscription : subscriptionList) {
 
-                    String subtype = subscription.getProperties().get("serviceSubType").toString();
+                    if(subscription.getDiscoveredName().contains(subscriber)) {
+                        String subtype = subscription.getProperties().get("serviceSubType").toString();
 
-                    if ("IPTV".equalsIgnoreCase(subtype)) {
-                        iptvExists = true;
-                    }
+                        if ("IPTV".equalsIgnoreCase(subtype)) {
+                            iptvExists = true;
+                        }
 
-                    if ("Broadband".equalsIgnoreCase(subtype)) {
-                        broadbandExists = true;
+                        if ("Broadband".equalsIgnoreCase(subtype)) {
+                            broadbandExists = true;
+                        }
                     }
                 }
 
@@ -1675,6 +1677,8 @@ public class QueryFlags implements HttpAction {
         putIfNotBlank(flags, "SERVICE_PORT3_EXIST", templateNamePort3);
         putIfNotBlank(flags, "SERVICE_PORT4_EXIST", templateNamePort4);
         putIfNotBlank(flags, "SERVICE_PORT5_EXIST", templateNamePort5);
+        putIfNotBlank(flags, "SERVICE_TEMPLATE_CREATE",tempTemplateCreate);
+        putIfNotBlank(flags, "SERVICE_TEMPLATE_MGMT",tempTemplateMGMT);
         flags.put("ONT_TEMPLATE", ontTemplate);
         flags.put("SERVICE_OLT_POSITION", serviceOltPosition);
         flags.put("SERVICE_EVPN_WIFIM_FIRST", serviceevpnwififlag);
