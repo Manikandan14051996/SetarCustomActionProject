@@ -191,8 +191,8 @@ public class CreateServiceCbmVoice implements HttpAction {
                 if (request.getFirstName() != null && !request.getFirstName().trim().isEmpty()) sp.put("firstName", request.getFirstName());
                 if (request.getLastName() != null && !request.getLastName().trim().isEmpty()) sp.put("lastName", request.getLastName());
                 if (request.getCompanyName() != null && !request.getCompanyName().trim().isEmpty()) sp.put("companyName", request.getCompanyName());
-                if (request.getContactPhone() != null && !request.getContactPhone().trim().isEmpty()) sp.put("contactPhone", request.getContactPhone());
-                if (request.getSubsAddress() != null && !request.getSubsAddress().trim().isEmpty()) sp.put("subsAddress", request.getSubsAddress());
+                if (request.getContactPhone() != null && !request.getContactPhone().trim().isEmpty()) sp.put("contactPhoneNumber", request.getContactPhone());
+                if (request.getSubsAddress() != null && !request.getSubsAddress().trim().isEmpty()) sp.put("subscriberAddress", request.getSubsAddress());
                 subscriber.setProperties(sp);
                 subscriberRepository.save(subscriber, 2);
             } catch (Exception e) {
