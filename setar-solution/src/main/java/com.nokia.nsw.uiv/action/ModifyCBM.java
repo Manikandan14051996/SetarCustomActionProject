@@ -446,8 +446,15 @@ public class ModifyCBM implements HttpAction {
             }
 
             // 11. Final Response (success)
-            String outSubscriberId = subscriber.isPresent() ? subscriber.get().getLocalName() : input.getSubscriberName();
-            String outSubscriptionId = subscription.getLocalName();
+            String outSubscriberId = subscriber
+                    .flatMap(c -> customerCustomRepository.findById(c.getUuid()))
+                    .map(c -> c.getDiscoveredName().toString())
+                    .orElse(input.getSubscriberName());
+
+            Subscription updatedSubscription = subscriptionRepository.findById(subscription.getUuid())
+                    .orElse(subscription);
+            String outSubscriptionId = updatedSubscription.getDiscoveredName();
+
 
             return new ModifyCBMResponse("200",
                     "UIV action ModifyCBM executed successfully.",
