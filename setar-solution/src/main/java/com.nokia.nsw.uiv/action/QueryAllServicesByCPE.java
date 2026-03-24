@@ -229,8 +229,6 @@ public class QueryAllServicesByCPE implements HttpAction {
         putIfNotNull(out, prefix + "KENAN_SUBS_ID", sub.getProperties().get("kenanSubscriberId"));
 
         populateSubscriberDetails(out, prefix, cust);
-        putIfNotNull(out, prefix + "Email", cust.getProperties().get("email"));
-        putIfNotNull(out, prefix + "Email_Password", cust.getProperties().get("emailPassword"));
 
         // Templates from OLT
         if (olt != null && ont != null) {
