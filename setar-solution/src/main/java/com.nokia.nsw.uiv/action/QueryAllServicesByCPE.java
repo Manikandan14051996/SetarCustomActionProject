@@ -240,7 +240,7 @@ public class QueryAllServicesByCPE implements HttpAction {
             putIfNotNull(out, prefix + "SERVICE_TEMPLATE_VEIP", oltProps.get("veipServiceTemplate"));
             putIfNotNull(out, prefix + "SERVICE_TEMPLATE_HSI", oltProps.get("veipHsiTemplate"));
         }
-        putIfNotNull(out, "Service_Prefix", prefix);
+        putIfNotNull(out, "Service_Prefix", "Broadband");
     }
 
     // --- Voice / VoIP ---
