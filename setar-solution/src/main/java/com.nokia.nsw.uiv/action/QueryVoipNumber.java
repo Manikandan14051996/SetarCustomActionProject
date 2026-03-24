@@ -129,7 +129,7 @@ public class QueryVoipNumber implements HttpAction {
 
                     if ("CBM".equals(linkType)) {
                         voipNumber1 = (String) subs.getProperties().get("voipNumber1");
-                        voipNumber2 = "";
+                        voipNumber2 = (String) subs.getProperties().get("voipNumber2");
                     }
 
                 }else {

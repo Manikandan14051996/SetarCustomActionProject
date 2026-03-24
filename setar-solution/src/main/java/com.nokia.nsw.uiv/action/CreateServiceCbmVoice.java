@@ -188,8 +188,8 @@ public class CreateServiceCbmVoice implements HttpAction {
             // update optional subscriber fields properly
             try {
                 Map<String, Object> sp = subscriber.getProperties() == null ? new HashMap<>() : subscriber.getProperties();
-                if (request.getFirstName() != null && !request.getFirstName().trim().isEmpty()) sp.put("firstName", request.getFirstName());
-                if (request.getLastName() != null && !request.getLastName().trim().isEmpty()) sp.put("lastName", request.getLastName());
+                if (request.getFirstName() != null && !request.getFirstName().trim().isEmpty()) sp.put("subscriberFirstName", request.getFirstName());
+                if (request.getLastName() != null && !request.getLastName().trim().isEmpty()) sp.put("subscriberLastName", request.getLastName());
                 if (request.getCompanyName() != null && !request.getCompanyName().trim().isEmpty()) sp.put("companyName", request.getCompanyName());
                 if (request.getContactPhone() != null && !request.getContactPhone().trim().isEmpty()) sp.put("contactPhoneNumber", request.getContactPhone());
                 if (request.getSubsAddress() != null && !request.getSubsAddress().trim().isEmpty()) sp.put("subscriberAddress", request.getSubsAddress());
@@ -238,17 +238,17 @@ public class CreateServiceCbmVoice implements HttpAction {
                                 props.put("simaSubsId", request.getSimaSubsId());
                                 props.put("simaEndpointId", request.getSimaEndpointId());
                                 props.put("voipServiceCode",request.getVoipServiceCode());
+                                props.put("servicePackage",request.getServicePackage());
                             } else if (port == 2) {
                                 props.put("simaCustId2", request.getSimaCustId());
                                 props.put("voipNumber2", request.getVoipNumber1());
-                                props.put("simaSubsI2", request.getSimaSubsId());
+                                props.put("simaSubsId2", request.getSimaSubsId());
                                 if (request.getServicePackage() != null) props.put("voipPackage2", request.getServicePackage());
                                 props.put("simaEndpointId2", request.getSimaEndpointId());
                                 props.put("voipServiceCode2",request.getVoipServiceCode());
+                                props.put("servicePackage2",request.getServicePackage());
                             }
                         }
-
-                        props.put("servicePackage",request.getServicePackage());
                         props.put("createdBy",
                                 request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
                                         ? request.getCreatedBy()
@@ -271,9 +271,7 @@ public class CreateServiceCbmVoice implements HttpAction {
             try {
                 Map<String, Object> subsProps = subscription.getProperties() == null ? new HashMap<>() : subscription.getProperties();
                 if (request.getServicePackage() != null && request.getServicePackage().trim().length() > 0)
-                    subsProps.put("voipPackage", request.getServicePackage());
-                // voipServiceCode might be named differently in your request; if present add accordingly
-                // if request object has getVoipServiceCode() then store, else ignore
+//                    subsProps.put("voipPackage", request.getServicePackage());
                 // subsProps.put("voipServiceCodePrimary", request.getVoipServiceCode());
                 subscription.setProperties(subsProps);
                 subscriptionRepository.save(subscription, 2);
