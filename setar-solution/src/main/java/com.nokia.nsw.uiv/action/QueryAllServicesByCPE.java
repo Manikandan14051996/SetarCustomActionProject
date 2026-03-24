@@ -338,15 +338,21 @@ public class QueryAllServicesByCPE implements HttpAction {
         putIfNotNull(out, prefix + "TEMPLATE_NAME_VPLS", subProps.get("evpnTemplateVPLS"));
 
         populateSubscriberDetails(out, prefix, cust);
-
+        String evpnPort= subProps.get("evpnPort").toString();
         // OLT templates
         if (olt != null) {
             Map<String, Object> ontProps = ont.getProperties();
             Map<String, Object> oltProps = olt.getProperties();
             putIfNotNull(out, prefix + "ONT_TEMPLATE", oltProps.get("ontTemplate"));
             putIfNotNull(out, prefix + "TEMPLATE_NAME_CARD", oltProps.get("evpnOntCardTemplate"));
-            putIfNotNull(out, prefix + "TEMPLATE_NAME_PORT", ontProps.get("evpnEthPortTemplate"));
+            if(ontProps.get("evpnEthPort3Template") != null && !ontProps.get("evpnEthPort3Template").toString().isEmpty() && evpnPort.equals("3")){
+                putIfNotNull(out, prefix + "TEMPLATE_NAME_PORT", ontProps.get("evpnEthPort3Template"));
+            }
+            if(ontProps.get("evpnEthPort4Template") != null && !ontProps.get("evpnEthPort4Template").toString().isEmpty() && evpnPort.equals("4")){
+                putIfNotNull(out, prefix + "TEMPLATE_NAME_PORT", ontProps.get("evpnEthPort4Template"));
+            }
             putIfNotNull(out, prefix + "TEMPLATE_NAME_PORT_CREATE", ontProps.get("createTemplate"));
+            putIfNotNull(out, prefix + "TEMPLATE_NAME_VLAN_MGMNT", ontProps.get("mgmtTemplate"));
         }
         putIfNotNull(out, "Service_Prefix", "ENTERPRISE");
     }
