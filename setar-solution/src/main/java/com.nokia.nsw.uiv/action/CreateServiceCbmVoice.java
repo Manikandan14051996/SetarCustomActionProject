@@ -226,13 +226,28 @@ public class CreateServiceCbmVoice implements HttpAction {
                         if (request.getCustomerGroupId() != null && !"NA".equalsIgnoreCase(request.getCustomerGroupId()))
                             props.put("customerGroupId", request.getCustomerGroupId());
                         if (request.getSubscriberId() != null) props.put("subscriberId", request.getSubscriberId());
-                        if (request.getServicePackage() != null) props.put("voipPackage", request.getServicePackage());
                         if (request.getKenanUidNo() != null) props.put("billingId", request.getKenanUidNo());
-                        props.put("simaCustId", request.getSimaCustId());
-                        props.put("voipNumber1", request.getVoipNumber1());
-                        props.put("simaSubsId", request.getSimaSubsId());
-                        props.put("simaEndpointId", request.getSimaEndpointId());
-                        props.put("voipServiceCode",request.getVoipServiceCode());
+                        String voipPort = request.getVoipPort();
+                        if (voipPort != null) {
+                            int port = Integer.parseInt(voipPort);
+
+                            if (port == 1) {
+                                props.put("simaCustId", request.getSimaCustId());
+                                props.put("voipNumber1", request.getVoipNumber1());
+                                if (request.getServicePackage() != null) props.put("voipPackage", request.getServicePackage());
+                                props.put("simaSubsId", request.getSimaSubsId());
+                                props.put("simaEndpointId", request.getSimaEndpointId());
+                                props.put("voipServiceCode",request.getVoipServiceCode());
+                            } else if (port == 2) {
+                                props.put("simaCustId2", request.getSimaCustId());
+                                props.put("voipNumber2", request.getVoipNumber1());
+                                props.put("simaSubsI2", request.getSimaSubsId());
+                                if (request.getServicePackage() != null) props.put("voipPackage2", request.getServicePackage());
+                                props.put("simaEndpointId2", request.getSimaEndpointId());
+                                props.put("voipServiceCode2",request.getVoipServiceCode());
+                            }
+                        }
+
                         props.put("servicePackage",request.getServicePackage());
                         props.put("createdBy",
                                 request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
