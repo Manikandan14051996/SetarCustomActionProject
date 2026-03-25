@@ -236,7 +236,7 @@ public class CreateServiceEVPN implements HttpAction {
                 }
                 subsProps.put("oltPosition", oltPos);
                 subsProps.put("kenanSubscriberId", req.getKenanUidNo());
-                subsProps.put("subscriberIdCbm", req.getSubscriberId());
+                subsProps.put("subscriberID_CableModem", req.getSubscriberId());
                 subsProps.put("linkedSubscriber", subscriber.getDiscoveredName());
                 subsProps.put("serviceSN", req.getOntSN());
                 if (req.getProductSubtype() != null && (req.getProductSubtype().contains("Bridged") || req.getProductSubtype().contains("Cloudstarter"))) {

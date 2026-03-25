@@ -225,7 +225,7 @@ public class CreateServiceCbmVoice implements HttpAction {
                         props.put("householdId", request.getHhid());
                         if (request.getCustomerGroupId() != null && !"NA".equalsIgnoreCase(request.getCustomerGroupId()))
                             props.put("customerGroupId", request.getCustomerGroupId());
-                        if (request.getSubscriberId() != null) props.put("subscriberId", request.getSubscriberId());
+                        if (request.getSubscriberId() != null) props.put("subscriberID_CableModem", request.getSubscriberId());
                         if (request.getKenanUidNo() != null) props.put("billingId", request.getKenanUidNo());
                         String voipPort = request.getVoipPort();
                         if (voipPort != null) {
