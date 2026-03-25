@@ -31,13 +31,20 @@ public class ModifyCBM implements HttpAction {
     protected static final String ACTION_LABEL = Constants.MODIFY_CBM;
     private static final String ERROR_PREFIX = "UIV action ModifyCBM execution failed - ";
 
-    @Autowired private CustomerCustomRepository customerCustomRepository;
-    @Autowired private SubscriptionCustomRepository subscriptionRepository;
-    @Autowired private ProductCustomRepository productRepository;
-    @Autowired private LogicalDeviceCustomRepository logicalDeviceRepository;
-    @Autowired private LogicalComponentCustomRepository logicalComponentRepository;
-    @Autowired private LogicalInterfaceCustomRepository logicalInterfaceRepository;
-    @Autowired private ServiceCustomRepository serviceCustomRepository;
+    @Autowired
+    private CustomerCustomRepository customerCustomRepository;
+    @Autowired
+    private SubscriptionCustomRepository subscriptionRepository;
+    @Autowired
+    private ProductCustomRepository productRepository;
+    @Autowired
+    private LogicalDeviceCustomRepository logicalDeviceRepository;
+    @Autowired
+    private LogicalComponentCustomRepository logicalComponentRepository;
+    @Autowired
+    private LogicalInterfaceCustomRepository logicalInterfaceRepository;
+    @Autowired
+    private ServiceCustomRepository serviceCustomRepository;
 
     @Override
     public Class<?> getActionClass() {
@@ -62,7 +69,7 @@ public class ModifyCBM implements HttpAction {
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             } catch (BadRequestException bre) {
                 return new ModifyCBMResponse("400",
-                        ERROR_PREFIX +  bre.getMessage(),
+                        ERROR_PREFIX + bre.getMessage(),
                         getCurrentTimestamp(), "", "");
             }
 
@@ -86,7 +93,7 @@ public class ModifyCBM implements HttpAction {
             String rfsName = "RFS" + Constants.UNDER_SCORE + subscriptionName;
             String productName = input.getSubscriberName() + Constants.UNDER_SCORE
                     + input.getProductSubtype() + Constants.UNDER_SCORE + input.getServiceId();
-            String cbmDeviceName = "CBM" +input.getServiceId();
+            String cbmDeviceName = "CBM" + input.getServiceId();
 
             log.error("ModifyCBM start: subscriberDerived='{}', subscriptionName='{}', cfsName='{}', rfsName='{}', productName='{}', cbmDeviceName='{}'",
                     subscriberNameDerived, subscriptionName, cfsName, rfsName, productName, cbmDeviceName);
@@ -135,25 +142,25 @@ public class ModifyCBM implements HttpAction {
 
             Optional<Subscription> optSubsc = subscriptionRepository.findByDiscoveredName(subscriptionName);
             if (optSubsc.isEmpty()) {
-                return new ModifyCBMResponse("409", ERROR_PREFIX + "No entry found to modify Subscription: "+subscriptionName, String.valueOf(System.currentTimeMillis()), "", "");
+                return new ModifyCBMResponse("409", ERROR_PREFIX + "No entry found to modify Subscription: " + subscriptionName, String.valueOf(System.currentTimeMillis()), "", "");
             }
             Subscription subscription = optSubsc.get();
 
             Optional<Service> optCfs = serviceCustomRepository.findByDiscoveredName(cfsName);
             if (optCfs.isEmpty()) {
-                return new ModifyCBMResponse("409", ERROR_PREFIX + "No entry found to modify CFS: "+cfsName, String.valueOf(System.currentTimeMillis()), "", "");
+                return new ModifyCBMResponse("409", ERROR_PREFIX + "No entry found to modify CFS: " + cfsName, String.valueOf(System.currentTimeMillis()), "", "");
             }
             Service cfs = optCfs.get();
 
             Optional<Service> optRfs = serviceCustomRepository.findByDiscoveredName(rfsName);
             if (optRfs.isEmpty()) {
-                return new ModifyCBMResponse("409", ERROR_PREFIX + "No entry found to modify RFS: "+rfsName, String.valueOf(System.currentTimeMillis()), "", "");
+                return new ModifyCBMResponse("409", ERROR_PREFIX + "No entry found to modify RFS: " + rfsName, String.valueOf(System.currentTimeMillis()), "", "");
             }
             Service rfs = optRfs.get();
 
             Optional<LogicalDevice> optCbm = logicalDeviceRepository.findByDiscoveredName(cbmDeviceName);
             if (optCbm.isEmpty()) {
-                return new ModifyCBMResponse("409", ERROR_PREFIX + "No entry found to modify CBM device: "+cbmDeviceName, String.valueOf(System.currentTimeMillis()), "", "");
+                return new ModifyCBMResponse("409", ERROR_PREFIX + "No entry found to modify CBM device: " + cbmDeviceName, String.valueOf(System.currentTimeMillis()), "", "");
             }
             LogicalDevice cbmDevice = optCbm.get();
 
@@ -162,40 +169,44 @@ public class ModifyCBM implements HttpAction {
                 Map<String, Object> rfsProps = Optional.ofNullable(rfs.getProperties()).map(HashMap::new).orElse(new HashMap<>());
                 rfsProps.put("transactionId", fxOrderId);
                 rfsProps.put("transactionType", input.getModifyType());
-                rfsProps.put("endDate",getCurrentTimestamp());
+                rfsProps.put("endDate", getCurrentTimestamp());
                 rfs.setProperties(rfsProps);
                 serviceCustomRepository.save(rfs);
             }
-            if(!"IPTV".equalsIgnoreCase(input.getProductType())){
+            if (!"IPTV".equalsIgnoreCase(input.getProductType())) {
                 // Update Service MAC / Gateway MAC flows (ModifyCableModem / Cable_Modem)
                 if (containsAny(input.getModifyType(), "ModfiyCableModem", "Cable_Modem", "ModifyCableModem")) {
 
                     // subscriberWithMAC variant (subscriberName + resourceSN sanitized)
-                    String subscriberWithMAC = input.getSubscriberName()+ Constants.UNDER_SCORE + sanitizeForName(input.getResourceSN());
+                    String subscriberWithMAC = input.getSubscriberName() + Constants.UNDER_SCORE + sanitizeForName(input.getResourceSN());
                     Optional<Customer> optSubscriberWithMac = customerCustomRepository.findByDiscoveredName(subscriberWithMAC);
                     Optional<Customer> subscriberWithMac = optSubscriberWithMac;
 
                     // CBM for modifyParam1 if present
                     LogicalDevice cbmForParam1 = null;
                     if (modifyParam1 != null && !modifyParam1.isEmpty()) {
-                        String cbmForParam1Name = "CBM" +removeColons(modifyParam1);
+                        String cbmForParam1Name = "CBM_" + modifyParam1;
                         Optional<LogicalDevice> opt = logicalDeviceRepository.findByDiscoveredName(cbmForParam1Name);
-                        if (opt.isPresent()) cbmForParam1 = opt.get();
+                        if (opt.isPresent()) {
+                            cbmForParam1 = opt.get();
+                            cbmModelInput = cbmForParam1.getProperties().get("deviceModel").toString();
+                        }
                     }
 
                     try {
-                        Map<String, Object> subProps =subscription.getProperties()==null?new HashMap<>():subscription.getProperties();
-                        String svcMac = subProps.get("serviceMac")!=null?subProps.get("serviceMac").toString():"";
+                        Map<String, Object> subProps = subscription.getProperties() == null ? new HashMap<>() : subscription.getProperties();
+                        String svcMac = subProps.get("serviceMac") != null ? subProps.get("serviceMac").toString() : "";
 
                         // when serviceMAC equals input.resourceSN -> update the "current" CBM
                         if (svcMac != null && svcMac.equalsIgnoreCase(input.getResourceSN())) {
-                            String subType = subProps.get("serviceSubType")!=null?subProps.get("serviceSubType").toString():"";
+                            String subType = subProps.get("serviceSubType") != null ? subProps.get("serviceSubType").toString() : "";
                             if ("IPTV".equalsIgnoreCase(subType)) {
                                 // IPTV special-case
                                 if (modifyParam1 != null && !modifyParam1.isEmpty()) {
                                     subProps.put("serviceMac", modifyParam1);
                                     cbmDevice.getProperties().put("macAddress", modifyParam1);
-                                    if (cbmModelInput != null) cbmDevice.getProperties().put("deviceModel", cbmModelInput);
+                                    if (cbmModelInput != null)
+                                        cbmDevice.getProperties().put("deviceModel", cbmModelInput);
                                 }
                                 if (modifyParam2 != null && !modifyParam2.isEmpty()) {
                                     subProps.put("gatewayMAC", modifyParam2);
@@ -206,7 +217,7 @@ public class ModifyCBM implements HttpAction {
                             } else {
                                 // serviceMAC mismatch: try to find CBM by serviceID (from subscription) and update that device
                                 String serviceID = (String) subscription.getProperties().getOrDefault("serviceID", "");
-                                String newCBMName = "CBM" +serviceID;
+                                String newCBMName = "CBM" + serviceID;
                                 Optional<LogicalDevice> optNewCbm = logicalDeviceRepository.findByDiscoveredName(newCBMName);
                                 Map<String, Object> dProps = Optional.ofNullable(subscription.getProperties()).map(HashMap::new).orElse(new HashMap<>());
                                 if (optNewCbm.isPresent()) {
@@ -259,8 +270,8 @@ public class ModifyCBM implements HttpAction {
                 //Migrate Broadband Port Assignments
                 if ("Broadband".equalsIgnoreCase(input.getProductType()) && modifyParam1 != null && !modifyParam1.isEmpty()) {
                     try {
-                        String oldCbmName = "CBM_" +sanitizeForName(input.getResourceSN());
-                        String newCbmName = "CBM_" +sanitizeForName(modifyParam1);
+                        String oldCbmName = "CBM_" + sanitizeForName(input.getResourceSN());
+                        String newCbmName = "CBM_" + sanitizeForName(modifyParam1);
 
                         Optional<LogicalDevice> optOldCbm = logicalDeviceRepository.findByDiscoveredName(oldCbmName);
                         Optional<LogicalDevice> optNewCbm = logicalDeviceRepository.findByDiscoveredName(newCbmName);
@@ -364,7 +375,7 @@ public class ModifyCBM implements HttpAction {
                                 String cfsNameNew = "CFS" + Constants.UNDER_SCORE + subscriptionNameNew;
                                 String rfsNameNew = "RFS" + Constants.UNDER_SCORE + subscriptionNameNew;
                                 String productNameNew = input.getSubscriberName() + Constants.UNDER_SCORE + input.getProductSubtype() + Constants.UNDER_SCORE + newServiceId;
-                                String cbmDeviceNameNew = "CBM" +newServiceId;
+                                String cbmDeviceNameNew = "CBM" + newServiceId;
 
                                 // rename subscription
                                 subscription.setDiscoveredName(subscriptionNameNew);
@@ -499,27 +510,25 @@ public class ModifyCBM implements HttpAction {
 
     private String deriveSubscriberName(String productType, String origSubscriber, String resourceSN,
                                         String modifyType, String modifyParam1) {
-        if ("IPTV".equalsIgnoreCase(productType))
-        {
+        if ("IPTV".equalsIgnoreCase(productType)) {
             return origSubscriber;
-        }
-        else if (resourceSN == null || resourceSN.trim().isEmpty() || "NA".equalsIgnoreCase(resourceSN)) {
+        } else if (resourceSN == null || resourceSN.trim().isEmpty() || "NA".equalsIgnoreCase(resourceSN)) {
             if (containsAny(modifyType, "Package", "Components", "Products", "Contracts")) {
                 return origSubscriber;
             } else {
                 return (modifyParam1 != null && !modifyParam1.isEmpty())
-                        ? origSubscriber + Constants.UNDER_SCORE  + removeColons(modifyParam1)
+                        ? origSubscriber + Constants.UNDER_SCORE + removeColons(modifyParam1)
                         : origSubscriber;
             }
-        }
-        else{
-            return origSubscriber + Constants.UNDER_SCORE  + removeColons(resourceSN);
+        } else {
+            return origSubscriber + Constants.UNDER_SCORE + removeColons(resourceSN);
         }
     }
 
     private String trimOrNull(String s) {
         return (s == null) ? null : (s.trim().isEmpty() ? null : s.trim());
     }
+
     private String getCurrentTimestamp() {
         return Instant.now().toString();
     }
