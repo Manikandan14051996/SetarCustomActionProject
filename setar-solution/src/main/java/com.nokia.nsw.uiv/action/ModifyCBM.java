@@ -195,6 +195,7 @@ public class ModifyCBM implements HttpAction {
 
                     try {
                         Map<String, Object> subProps = subscription.getProperties() == null ? new HashMap<>() : subscription.getProperties();
+                        subscription=subscriptionRepository.findByDiscoveredName(subscription.getDiscoveredName()).get();
                         String svcMac = subProps.get("serviceMac") != null ? subProps.get("serviceMac").toString() : "";
 
                         // when serviceMAC equals input.resourceSN -> update the "current" CBM
