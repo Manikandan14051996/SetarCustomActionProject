@@ -69,7 +69,6 @@ public class CreateServiceCBM implements HttpAction {
             Validations.validateMandatoryParams(request.getCbmModel(), "cbmModel");
             Validations.validateMandatoryParams(request.getHhid(), "hhid");
             Validations.validateMandatoryParams(request.getServiceId(), "serviceId");
-            Validations.validateMandatoryParams(request.getQosProfile(), "qosProfile");
             log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
         }catch (BadRequestException bre) {
             return new CreateServiceCBMResponse("400", ERROR_PREFIX +  bre.getMessage(),
