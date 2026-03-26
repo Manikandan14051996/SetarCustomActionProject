@@ -105,7 +105,7 @@ public class ModifySPR implements HttpAction {
             Optional<Customer> subscriberOpt = customerRepository.findByDiscoveredName(subscriberName);
             Customer subscriber = null;
 
-            LogicalDevice ontDevice=logicalCustomDeviceRepository.findByDiscoveredName(ontName).orElseThrow(() -> new BadRequestException("No entry found to modify ONTDevice: " + ontName));
+            LogicalDevice ontDevice = logicalCustomDeviceRepository.findByDiscoveredName(ontName).orElseThrow(() -> new BadRequestException("No entry found to modify ONTDevice: " + ontName));
 
             if (!subscriberOpt.isPresent()) {
                 flag = "partly";
@@ -306,7 +306,7 @@ public class ModifySPR implements HttpAction {
                 .orElseThrow(() -> new BadRequestException("No entry found to modify ONT: " + ontName));
         if (ont != null) {
             Set<Subscription> iptvSubscriptions = getiptvSubscriptions(request.getSubscriberName());
-            if(!iptvSubscriptions.isEmpty()) {
+            if (!iptvSubscriptions.isEmpty()) {
                 for (Subscription subscription : iptvSubscriptions) {
                     subscription = subscriptionRepository.findByDiscoveredName(subscription.getDiscoveredName()).get();
                     subscription.getProperties().put("serviceSN", request.getModifyParam1());
@@ -340,7 +340,8 @@ public class ModifySPR implements HttpAction {
                 for (Subscription subs : subscriptions) {
                     subs = subscriptionRepository.findByDiscoveredName(subs.getDiscoveredName()).get();
                     String serviceSubType = subs.getProperties().get("serviceSubType") != null ? subs.getProperties().get("serviceSubType").toString() : "";
-                    if ((serviceSubType.equalsIgnoreCase("Bridged") && request.getOntModel().contains("XS-2426G-B"))) {
+                    String ontModel = request.getOntModel() != null ? request.getOntModel() : "";
+                    if ((serviceSubType.equalsIgnoreCase("Bridged") && ontModel.contains("XS-2426G-B"))) {
 
                         LogicalDevice oltDevice = (LogicalDevice) ontDevice.get().getUsedResource().stream().findFirst().get();
                         oltDevice = logicalCustomDeviceRepository.findByDiscoveredName(oltDevice.getDiscoveredName()).get();
@@ -416,7 +417,9 @@ public class ModifySPR implements HttpAction {
                             log.error("++++++  ontModel  ++++++" + request.getOntModel());
                             tempOnt.setDiscoveredName(ontNameNew);
                             tempOnt.getProperties().put("serialNo", request.getModifyParam1());
-                            tempOnt.getProperties().put("deviceModel", request.getOntModel());
+                            if (request.getOntModel() != null) {
+                                tempOnt.getProperties().put("deviceModel", request.getOntModel());
+                            }
                             logicalCustomDeviceRepository.save(tempOnt, 2);
                         }
 
