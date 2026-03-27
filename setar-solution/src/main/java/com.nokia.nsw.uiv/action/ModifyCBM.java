@@ -196,7 +196,7 @@ public class ModifyCBM implements HttpAction {
                     try {
                         Map<String, Object> subProps = subscription.getProperties() == null ? new HashMap<>() : subscription.getProperties();
                         subscription=subscriptionRepository.findByDiscoveredName(subscription.getDiscoveredName()).get();
-                        String svcMac = subProps.get("serviceMac") != null ? subProps.get("serviceMac").toString() : "";
+                        String svcMac = subProps.get("serviceMAC") != null ? subProps.get("serviceMAC").toString() : "";
 
                         // when serviceMAC equals input.resourceSN -> update the "current" CBM
                         if (svcMac != null && svcMac.equalsIgnoreCase(input.getResourceSN())) {
@@ -204,7 +204,7 @@ public class ModifyCBM implements HttpAction {
                             if ("IPTV".equalsIgnoreCase(subType)) {
                                 // IPTV special-case
                                 if (modifyParam1 != null && !modifyParam1.isEmpty()) {
-                                    subProps.put("serviceMac", modifyParam1);
+                                    subProps.put("serviceMAC", modifyParam1);
                                     cbmDevice.getProperties().put("macAddress", modifyParam1);
                                     if (cbmModelInput != null)
                                         cbmDevice.getProperties().put("deviceModel", cbmModelInput);
@@ -225,7 +225,7 @@ public class ModifyCBM implements HttpAction {
                                     LogicalDevice newCBM = optNewCbm.get();
                                     Map<String, Object> sProps = Optional.ofNullable(subscription.getProperties()).map(HashMap::new).orElse(new HashMap<>());
                                     if (modifyParam1 != null && !modifyParam1.isEmpty()) {
-                                        sProps.put("serviceMac", modifyParam1);
+                                        sProps.put("serviceMAC", modifyParam1);
                                         dProps.put("macAddress", modifyParam1);
                                         if (cbmModelInput != null) dProps.put("deviceModel", cbmModelInput);
                                     }
