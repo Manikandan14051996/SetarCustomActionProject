@@ -193,11 +193,11 @@ public class CreateServiceVoIP implements HttpAction {
             if (req.getCompanyName() != null) subProps.put("companyName", req.getCompanyName());
             if (req.getContactPhone() != null) subProps.put("contactPhoneNumber", req.getContactPhone());
             if (req.getSubsAddress() != null) subProps.put("subscriberAddress", req.getSubsAddress());
-            Object existingSimaCustId = subProps.get("simaCustId");
+            Object existingSimaCustId = subProps.get("simaCustId1");
 
             if ((existingSimaCustId == null || existingSimaCustId.toString().isEmpty())
                     && req.getSimaCustID() != null && !req.getSimaCustID().isEmpty()) {
-                subProps.put("simaCustId", req.getSimaCustID());
+                subProps.put("simaCustId1", req.getSimaCustID());
             }
             subscriber.setProperties(subProps);
 
@@ -218,13 +218,13 @@ public class CreateServiceVoIP implements HttpAction {
 
             }else {
                 subsProps.put("voipNumber1", req.getVoipNumber1());
-                subsProps.put("simaCustId", req.getSimaCustID());
-                subsProps.put("simaSubsId", req.getSimaSubsID());
-                subsProps.put("simaEndpointId", req.getSimaEndpointID());
+                subsProps.put("simaCustId1", req.getSimaCustID());
+                subsProps.put("simaSubsId1", req.getSimaSubsID());
+                subsProps.put("simaEndpointId1", req.getSimaEndpointID());
                 if (req.getVoipPackage() != null && !req.getVoipPackage().isEmpty()) {
-                    subsProps.put("voipPackage", req.getVoipPackage());
+                    subsProps.put("voipPackage1", req.getVoipPackage());
                 }
-                subsProps.put("voipServiceCode", req.getVoipServiceCode());
+                subsProps.put("voipServiceCode1", req.getVoipServiceCode());
             }
 
             subsProps.put("serviceLink", (req.getOntSN() != null && req.getOntSN().startsWith("ALCL")) ? "ONT" : "Cable_Modem");

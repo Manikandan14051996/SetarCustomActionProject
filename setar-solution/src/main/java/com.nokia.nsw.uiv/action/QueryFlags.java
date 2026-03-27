@@ -1778,7 +1778,7 @@ public class QueryFlags implements HttpAction {
                     if ((subscriber + UNDER_SCORE + serviceID).equalsIgnoreCase(s.getDiscoveredName())) {
                         result.put("ACCOUNT_EXIST", "Exist");
                     }
-                    String sima = safeString(safeProps(s.getProperties()).get("simaCustId"));
+                    String sima = safeString(safeProps(s.getProperties()).get("simaCustId1"));
                     if (sima != null && !sima.isEmpty()) {
                         result.put("SIMA_CUST_ID", sima);
                     } else if (s.getProperties().get("simaCustId2") != null) {

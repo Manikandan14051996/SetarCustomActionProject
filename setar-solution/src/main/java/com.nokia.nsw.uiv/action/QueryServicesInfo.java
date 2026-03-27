@@ -530,18 +530,18 @@ public class QueryServicesInfo implements HttpAction {
                         // SIMA and voice details from subscription if present
                         if (setarSubscription != null && setarSubscription.getProperties() != null) {
                             Map<String, Object> sprops = setarSubscription.getProperties();
-                            allvalues.put(prefix + "SIMA_CUST_ID", sprops.getOrDefault("simaCustId", ""));
+                            allvalues.put(prefix + "SIMA_CUST_ID", sprops.getOrDefault("simaCustId1", ""));
                             allvalues.put(prefix + "SIMA_CUST_ID2", sprops.getOrDefault("simaCustId2", ""));
-                            allvalues.put(prefix + "SIMA_ENDPOINT_ID", sprops.getOrDefault("simaEndpointId", ""));
+                            allvalues.put(prefix + "SIMA_ENDPOINT_ID", sprops.getOrDefault("simaEndpointId1", ""));
                             allvalues.put(prefix + "SIMA_ENDPOINT_ID2", sprops.getOrDefault("simaEndpointId2", ""));
-                            allvalues.put(prefix + "SIMA_SUBS_ID", sprops.getOrDefault("simaSubsId", ""));
+                            allvalues.put(prefix + "SIMA_SUBS_ID", sprops.getOrDefault("simaSubsId1", ""));
                             allvalues.put(prefix + "SIMA_SUBS_ID2", sprops.getOrDefault("simaSubsId2", ""));
                             allvalues.put(prefix + "VOIP_NUMBER_1", sprops.getOrDefault("voipNumber1", ""));
                             allvalues.put(prefix + "VOIP_NUMBER_2", sprops.getOrDefault("voipNumber2", ""));
-                            allvalues.put(prefix + "VOIP_PACKAGE", sprops.getOrDefault("voipPackage", ""));
+                            allvalues.put(prefix + "VOIP_PACKAGE", sprops.getOrDefault("voipPackage1", ""));
                             allvalues.put(prefix + "VOIP_PACKAGE2", sprops.getOrDefault("voipPackage2", ""));
                             // VoIP service code logic: if code2 exists overwrite code1
-                            allvalues.put(prefix + "VOIP_SERVICE_CODE",sprops.getOrDefault("voipServiceCode", ""));
+                            allvalues.put(prefix + "VOIP_SERVICE_CODE",sprops.getOrDefault("voipServiceCode1", ""));
                             allvalues.put(prefix + "VOIP_SERVICE_CODE2", sprops.getOrDefault("voipServiceCode2", ""));
 
                         }

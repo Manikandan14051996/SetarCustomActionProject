@@ -232,12 +232,12 @@ public class CreateServiceCbmVoice implements HttpAction {
                             int port = Integer.parseInt(voipPort);
 
                             if (port == 1) {
-                                props.put("simaCustId", request.getSimaCustId());
+                                props.put("simaCustId1", request.getSimaCustId());
                                 props.put("voipNumber1", request.getVoipNumber1());
-                                if (request.getServicePackage() != null) props.put("voipPackage", request.getServicePackage());
-                                props.put("simaSubsId", request.getSimaSubsId());
-                                props.put("simaEndpointId", request.getSimaEndpointId());
-                                props.put("voipServiceCode",request.getVoipServiceCode());
+                                if (request.getServicePackage() != null) props.put("voipPackage1", request.getServicePackage());
+                                props.put("simaSubsId1", request.getSimaSubsId());
+                                props.put("simaEndpointId1", request.getSimaEndpointId());
+                                props.put("voipServiceCode1",request.getVoipServiceCode());
                                 props.put("servicePackage",request.getServicePackage());
                             } else if (port == 2) {
                                 props.put("simaCustId2", request.getSimaCustId());
@@ -271,7 +271,7 @@ public class CreateServiceCbmVoice implements HttpAction {
             try {
                 Map<String, Object> subsProps = subscription.getProperties() == null ? new HashMap<>() : subscription.getProperties();
                 if (request.getServicePackage() != null && request.getServicePackage().trim().length() > 0)
-//                    subsProps.put("voipPackage", request.getServicePackage());
+//                    subsProps.put("voipPackage1", request.getServicePackage());
                 // subsProps.put("voipServiceCodePrimary", request.getVoipServiceCode());
                 subscription.setProperties(subsProps);
                 subscriptionRepository.save(subscription, 2);

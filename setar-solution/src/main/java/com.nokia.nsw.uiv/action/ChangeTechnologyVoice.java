@@ -127,27 +127,27 @@ public class ChangeTechnologyVoice implements HttpAction {
 
                 // SIMA fields if provided
                 if (req.getSimaSubsId() != null && !req.getSimaSubsId().trim().isEmpty()) {
-                    props.put("simaSubsId", req.getSimaSubsId());
+                    props.put("simaSubsId1", req.getSimaSubsId());
                     log.error("------------Test Trace # 8--------------- Set SIMA subs id: " + req.getSimaSubsId());
                 }
                 if (req.getServiceEndpointNumber1() != null && !req.getServiceEndpointNumber1().trim().isEmpty()) {
                     // map to subscription endpoint slot 1
-                    props.put("simaEndpointId", req.getServiceEndpointNumber1());
+                    props.put("simaEndpointId1", req.getServiceEndpointNumber1());
                     log.error("------------Test Trace # 9--------------- Set SIMA endpoint id 1: " + req.getServiceEndpointNumber1());
                 }
 
                 if (req.getServiceEndpointNumber2() != null && !req.getServiceEndpointNumber2().trim().isEmpty()) {
-                    props.put("simaEndpointId", req.getServiceEndpointNumber2());
+                    props.put("simaEndpointId1", req.getServiceEndpointNumber2());
                     log.error("------------Test Trace # 9--------------- Set SIMA endpoint id 1: " + req.getServiceEndpointNumber1());
                 }
 
                 // VoIP package/code
                 if (req.getVoipPackage() != null && !req.getVoipPackage().trim().isEmpty()) {
-                    props.put("voipPackage", req.getVoipPackage());
+                    props.put("voipPackage1", req.getVoipPackage());
                     log.error("------------Test Trace # 10--------------- Set VoIP package: " + req.getVoipPackage());
                 }
                 if (req.getVoipServiceCode() != null && !req.getVoipServiceCode().trim().isEmpty()) {
-                    props.put("voipServiceCode", req.getVoipServiceCode());
+                    props.put("voipServiceCode1", req.getVoipServiceCode());
                     log.error("------------Test Trace # 11--------------- Set VoIP service code: " + req.getVoipServiceCode());
                 }
 
@@ -178,7 +178,7 @@ public class ChangeTechnologyVoice implements HttpAction {
                     custProps.put("subscriberStatus", "Active");
                     custProps.put("subscriberType","Regular");
                     if (req.getHhid() != null) custProps.put("houseHoldId", req.getHhid());
-                    if (req.getSimaCustId() != null) custProps.put("simaCustId", req.getSimaCustId());
+                    if (req.getSimaCustId() != null) custProps.put("simaCustId1", req.getSimaCustId());
                     cust.setProperties(custProps);
                     customerRepo.save(cust);
                     log.error("------------Test Trace # 15--------------- Subscriber updated and saved");

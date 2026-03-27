@@ -106,11 +106,11 @@ public class QueryVoipNumber implements HttpAction {
                 Optional<Subscription> subsOpt = subscriptionRepo.findByDiscoveredName(subscriptionName);
                 if (subsOpt.isPresent()) {
                     Subscription subs = subsOpt.get();
-                    simaCustId     = (String) subs.getProperties().getOrDefault("simaCustId","");
-                    simaSubsId     = (String) subs.getProperties().getOrDefault("simaSubsId","");
-                    simaEndpointId = (String) subs.getProperties().getOrDefault("simaEndpointId","");
-                    voipCode1      = (String) subs.getProperties().getOrDefault("voipServiceCode","");
-                    voipPackage    = (String) subs.getProperties().getOrDefault("voipPackage","");
+                    simaCustId     = (String) subs.getProperties().getOrDefault("simaCustId1","");
+                    simaSubsId     = (String) subs.getProperties().getOrDefault("simaSubsId1","");
+                    simaEndpointId = (String) subs.getProperties().getOrDefault("simaEndpointId1","");
+                    voipCode1      = (String) subs.getProperties().getOrDefault("voipServiceCode1","");
+                    voipPackage    = (String) subs.getProperties().getOrDefault("voipPackage1","");
                     voipPackage2    = (String) subs.getProperties().getOrDefault("voipPackage2","");
                     simaCustId2     = (String) subs.getProperties().getOrDefault("simaCustId2","");
                     simaSubsId2     = (String) subs.getProperties().getOrDefault("simaSubsId2","");
@@ -180,11 +180,11 @@ public class QueryVoipNumber implements HttpAction {
                     // 1 → Capture primary record
                     if (matchedSubs.size() == 1) {
                         Subscription s = matchedSubs.get(0);
-                        simaCustId     = (String) s.getProperties().getOrDefault("simaCustId", "");
-                        simaSubsId     = (String) s.getProperties().getOrDefault("simaSubsId", "");
-                        simaEndpointId = (String) s.getProperties().getOrDefault("simaEndpointId", "");
-                        voipCode1      = (String) s.getProperties().getOrDefault("voipServiceCode", "");
-                        voipPackage    = (String) s.getProperties().getOrDefault("voipPackage", "");
+                        simaCustId     = (String) s.getProperties().getOrDefault("simaCustId1", "");
+                        simaSubsId     = (String) s.getProperties().getOrDefault("simaSubsId1", "");
+                        simaEndpointId = (String) s.getProperties().getOrDefault("simaEndpointId1", "");
+                        voipCode1      = (String) s.getProperties().getOrDefault("voipServiceCode1", "");
+                        voipPackage    = (String) s.getProperties().getOrDefault("voipPackage1", "");
 
                         if ("CBM".equals(linkType)) {
                             voipNumber1 = (String) s.getProperties().getOrDefault("voipNumber1", "");
@@ -195,12 +195,12 @@ public class QueryVoipNumber implements HttpAction {
                         for (Subscription sub : matchedSubs) {
                             Map<String, Object> props = sub.getProperties();
 
-                            if (props.containsKey("simaCustId")) {
-                                simaCustId     = (String) props.getOrDefault("simaCustId", "");
-                                simaSubsId     = (String) props.getOrDefault("simaSubsId", "");
-                                simaEndpointId = (String) props.getOrDefault("simaEndpointId", "");
-                                voipCode1      = (String) props.getOrDefault("voipServiceCode", "");
-                                voipPackage    = (String) props.getOrDefault("voipPackage", "");
+                            if (props.containsKey("simaCustId1")) {
+                                simaCustId     = (String) props.getOrDefault("simaCustId1", "");
+                                simaSubsId     = (String) props.getOrDefault("simaSubsId1", "");
+                                simaEndpointId = (String) props.getOrDefault("simaEndpointId1", "");
+                                voipCode1      = (String) props.getOrDefault("voipServiceCode1", "");
+                                voipPackage    = (String) props.getOrDefault("voipPackage1", "");
                             }
 
                             else if (props.containsKey("simaCustId2")) {

@@ -89,7 +89,7 @@ public class UpdateVOIPService implements HttpAction {
             if (subscriberOpt.isPresent() && req.getSimaCustId() != null && !req.getSimaCustId().isEmpty()) {
                 Customer subscriber = subscriberOpt.get();
                 Map<String, Object> props = subscriber.getProperties();
-                props.put("simaCustId", req.getSimaCustId());
+                props.put("simaCustId1", req.getSimaCustId());
                 subscriber.setProperties(props);
                 try {
                     customerRepo.save(subscriber);
@@ -112,15 +112,15 @@ public class UpdateVOIPService implements HttpAction {
                 Map<String, Object> props = subs.getProperties();
 
                 if (req.getSimaCustId() != null && !req.getSimaCustId().isEmpty()) {
-                    props.put("simaCustId", req.getSimaCustId());
+                    props.put("simaCustId1", req.getSimaCustId());
                     updatedFlag = true;
                 }
                 if (req.getSimaSubsId() != null && !req.getSimaSubsId().isEmpty()) {
-                    props.put("simaSubsId", req.getSimaSubsId());
+                    props.put("simaSubsId1", req.getSimaSubsId());
                     updatedFlag = true;
                 }
                 if (req.getSimaEndpointId() != null && !req.getSimaEndpointId().isEmpty()) {
-                    props.put("simaEndpointId", req.getSimaEndpointId());
+                    props.put("simaEndpointId1", req.getSimaEndpointId());
                     updatedFlag = true;
                 }
 
