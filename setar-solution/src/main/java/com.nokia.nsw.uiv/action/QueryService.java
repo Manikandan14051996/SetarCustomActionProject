@@ -129,7 +129,7 @@ public class QueryService implements HttpAction {
                 if (optSub.isPresent()) {
                     Subscription sub = optSub.get();
                     iptvinfo.put("CUSTOMER_GROUP_ID", sub.getProperties().get("customerGroupId"));
-                    iptvinfo.put("CPE_MacAddr_1", sub.getProperties().get("serviceMac"));
+                    iptvinfo.put("CPE_MacAddr_1", sub.getProperties().get("serviceMAC"));
                     if (sub.getProperties().get("serviceLink").toString().equalsIgnoreCase("Cable_Modem")) {
                         iptvinfo.put("CBM_Subscriber_ID_1", sub.getProperties().get("subscriberID_CableModem"));
                     }

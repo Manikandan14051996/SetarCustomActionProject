@@ -131,7 +131,7 @@ public class QueryAccountCPE implements HttpAction {
                     ontSN = parts[parts.length - 1];
                 }
             } else if ("Cable_Modem".equalsIgnoreCase(serviceLink)) {
-                cbmMac = safeStr(matchedSub.getProperties().get("serviceMac"));
+                cbmMac = safeStr(matchedSub.getProperties().get("serviceMAC"));
             }
 
             // Step 5: Enrich from CPE Device

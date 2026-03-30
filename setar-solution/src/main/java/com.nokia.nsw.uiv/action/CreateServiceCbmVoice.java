@@ -219,7 +219,7 @@ public class CreateServiceCbmVoice implements HttpAction {
                         props.put("serviceSubType", request.getProductSubtype());
                         props.put("serviceLink", "Cable_Modem");
                         props.put("serviceSN", request.getCbmSN());
-                        props.put("serviceMac", request.getCbmMac());
+                        props.put("serviceMAC", request.getCbmMac());
                         props.put("serviceID", request.getServiceId());
                         if (request.getQosProfile() != null) props.put("qosProfile", request.getQosProfile());
                         props.put("householdId", request.getHhid());

@@ -187,7 +187,7 @@ public class ChangeTechnology implements HttpAction {
                 subscription = maybeSubscription.get();
                 Map<String, Object> subProps = subscription.getProperties() != null ? subscription.getProperties() : new HashMap<>();
                 subProps.put("serviceLink", "ONT");
-                subProps.put("serviceMac", ontMacAddr);
+                subProps.put("serviceMAC", ontMacAddr);
                 subProps.put("serviceSN", ontSN);
                 subProps.put("serviceSubType", "Broadband");
                 if ("Fibernet".equalsIgnoreCase(productSubtype)) {

@@ -177,7 +177,7 @@ public class QueryIPTVByServiceID implements HttpAction {
                 if (subscription != null) {
                     // Map legacy fields to UIV fields (defensive getters)
                     String customerGroupId = safeGet(subscription.getProperties(), "customerGroupId");
-                    String serviceMac = safeGet(subscription.getProperties(), "serviceMac");
+                    String serviceMac = safeGet(subscription.getProperties(), "serviceMAC");
                     String serviceLink = safeGet(subscription.getProperties(), "serviceLink");
                     String gatewayMac = safeGet(subscription.getProperties(), "gatewayMacAddress");
                     String cbmSubscriberId = safeGet(subscription.getProperties(), "subscriberID_CableModem");

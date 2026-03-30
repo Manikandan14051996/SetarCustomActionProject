@@ -254,7 +254,7 @@ public class QueryFlags implements HttpAction {
                         Map<String, Object> p = safeProps(subOpt.get().getProperties());
                         String sLink = safeString(p.get("serviceLink"));
                         String sSN = safeString(p.get("serviceSN"));
-                        String sMAC = safeString(p.get("serviceMac"));
+                        String sMAC = safeString(p.get("serviceMAC"));
 
                         if (sSN != null && !sSN.isEmpty()) {
                             if ("ONT".equalsIgnoreCase(sLink) || "SRX".equalsIgnoreCase(sLink)) {
@@ -355,8 +355,8 @@ public class QueryFlags implements HttpAction {
                         Map<String, Object> p = safeProps(subOpt.get().getProperties());
                         serviceLink = safeString(p.get("serviceLink"));
                         serviceSN = safeString(p.get("serviceSN"));
-                        serviceMAC = safeString(p.get("serviceMac"));
-                        cbmmac = safeString(p.get("serviceMac"));
+                        serviceMAC = safeString(p.get("serviceMAC"));
+                        cbmmac = safeString(p.get("serviceMAC"));
                         qosProfile = safeString(p.get("veipQosSessionProfile"));
                         kenanUidNumber = safeString(p.get("kenanSubscriberId"));
                         if (!serviceLink.isEmpty()) {
@@ -460,7 +460,7 @@ public class QueryFlags implements HttpAction {
 
                 Map<String, Object> p = safeProps(sub.getProperties());
 
-                cbmmac = safeString(p.get("serviceMac"));
+                cbmmac = safeString(p.get("serviceMAC"));
 
                 flags.put("CBM_MAC", cbmmac);
             }
@@ -476,7 +476,7 @@ public class QueryFlags implements HttpAction {
 
                 serviceLink = safeString(p.get("serviceLink"));
                 serviceSN = safeString(p.get("serviceSN"));
-                serviceMAC = safeString(p.get("serviceMac"));
+                serviceMAC = safeString(p.get("serviceMAC"));
 
                 flags.put("SERVICE_LINK", serviceLink);
                 flags.put("SERVICE_SN", serviceSN);
@@ -1752,7 +1752,7 @@ public class QueryFlags implements HttpAction {
                     Map<String, Object> p = safeProps(s.getProperties());
                     if ("Cable_Modem".equalsIgnoreCase(safeString(p.get("serviceLink")))) {
                         cbmCount++;
-                        String mac = safeString(p.get("serviceMac"));
+                        String mac = safeString(p.get("serviceMAC"));
                         if (mac != null && !mac.isEmpty()) macSet.add(mac);
                     }
                 }

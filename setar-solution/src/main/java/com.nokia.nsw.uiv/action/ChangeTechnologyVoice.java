@@ -121,7 +121,7 @@ public class ChangeTechnologyVoice implements HttpAction {
                 // Update core subscription fields
                 Map<String, Object> props = subs.getProperties();
                 props.put("serviceLink", "ONT");
-                props.put("serviceMac", req.getOntMacAddr());
+                props.put("serviceMAC", req.getOntMacAddr());
                 props.put("serviceSN", req.getOntSN());
                 props.put("serviceSubType", "Voice");
 
