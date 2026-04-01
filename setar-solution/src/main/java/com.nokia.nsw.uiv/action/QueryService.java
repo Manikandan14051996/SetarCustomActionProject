@@ -128,15 +128,15 @@ public class QueryService implements HttpAction {
                 // Step 4: Populate Subscription details
                 if (optSub.isPresent()) {
                     Subscription sub = optSub.get();
-                    iptvinfo.put("CUSTOMER_GROUP_ID", sub.getProperties().get("customerGroupId"));
-                    iptvinfo.put("CPE_MacAddr_1", sub.getProperties().get("serviceMAC"));
+                    iptvinfo.put("CUSTOMER_GROUP_ID", sub.getProperties().getOrDefault("customerGroupId", ""));
+                    iptvinfo.put("CPE_MacAddr_1", sub.getProperties().getOrDefault("serviceMAC",""));
                     if (sub.getProperties().get("serviceLink").toString().equalsIgnoreCase("Cable_Modem")) {
-                        iptvinfo.put("CBM_Subscriber_ID_1", sub.getProperties().get("subscriberID_CableModem"));
+                        iptvinfo.put("CBM_Subscriber_ID_1", sub.getProperties().getOrDefault("subscriberID_CableModem",""));
                     }
-                    iptvinfo.put("Service_Link", sub.getProperties().get("serviceLink"));
-                    iptvinfo.put("CPE_GW_MacAddr_1", sub.getProperties().get("gatewayMacAddress"));
-                    iptvinfo.put("Service_Package_1", sub.getProperties().get("veipQosSessionProfile"));
-                    iptvinfo.put("Service_Subscriber_1", sub.getProperties().get("veipQosSessionProfile"));
+                    iptvinfo.put("Service_Link", sub.getProperties().getOrDefault("serviceLink",""));
+                    iptvinfo.put("CPE_GW_MacAddr_1", sub.getProperties().getOrDefault("gatewayMacAddress",""));
+                    iptvinfo.put("Service_Package_1", sub.getProperties().getOrDefault("veipQosSessionProfile",""));
+                    iptvinfo.put("Service_Subscriber_1", sub.getProperties().getOrDefault("veipQosSessionProfile",""));
                     returnedParams.addAll(Arrays.asList("CUSTOMER_GROUP_ID", "CPE_MacAddr_1", "Service_Link",
                             "CPE_GW_MacAddr_1", "Service_Package_1", "Service_Subscriber_1", "CBM_Subscriber_ID_1"));
 
@@ -173,14 +173,14 @@ public class QueryService implements HttpAction {
                 // Step 5: Populate Subscriber details
                 if (optCust.isPresent()) {
                     Customer cust = optCust.get();
-                    iptvinfo.put("Service_EmailId_1", cust.getProperties().get("email"));
-                    iptvinfo.put("Service_EmailPw_1", cust.getProperties().get("emailPassword"));
-                    iptvinfo.put("Service_Company_1", cust.getProperties().get("companyName"));
-                    iptvinfo.put("Service_ContactPhone_1", cust.getProperties().get("contactPhoneNumber"));
-                    iptvinfo.put("Service_Address_1", cust.getProperties().get("subscriberAddress"));
-                    iptvinfo.put("Service_HHID_1", cust.getProperties().get("houseHoldId"));
-                    iptvinfo.put("Service_FirstName_1", cust.getProperties().get("subscriberFirstName"));
-                    iptvinfo.put("Service_LastName_1", cust.getProperties().get("subscriberLastName"));
+                    iptvinfo.put("Service_EmailId_1", cust.getProperties().getOrDefault("email",""));
+                    iptvinfo.put("Service_EmailPw_1", cust.getProperties().getOrDefault("emailPassword",""));
+                    iptvinfo.put("Service_Company_1", cust.getProperties().getOrDefault("companyName",""));
+                    iptvinfo.put("Service_ContactPhone_1", cust.getProperties().getOrDefault("contactPhoneNumber",""));
+                    iptvinfo.put("Service_Address_1", cust.getProperties().getOrDefault("subscriberAddress",""));
+                    iptvinfo.put("Service_HHID_1", cust.getProperties().getOrDefault("houseHoldId",""));
+                    iptvinfo.put("Service_FirstName_1", cust.getProperties().getOrDefault("subscriberFirstName",""));
+                    iptvinfo.put("Service_LastName_1", cust.getProperties().getOrDefault("subscriberLastName",""));
                 }
 
                 // Step 6: Fetch Devices from RFS
@@ -204,9 +204,9 @@ public class QueryService implements HttpAction {
                             /* ===================== ONT ===================== */
                             if (name.contains("ONT")) {
                                 iptvinfo.put("Service_Link", "ONT");
-                                iptvinfo.put("CPE_Model_1", device.getProperties().get("deviceModel"));
-                                iptvinfo.put("CPE_Serial_Number_1", device.getProperties().get("serialNo"));
-                                iptvinfo.put("Menm_1", device.getProperties().get("description"));
+                                iptvinfo.put("CPE_Model_1", device.getProperties().getOrDefault("deviceModel",""));
+                                iptvinfo.put("CPE_Serial_Number_1", device.getProperties().getOrDefault("serialNo",""));
+                                iptvinfo.put("Menm_1", device.getProperties().getOrDefault("description",""));
 
                                 returnedParams.add("CPE_Model_1");
                                 returnedParams.add("CPE_Serial_Number_1");
@@ -216,8 +216,8 @@ public class QueryService implements HttpAction {
                             /* ===================== CBM ===================== */
                             else if (name.contains("CBM")) {
                                 iptvinfo.put("Service_Link", "Cable_Modem");
-                                iptvinfo.put("CBM_Device_MacAddr_1", device.getProperties().get("macAddress"));
-                                iptvinfo.put("CBM_Device_Model_1", device.getProperties().get("deviceType"));
+                                iptvinfo.put("CBM_Device_MacAddr_1", device.getProperties().getOrDefault("macAddress",""));
+                                iptvinfo.put("CBM_Device_Model_1", device.getProperties().getOrDefault("deviceType",""));
 
                                 returnedParams.add("CBM_Device_MacAddr_1");
                                 returnedParams.add("CBM_Device_Model_1");
@@ -226,11 +226,11 @@ public class QueryService implements HttpAction {
                             /* ===================== OLT ===================== */
                             else if (name.contains(":")) {
                                 iptvinfo.put("ONT_OBJECT_ID", device.getName());
-                                iptvinfo.put("TEMPLATE_NAME_ONT", device.getProperties().get("ontTemplate"));
-                                iptvinfo.put("TEMPLATE_NAME_IPTV", device.getProperties().get("veipIptvTemplate"));
-                                iptvinfo.put("TEMPLATE_NAME_IGMP", device.getProperties().get("igmpTemplate"));
-                                iptvinfo.put("TEMPLATE_NAME_VEIP", device.getProperties().get("veipServiceTemplate"));
-                                iptvinfo.put("TEMPLATE_NAME_HSI", device.getProperties().get("veipHsiTemplate"));
+                                iptvinfo.put("TEMPLATE_NAME_ONT", device.getProperties().getOrDefault("ontTemplate",""));
+                                iptvinfo.put("TEMPLATE_NAME_IPTV", device.getProperties().getOrDefault("veipIptvTemplate",""));
+                                iptvinfo.put("TEMPLATE_NAME_IGMP", device.getProperties().getOrDefault("igmpTemplate",""));
+                                iptvinfo.put("TEMPLATE_NAME_VEIP", device.getProperties().getOrDefault("veipServiceTemplate",""));
+                                iptvinfo.put("TEMPLATE_NAME_HSI", device.getProperties().getOrDefault("veipHsiTemplate",""));
 
                                 returnedParams.add("ONT_OBJECT_ID");
                                 returnedParams.add("TEMPLATE_NAME_ONT");
@@ -244,11 +244,11 @@ public class QueryService implements HttpAction {
                             else if (name.startsWith("AP")) {
                                 String idx = String.valueOf(apIndex);
 
-                                iptvinfo.put("AP_SerialNo_" + idx, device.getProperties().get("serialNo"));
-                                iptvinfo.put("AP_MacAddr_" + idx, device.getProperties().get("macAddress"));
-                                iptvinfo.put("AP_PreShareKey_" + idx, device.getProperties().get("presharedKey"));
-                                iptvinfo.put("AP_Status_" + idx, device.getProperties().get("administrativeStateName"));
-                                iptvinfo.put("AP_Model_" + idx, device.getProperties().get("deviceModel"));
+                                iptvinfo.put("AP_SerialNo_" + idx, device.getProperties().getOrDefault("serialNo",""));
+                                iptvinfo.put("AP_MacAddr_" + idx, device.getProperties().getOrDefault("macAddress",""));
+                                iptvinfo.put("AP_PreShareKey_" + idx, device.getProperties().getOrDefault("presharedKey",""));
+                                iptvinfo.put("AP_Status_" + idx, device.getProperties().getOrDefault("administrativeStateName",""));
+                                iptvinfo.put("AP_Model_" + idx, device.getProperties().getOrDefault("deviceModel",""));
 
                                 returnedParams.add("AP_SerialNo_" + idx);
                                 returnedParams.add("AP_MacAddr_" + idx);
@@ -263,12 +263,12 @@ public class QueryService implements HttpAction {
                             else if (name.startsWith("STB")) {
                                 String idx = String.valueOf(stbIndex);
 
-                                iptvinfo.put("STB_SerialNo_" + idx, device.getProperties().get("serialNo"));
-                                iptvinfo.put("STB_MacAddr_" + idx, device.getProperties().get("macAddress"));
-                                iptvinfo.put("STB_PreShareKey_" + idx, device.getProperties().get("presharedKey"));
-                                iptvinfo.put("STB_CustomerGroupID_" + idx, device.getProperties().get("deviceGroupId"));
-                                iptvinfo.put("STB_Status_" + idx, device.getProperties().get("administrativeStateName"));
-                                iptvinfo.put("STB_Model_" + idx, device.getProperties().get("deviceModel"));
+                                iptvinfo.put("STB_SerialNo_" + idx, device.getProperties().getOrDefault("serialNo",""));
+                                iptvinfo.put("STB_MacAddr_" + idx, device.getProperties().getOrDefault("macAddress",""));
+                                iptvinfo.put("STB_PreShareKey_" + idx, device.getProperties().getOrDefault("presharedKey",""));
+                                iptvinfo.put("STB_CustomerGroupID_" + idx, device.getProperties().getOrDefault("deviceGroupId",""));
+                                iptvinfo.put("STB_Status_" + idx, device.getProperties().getOrDefault("administrativeStateName",""));
+                                iptvinfo.put("STB_Model_" + idx, device.getProperties().getOrDefault("deviceModel",""));
 
                                 returnedParams.add("STB_SerialNo_" + idx);
                                 returnedParams.add("STB_MacAddr_" + idx);

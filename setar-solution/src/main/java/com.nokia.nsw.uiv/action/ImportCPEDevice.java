@@ -173,8 +173,6 @@ public class ImportCPEDevice implements HttpAction {
             potsPort.setProperties(properties);
 
             componentRepository.save(potsPort, 2);
-//            cpeDevice.setContained(new HashSet<>(List.of(potsPort)));
-            cpeDeviceRepository.save(cpeDevice, 2);
             log.error("POTS port created and associated: {}", portName);
         } else {
             log.error("POTS port already exists: {}", portName);
@@ -209,8 +207,6 @@ public class ImportCPEDevice implements HttpAction {
             properties.put("actionName", ACTION_LABEL);
             ethPort.setProperties(properties);
             componentRepository.save(ethPort, 2);
-//            cpeDevice.setContained(new HashSet<>(List.of(ethPort)));
-            cpeDeviceRepository.save(cpeDevice, 2);
             log.error("Ethernet port created and associated: {}", portName);
 
             // VLAN interfaces (LogicalInterface)
@@ -249,7 +245,6 @@ public class ImportCPEDevice implements HttpAction {
                         vlanProps.put("description","VLAN Interface for " + portName);
                         vlan.setProperties(vlanProps);
                         logicalInterfaceRepository.save(vlan, 2);
-//                        ethPort.setContainedinterface(new HashSet<>(List.of(vlan)));
                     }
                 }
                 try {
