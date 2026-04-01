@@ -185,7 +185,7 @@ public class QueryAllServicesByCPE implements HttpAction {
                 } else if (rfsType.equals("ENTERPRISE")) {
                     entCount++;
                     String entPrefix = "ENTERPRISE_" + entCount;
-                    populateEnterprise(serviceMap, entPrefix, rfs, subscription, customer, olt, ont);
+                    populateEnterprise(serviceMap, entPrefix, rfs, subscription, customer, olt, ont,product);
                     services.add(serviceMap);
                 } else if (rfsType.equals("EVPN")) {
                     entCount++;
@@ -193,7 +193,7 @@ public class QueryAllServicesByCPE implements HttpAction {
                     populateEvpnService(serviceMap, prefix,
                             "ENTERPRISE",
                             rfsType,
-                            subscription, customer, olt, ont);
+                            subscription, customer, olt, ont,product);
                     services.add(serviceMap);
                 } else if (rfsType.equals("IPTV")) {
                     iptvCount++;
@@ -329,7 +329,7 @@ public class QueryAllServicesByCPE implements HttpAction {
 
     // --- Enterprise / EVPN ---
     private void populateEnterprise(Map<String, Object> out, String prefix, Service rfs,
-                                    Subscription sub, Customer cust, LogicalDevice olt, LogicalDevice ont) {
+                                    Subscription sub, Customer cust, LogicalDevice olt, LogicalDevice ont,Service prod) {
         Map<String, Object> rfsProps = rfs.getProperties();
         Map<String, Object> subProps = sub != null ? sub.getProperties() : Collections.emptyMap();
 
@@ -363,7 +363,8 @@ public class QueryAllServicesByCPE implements HttpAction {
             putIfNotNull(out,  "TEMPLATE_NAME_CREATE", ontProps.get("createTemplate"));
             putIfNotNull(out,  "TEMPLATE_NAME_VLAN_MGMNT", ontProps.get("mgmtTemplate"));
         }
-        putIfNotNull(out, "Service_Prefix", prefix);
+
+        putIfNotNull(out, "Service_Prefix", prod.getProperties().get("productType")+"_"+prefix.split("_")[1]);
     }
 
     // --- IPTV ---
@@ -605,7 +606,7 @@ public class QueryAllServicesByCPE implements HttpAction {
     private void populateEvpnService(Map<String, Object> out, String prefix,
                                      String serviceType, String servicePrefixValue,
                                      Subscription sub, Customer cust,
-                                     LogicalDevice olt, LogicalDevice ont) {
+                                     LogicalDevice olt, LogicalDevice ont,Service prod) {
 
         Map<String, Object> subProps = sub != null ? sub.getProperties() : null;
         Map<String, Object> custProps = cust != null ? cust.getProperties() : null;
@@ -651,8 +652,7 @@ public class QueryAllServicesByCPE implements HttpAction {
             putIfNotNull(out, "TEMPLATE_NAME_CREATE", ontProps.get("createTemplate"));
             putIfNotNull(out, "TEMPLATE_NAME_VLAN_MGMNT", ontProps.get("mgmtTemplate"));
         }
-
         // Common
-        putIfNotNull(out, "Service_Prefix", prefix);
+        putIfNotNull(out, "Service_Prefix",prod.getProperties().get("productType")+"_"+prefix.split("_")[1] );
     }
 }
