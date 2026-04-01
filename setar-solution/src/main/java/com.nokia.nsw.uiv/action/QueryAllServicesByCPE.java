@@ -335,7 +335,7 @@ public class QueryAllServicesByCPE implements HttpAction {
 
         putIfNotNull(out, "SERVICE_ID", subProps.get("serviceID"));
         putIfNotNull(out, "SERVICE_SUBTYPE", subProps.get("serviceSubType"));
-        out.put( "SERVICE_TYPE", "Enterprise");
+        out.put( "SERVICE_TYPE", "ENTERPRISE");
         putIfNotNull(out, "QOS_PROFILE", subProps.get("evpnQosSessionProfile"));
         putIfNotNull(out, "KENAN_SUBS_ID", subProps.get("kenanSubscriberId"));
         putIfNotNull(out, "PORT", subProps.get("evpnPort"));
