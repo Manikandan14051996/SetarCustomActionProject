@@ -356,7 +356,7 @@ public class QueryIPTVByServiceID implements HttpAction {
                                 String serial = safeGet(resProps, "serialNo");
                                 String mac = safeGet(resProps, "macAddress");
                                 String preshared = safeGet(resProps, "presharedKey");
-                                String status = safeGet(resProps, "administrativeStateName");
+                                String status = safeGet(resProps, "AdministrativeState");
                                 String model = safeGet(resProps, "deviceModel");
 
                                 if (serial != null) { iptvInfo.put(sNoKey, serial); outputParameterNames.add(sNoKey); }
@@ -381,7 +381,7 @@ public class QueryIPTVByServiceID implements HttpAction {
                                 String mac = safeGet(resProps, "macAddress");
                                 String preshared = safeGet(resProps, "presharedKey");
                                 String groupId = safeGet(resProps, "deviceGroupId");
-                                String status = safeGet(resProps, "administrativeStateName");
+                                String status = safeGet(resProps, "AdministrativeState");
                                 String model = safeGet(resProps, "deviceModel");
 
                                 if (serial != null) { iptvInfo.put(sNoKey, serial); outputParameterNames.add(sNoKey); }
