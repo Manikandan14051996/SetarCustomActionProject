@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Action
@@ -186,12 +187,12 @@ public class QueryService implements HttpAction {
                 // Step 6: Fetch Devices from RFS
                 if (optRfs.isPresent()) {
                     Service rfs = optRfs.get();
-
-                    Set<Resource> ls = rfs.getUsedResource();
-                    ls.forEach(res -> {
+                    final Set<Resource>[] ls = new Set[]{rfs.getUsedResource()};
+                    AtomicInteger apIndex = new AtomicInteger(1);
+                    AtomicInteger stbIndex = new AtomicInteger(1);
+                    ls[0].forEach(res -> {
                         // Counters should be defined outside the loop
-                        int apIndex = 1;
-                        int stbIndex = 1;
+
 
                         if (res instanceof LogicalDevice) {
                             LogicalDevice device = (LogicalDevice) res;
@@ -242,12 +243,12 @@ public class QueryService implements HttpAction {
 
                             /* ===================== AP ===================== */
                             else if (name.startsWith("AP")) {
-                                String idx = String.valueOf(apIndex);
+                                String idx = String.valueOf(apIndex.getAndIncrement());
 
                                 iptvinfo.put("AP_SerialNo_" + idx, device.getProperties().getOrDefault("serialNo",""));
                                 iptvinfo.put("AP_MacAddr_" + idx, device.getProperties().getOrDefault("macAddress",""));
                                 iptvinfo.put("AP_PreShareKey_" + idx, device.getProperties().getOrDefault("presharedKey",""));
-                                iptvinfo.put("AP_Status_" + idx, device.getProperties().getOrDefault("administrativeStateName",""));
+                                iptvinfo.put("AP_Status_" + idx, device.getProperties().getOrDefault("AdministrativeState",""));
                                 iptvinfo.put("AP_Model_" + idx, device.getProperties().getOrDefault("deviceModel",""));
 
                                 returnedParams.add("AP_SerialNo_" + idx);
@@ -256,18 +257,17 @@ public class QueryService implements HttpAction {
                                 returnedParams.add("AP_Status_" + idx);
                                 returnedParams.add("AP_Model_" + idx);
 
-                                apIndex++;
                             }
 
                             /* ===================== STB ===================== */
                             else if (name.startsWith("STB")) {
-                                String idx = String.valueOf(stbIndex);
+                                String idx = String.valueOf(stbIndex.getAndIncrement());;
 
                                 iptvinfo.put("STB_SerialNo_" + idx, device.getProperties().getOrDefault("serialNo",""));
                                 iptvinfo.put("STB_MacAddr_" + idx, device.getProperties().getOrDefault("macAddress",""));
                                 iptvinfo.put("STB_PreShareKey_" + idx, device.getProperties().getOrDefault("presharedKey",""));
                                 iptvinfo.put("STB_CustomerGroupID_" + idx, device.getProperties().getOrDefault("deviceGroupId",""));
-                                iptvinfo.put("STB_Status_" + idx, device.getProperties().getOrDefault("administrativeStateName",""));
+                                iptvinfo.put("STB_Status_" + idx, device.getProperties().getOrDefault("AdministrativeState",""));
                                 iptvinfo.put("STB_Model_" + idx, device.getProperties().getOrDefault("deviceModel",""));
 
                                 returnedParams.add("STB_SerialNo_" + idx);
@@ -277,7 +277,6 @@ public class QueryService implements HttpAction {
                                 returnedParams.add("STB_Status_" + idx);
                                 returnedParams.add("STB_Model_" + idx);
 
-                                stbIndex++;
                             }
 
                             log.debug("Processed device: {}", device.getLocalName());
