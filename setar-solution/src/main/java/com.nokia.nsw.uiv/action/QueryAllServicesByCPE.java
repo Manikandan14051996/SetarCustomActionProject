@@ -343,13 +343,13 @@ public class QueryAllServicesByCPE implements HttpAction {
             putIfNotNull(out,  "ONT_TEMPLATE", oltProps.get("ontTemplate"));
             putIfNotNull(out,  "TEMPLATE_NAME_CARD", oltProps.get("evpnOntCardTemplate"));
             if (ontProps.get("evpnEthPort3Template") != null && !ontProps.get("evpnEthPort3Template").toString().isEmpty() && evpnPort.equals("3")) {
-                putIfNotNull(out,  "TEMPLATE_NAME_PORT", ontProps.get("evpnEthPort3Template"));
+                putIfNotNull(out, prefix + "TEMPLATE_NAME_PORT", ontProps.get("evpnEthPort3Template"));
             }
             if (ontProps.get("evpnEthPort4Template") != null && !ontProps.get("evpnEthPort4Template").toString().isEmpty() && evpnPort.equals("4")) {
-                putIfNotNull(out,  "TEMPLATE_NAME_PORT", ontProps.get("evpnEthPort4Template"));
+                putIfNotNull(out,prefix +  "TEMPLATE_NAME_PORT", ontProps.get("evpnEthPort4Template"));
             }
-            putIfNotNull(out,  "TEMPLATE_NAME_CREATE", ontProps.get("createTemplate"));
-            putIfNotNull(out,  "TEMPLATE_NAME_VLAN_MGMNT", ontProps.get("mgmtTemplate"));
+            putIfNotNull(out,prefix +  "TEMPLATE_NAME_CREATE", ontProps.get("createTemplate"));
+            putIfNotNull(out, prefix + "TEMPLATE_NAME_VLAN_MGMNT", ontProps.get("mgmtTemplate"));
         }
         putIfNotNull(out, "Service_Prefix", "ENTERPRISE");
     }
