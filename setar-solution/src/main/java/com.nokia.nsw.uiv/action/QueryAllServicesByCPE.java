@@ -290,7 +290,7 @@ public class QueryAllServicesByCPE implements HttpAction {
         putIfNotNull(out, prefix + "VOIP_CODE_1", subProps.get("voipServiceCode1"));
         putIfNotNull(out, prefix + "VOIP_CODE_2", subProps.get("voipServiceCode2"));
         putIfNotNull(out, prefix + "QOS_PROFILE", subProps.get("voipPackage1"));
-        putIfNotNull(out, "QOS_PROFILE2", subProps.get("voipPackage2"));
+        putIfNotNull(out,prefix + "QOS_PROFILE2", subProps.get("voipPackage2"));
         populateSubscriberDetails(out, prefix, cust);
 
         // Templates from OLT
