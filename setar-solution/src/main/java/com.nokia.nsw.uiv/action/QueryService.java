@@ -226,7 +226,7 @@ public class QueryService implements HttpAction {
 
                             /* ===================== OLT ===================== */
                             else if (name.contains(":")) {
-                                iptvinfo.put("ONT_OBJECT_ID", device.getName());
+                                iptvinfo.put("ONT_OBJECT_ID", device.getDiscoveredName());
                                 iptvinfo.put("TEMPLATE_NAME_ONT", device.getProperties().getOrDefault("ontTemplate",""));
                                 iptvinfo.put("TEMPLATE_NAME_IPTV", device.getProperties().getOrDefault("veipIptvTemplate",""));
                                 iptvinfo.put("TEMPLATE_NAME_IGMP", device.getProperties().getOrDefault("igmpTemplate",""));
