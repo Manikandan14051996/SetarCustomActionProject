@@ -377,9 +377,7 @@ public class CreateServiceIPTV implements HttpAction {
                 vlanRepository.save(vlanInterface, 2);
                 log.error("Created VLAN Interface: {}", mgmtVlanName);
             }
-            if (request.getMenm() != "" && request.getMenm() !=null && request.getMenm() != "NA"){
-                ontDevice.getProperties().put("description",request.getMenm());
-            }
+
             oltDevice = logicalDeviceRepository
                     .findByDiscoveredName(oltDevice.getDiscoveredName())
                     .get();
@@ -390,7 +388,9 @@ public class CreateServiceIPTV implements HttpAction {
             ontDevice.getProperties().put("iptvVlan", request.getVlanID());
             ontDevice.setUsingService(new HashSet<>(List.of(rfs)));
             ontDevice.setUsedResource(new HashSet<>(List.of(oltDevice)));
-
+            if (request.getMenm() != "" && request.getMenm() !=null && request.getMenm() != "NA"){
+                ontDevice.getProperties().put("description",request.getMenm());
+            }
             oltDevice.getProperties().put("veipServiceTemplate", request.getTemplateNameVEIP());
             oltDevice.getProperties().put("veipIptvTemplate", request.getTemplateNameIPTV());
             oltDevice.getProperties().put("igmpTemplate", request.getTemplateNameIGMP());
