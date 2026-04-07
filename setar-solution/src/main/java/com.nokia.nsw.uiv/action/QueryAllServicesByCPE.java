@@ -281,15 +281,15 @@ public class QueryAllServicesByCPE implements HttpAction {
         putIfNotNull(out, prefix + "SERVICE_ID", subProps.get("serviceID"));
         putIfNotNull(out, prefix + "SERVICE_SUBTYPE", subProps.get("serviceSubType"));
         out.put(prefix + "SERVICE_TYPE", "Voice");
-        putIfNotNull(out, prefix + "SIMA_CUSTOMER_ID", subProps.get("simaCustId"));
+        putIfNotNull(out, prefix + "SIMA_CUSTOMER_ID", subProps.get("simaCustId1"));
         putIfNotNull(out, prefix + "SIMA_CUSTOMER_ID2", subProps.get("simaCustId2"));
-        putIfNotNull(out, prefix + "SIMA_SUBS_ID", subProps.get("simaSubsId"));
+        putIfNotNull(out, prefix + "SIMA_SUBS_ID", subProps.get("simaSubsId1"));
         putIfNotNull(out, prefix + "SIMA_SUBS_ID2", subProps.get("simaSubsId2"));
-        putIfNotNull(out, prefix + "SIMA_ENDPOINT_ID", subProps.get("simaEndpointId"));
+        putIfNotNull(out, prefix + "SIMA_ENDPOINT_ID", subProps.get("simaEndpointId1"));
         putIfNotNull(out, prefix + "SIMA_ENDPOINT_ID2", subProps.get("simaEndpointId2"));
-        putIfNotNull(out, prefix + "VOIP_CODE_1", subProps.get("voipServiceCode"));
+        putIfNotNull(out, prefix + "VOIP_CODE_1", subProps.get("voipServiceCode1"));
         putIfNotNull(out, prefix + "VOIP_CODE_2", subProps.get("voipServiceCode2"));
-        putIfNotNull(out, prefix + "QOS_PROFILE", subProps.get("voipPackage"));
+        putIfNotNull(out, prefix + "QOS_PROFILE", subProps.get("voipPackage1"));
         putIfNotNull(out, "QOS_PROFILE2", subProps.get("voipPackage2"));
         populateSubscriberDetails(out, prefix, cust);
 
