@@ -340,8 +340,8 @@ public class QueryAllServicesByCPE implements HttpAction {
         if (olt != null) {
             Map<String, Object> ontProps = ont.getProperties();
             Map<String, Object> oltProps = olt.getProperties();
-            putIfNotNull(out,  "ONT_TEMPLATE", oltProps.get("ontTemplate"));
-            putIfNotNull(out,  "TEMPLATE_NAME_CARD", oltProps.get("evpnOntCardTemplate"));
+            putIfNotNull(out,  prefix +"ONT_TEMPLATE", oltProps.get("ontTemplate"));
+            putIfNotNull(out,  prefix +"TEMPLATE_NAME_CARD", oltProps.get("evpnOntCardTemplate"));
             if (ontProps.get("evpnEthPort3Template") != null && !ontProps.get("evpnEthPort3Template").toString().isEmpty() && evpnPort.equals("3")) {
                 putIfNotNull(out, prefix + "TEMPLATE_NAME_PORT", ontProps.get("evpnEthPort3Template"));
             }
