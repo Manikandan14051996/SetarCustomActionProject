@@ -202,7 +202,7 @@ public class ModifySPR implements HttpAction {
             } catch (Exception e) {
                 throw new ModificationNotAllowedException("Failed to persist password update " + e.getMessage());
             }
-        } else if (List.of("Package", "Component", "Product", "Contract").contains(request.getModifyType())) {
+        } else if (request.getModifyType().contains("Package") || request.getModifyType().contains("Component") || request.getModifyType().contains("Product") || request.getModifyType().contains("Contract")) {
             try {
                 Map<String, Object> subProps = subscription.getProperties();
                 if ("Cloudstarter".equalsIgnoreCase(request.getProductSubtype())
@@ -253,7 +253,7 @@ public class ModifySPR implements HttpAction {
     }
 
     private boolean handleVOIP(ModifySPRRequest request, Subscription subscription, String ontName) throws ModificationNotAllowedException, BadRequestException {
-        if (List.of("Package", "Product").contains(request.getModifyType())) {
+        if (request.getModifyType().contains("Package") || request.getModifyType().contains("Product")) {
             try {
                 Map<String, Object> subProps = subscription.getProperties();
                 subProps.put("voipPackage1", request.getModifyParam1());
