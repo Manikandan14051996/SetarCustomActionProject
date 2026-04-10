@@ -98,7 +98,7 @@ public class QueryVoipNumber implements HttpAction {
             }
 
             // Step 5: Exact subscription lookup
-            if (req.getSubscriberName() != null && req.getServiceId() != null) {
+            if (req.getSubscriberName() != null) {
                 String subscriptionName = ("CBM".equals(linkType))
                         ? req.getSubscriberName() + Constants.UNDER_SCORE  + req.getServiceId()
                         : req.getSubscriberName() + Constants.UNDER_SCORE  + req.getServiceId() + Constants.UNDER_SCORE  + req.getOntSN();
