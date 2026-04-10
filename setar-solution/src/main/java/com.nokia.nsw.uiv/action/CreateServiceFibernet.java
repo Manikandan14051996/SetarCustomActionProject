@@ -165,6 +165,7 @@ public class CreateServiceFibernet implements HttpAction {
                 subProps.put("subscriptionDetails", request.getSubscriberID());
                 subProps.put("serviceID", request.getServiceID());
                 subProps.put("serviceSN", request.getOntSN());
+                if (request.getOntPort() != null) subProps.put("evpnPort", request.getOntPort());
                 subProps.put("oltPosition", request.getOltName());
                 subProps.put("householdID", request.getHhid());
                 subProps.put("subscriberID_CableModem", request.getSubscriberID());
