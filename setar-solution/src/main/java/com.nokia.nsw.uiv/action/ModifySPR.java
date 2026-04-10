@@ -147,7 +147,7 @@ public class ModifySPR implements HttpAction {
                 return new ModifySPRResponse("200", "UIV action ModifySPR executed successfully.", getCurrentTimestamp(),
                         updatedOntName, updatedSubscriptionName);
             } else {
-                return new ModifySPRResponse("200", "UIV action ModifySPR executed successfully.Modification not done", getCurrentTimestamp(),
+                return new ModifySPRResponse("200", "Error,Modification not done", getCurrentTimestamp(),
                         updatedOntName, updatedSubscriptionName);
             }
 
