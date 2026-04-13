@@ -239,13 +239,12 @@ public class DeleteSPR implements HttpAction {
             // 8) Delete VOIP or Voice Services
             // -----------------------------
             if (equalsAny(req.getProductType(), "VOIP", "Voice")) {
-                String voipNumber1 = optSubscription.map(s -> stringProp(s.getProperties(), "voipNumber1")).orElse("");
-
+                String voipNumber2 = optSubscription.map(s -> stringProp(s.getProperties(), "voipNumber2")).orElse("");
                 // ONT POTS numbers
                 String pots1 = optOnt.map(ont -> stringProp(ont.getProperties(), "potsPort1Number")).orElse("");
                 String pots2 = optOnt.map(ont -> stringProp(ont.getProperties(), "potsPort2Number")).orElse("");
 
-                boolean matchP2 = voipNumber1 != null && !voipNumber1.isEmpty() && voipNumber1.equals(pots2);
+                boolean matchP2 = voipNumber2 != null && !voipNumber2.isEmpty() && voipNumber2.equals(pots2);
 
                 if (matchP2) {
                     optOnt.ifPresent(ont -> {
