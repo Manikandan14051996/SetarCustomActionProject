@@ -17,6 +17,7 @@ import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -79,8 +80,8 @@ public class CreateServiceFibernet implements HttpAction {
                 Validations.validateMandatory(request.getOntModel(), "ontModel");
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             }catch (BadRequestException bre) {
-                return new CreateServiceFibernetResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                        Instant.now().toString(), "","");
+                return ResponseEntity.status(400).body(new CreateServiceFibernetResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
+                        Instant.now().toString(), "",""));
             }
             // optional: template names etc.
 
@@ -97,16 +98,16 @@ public class CreateServiceFibernet implements HttpAction {
             AtomicBoolean isProductExist = new AtomicBoolean(true);
             // Length checks
             if (ontName.length() > 100) {
-                return createErrorResponse("ONT name too long", "400", "", "");
+                return ResponseEntity.status(400).body(createErrorResponse("ONT name too long", "400", "", ""));
             }
             if (subscriberName.length() > 100) {
-                return createErrorResponse("Subscriber name too long", "400", "", "");
+                return ResponseEntity.status(400).body(createErrorResponse("Subscriber name too long", "400", "", ""));
             }
             if (subscriptionName.length() > 100) {
-                return createErrorResponse("Subscription name too long", "400", "", "");
+                return ResponseEntity.status(400).body(createErrorResponse("Subscription name too long", "400", "", ""));
             }
             if (productName.length() > 100) {
-                return createErrorResponse("Product name too long", "400", "", "");
+                return ResponseEntity.status(400).body(createErrorResponse("Product name too long", "400", "", ""));
             }
 
             // 2. Subscriber: create or fetch
@@ -213,7 +214,7 @@ public class CreateServiceFibernet implements HttpAction {
             }
             if(isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()){
                 log.error("createServiceFibernate service already exist");
-                return new CreateServiceFibernetResponse("409","Service already exist/Duplicate entry",Instant.now().toString(),subscriptionName,ontName);
+                return ResponseEntity.status(409).body(new CreateServiceFibernetResponse("409","Service already exist/Duplicate entry",Instant.now().toString(),subscriptionName,ontName));
             }
             if(isSubscriptionExist.get()){
                 subscription = subscriptionRepository.findByDiscoveredName(subscription.getDiscoveredName()).get();
@@ -429,14 +430,14 @@ public class CreateServiceFibernet implements HttpAction {
             response.setTimestamp(Instant.now().toString());
             response.setSubscriptionName(subscriptionName);
             response.setOntName(ontNameResp);
-            return response;
+            return ResponseEntity.status(201).body(response);
 
         } catch (BadRequestException bre) {
             log.error("Validation error creating Fibernet", bre);
-            return createErrorResponse(bre.getMessage(), "400", "", "");
+            return ResponseEntity.status(400).body(createErrorResponse(bre.getMessage(), "400", "", ""));
         } catch (Exception ex) {
             log.error("Unhandled error in CreateServiceFibernet", ex);
-            return createErrorResponse("Internal server error occurred - " + ex.getMessage(), "500", "", "");
+            return ResponseEntity.status(500).body(createErrorResponse("Internal server error occurred - " + ex.getMessage(), "500", "", ""));
         }
     }
 
