@@ -66,8 +66,8 @@ public class QueryVoipNumber implements HttpAction {
             }
 
             // Step 2: Service link
-            String linkType = (req.getServiceLink() != null && "CBM".equalsIgnoreCase(req.getServiceLink()))
-                    ? "CBM" : "ONT";
+            String linkType = (req.getServiceLink() != null && "Cable_Modem".equalsIgnoreCase(req.getServiceLink()))
+                    ? "Cable_Modem" : "ONT";
             String ontName ="ONT" + req.getOntSN();
 
             // Step 3: Prepare empty fields
@@ -99,7 +99,7 @@ public class QueryVoipNumber implements HttpAction {
 
             // Step 5: Exact subscription lookup
             if (req.getSubscriberName() != null) {
-                String subscriptionName = ("CBM".equals(linkType))
+                String subscriptionName = ("Cable_Modem".equals(linkType))
                         ? req.getSubscriberName() + Constants.UNDER_SCORE  + req.getServiceId()
                         : req.getSubscriberName() + Constants.UNDER_SCORE  + req.getServiceId() + Constants.UNDER_SCORE  + req.getOntSN();
 
@@ -127,7 +127,7 @@ public class QueryVoipNumber implements HttpAction {
                         lastName = "";
                     }
 
-                    if ("CBM".equals(linkType)) {
+                    if ("Cable_Modem".equals(linkType)) {
                         voipNumber1 = (String) subs.getProperties().get("voipNumber1");
                         voipNumber2 = (String) subs.getProperties().get("voipNumber2");
                     }
@@ -186,7 +186,7 @@ public class QueryVoipNumber implements HttpAction {
                         voipCode1      = (String) s.getProperties().getOrDefault("voipServiceCode1", "");
                         voipPackage    = (String) s.getProperties().getOrDefault("voipPackage1", "");
 
-                        if ("CBM".equals(linkType)) {
+                        if ("Cable_Modem".equals(linkType)) {
                             voipNumber1 = (String) s.getProperties().getOrDefault("voipNumber1", "");
                         }
 
@@ -210,7 +210,7 @@ public class QueryVoipNumber implements HttpAction {
                                 voipCode2       = (String) props.getOrDefault("voipServiceCode2", "");
                                 voipPackage2    = (String) props.getOrDefault("voipPackage2", "");
                             }
-                            if ("CBM".equals(linkType)) {
+                            if ("Cable_Modem".equals(linkType)) {
 
                                 if (props.containsKey("voipNumber1")) {
                                     voipNumber1 = (String) props.getOrDefault("voipNumber1", "");
