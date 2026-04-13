@@ -23,6 +23,7 @@ import com.nokia.nsw.uiv.model.common.party.CustomerRepository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -83,7 +84,7 @@ public class AccountTransferByServiceID implements HttpAction {
 
             cfsList.removeIf(cfs -> !cfs.getDiscoveredName().contains(req.getServiceId()));
             if (cfsList.isEmpty()) {
-                return errorResponse("404", "No entry found for update",getCurrentTimestamp());
+                return ResponseEntity.status(404).body(errorResponse("404", "No entry found for update",getCurrentTimestamp()));
             }
             log.error("------Trace #3: Matching CFS found count=" + cfsList.size());
 
@@ -235,18 +236,18 @@ public class AccountTransferByServiceID implements HttpAction {
             }
 
             if (!updated) {
-                return errorResponse("404", "Error, No Account found", getCurrentTimestamp());
+                return ResponseEntity.status(404).body(errorResponse("404", "Error, No Account found", getCurrentTimestamp()));
             }
             log.error(Constants.ACTION_COMPLETED);
             AccountTransferByServiceIDResponse resp = new AccountTransferByServiceIDResponse();
             resp.setStatus("200");
             resp.setMessage("AccountNumber successfully updated.");
             resp.setTimestamp(Instant.now().toString());
-            return resp;
+            return ResponseEntity.status(200).body(resp);
 
         } catch (Exception ex) {
             log.error("Exception in AccountTransferByServiceID", ex);
-            return errorResponse("500", "Unexpected error - " + ex.getMessage(), getCurrentTimestamp());
+            return ResponseEntity.status(500).body(errorResponse("500", "Unexpected error - " + ex.getMessage(), getCurrentTimestamp()));
         }
     }
 

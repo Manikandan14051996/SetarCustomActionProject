@@ -17,6 +17,7 @@ import com.nokia.nsw.uiv.model.resource.logical.LogicalDeviceRepository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -74,12 +75,12 @@ public class AssociateResources implements HttpAction {
                 }
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             } catch (BadRequestException bre) {
-                return new AssociateResourcesResponse(
+                return ResponseEntity.status(400).body(new AssociateResourcesResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
                         Instant.now().toString(),
                         ""
-                );
+                ));
             }
 
             // Step 2: Prepare entity names
@@ -97,24 +98,24 @@ public class AssociateResources implements HttpAction {
                 subscriptionName = subscriberName + Constants.UNDER_SCORE + request.getServiceId() + Constants.UNDER_SCORE + request.getCbmSN();
                 rfsName = "RFS" + Constants.UNDER_SCORE + subscriptionName;
             } else {
-                return new AssociateResourcesResponse(
+                return  ResponseEntity.status(400).body(new AssociateResourcesResponse(
                         "400",
                         ERROR_PREFIX + "Invalid combination of identifiers",
                         Instant.now().toString(),
                         ""
-                );
+                ));
             }
 
             // Step 3: Retrieve RFS and Admin State
             log.error("----Trace #4: Retrieving RFS and AdminState ----");
             Optional<Service> optRfs = serviceCustomRepository.findByDiscoveredName(rfsName);
             if (!optRfs.isPresent()) {
-                return new AssociateResourcesResponse(
+                return  ResponseEntity.status(404).body(new AssociateResourcesResponse(
                         "404",
                         ERROR_PREFIX + "Required entity not found: " + rfsName,
                         Instant.now().toString(),
                         ""
-                );
+                ));
             }
             Service rfs = optRfs.get();
             Map<String, Object> rfsProps = rfs.getProperties();
@@ -167,12 +168,12 @@ public class AssociateResources implements HttpAction {
                         log.error("----Trace #6: Processing STB device: " + devName + " ----");
                         Optional<LogicalDevice> optDev = deviceRepository.findByDiscoveredName(devName);
                         if (!optDev.isPresent()) {
-                            return new AssociateResourcesResponse(
+                            return  ResponseEntity.status(404).body(new AssociateResourcesResponse(
                                     "404",
                                     ERROR_PREFIX + "Device not found: " + devName,
                                     Instant.now().toString(),
                                     ""
-                            );
+                            ));
                         }
                         LogicalDevice device = optDev.get();
                         device.getProperties().put("deviceGroupId", customerGroupIds[i]!=null?customerGroupIds[i]:"");
@@ -199,12 +200,12 @@ public class AssociateResources implements HttpAction {
                         log.error("----Trace #7: Processing AP device: " + devName + " ----");
                         Optional<LogicalDevice> optDev = deviceRepository.findByDiscoveredName(devName);
                         if (!optDev.isPresent()) {
-                            return new AssociateResourcesResponse(
+                            return ResponseEntity.status(404).body(new AssociateResourcesResponse(
                                     "404",
                                     ERROR_PREFIX + "Device not found: " + devName,
                                     Instant.now().toString(),
                                     ""
-                            );
+                            ));
                         }
                         LogicalDevice device = optDev.get();
                         device.getProperties().put("AdministrativeState", "Allocated");
@@ -227,12 +228,12 @@ public class AssociateResources implements HttpAction {
                 if (devName != null) {
                     Optional<LogicalDevice> optDev = deviceRepository.findByDiscoveredName(devName);
                     if (!optDev.isPresent()) {
-                        return new AssociateResourcesResponse(
+                        return ResponseEntity.status(404).body(new AssociateResourcesResponse(
                                 "404",
                                 ERROR_PREFIX + "Device not found: " + devName,
                                 Instant.now().toString(),
                                 ""
-                        );
+                        ));
                     }
                     LogicalDevice device = optDev.get();
                     Map<String, Object> props = new HashMap<>();
@@ -259,22 +260,22 @@ public class AssociateResources implements HttpAction {
                         subscriptionName
                 );
             } else {
-                return new AssociateResourcesResponse(
+                return  ResponseEntity.status(409).body(new AssociateResourcesResponse(
                         "409",
                         ERROR_PREFIX + "Resource not attached",
                         Instant.now().toString(),
                         ""
-                );
+                ));
             }
 
         } catch (Exception ex) {
             log.error("Unhandled exception during AssociateResources", ex);
-            return new AssociateResourcesResponse(
+            return ResponseEntity.status(500).body(new AssociateResourcesResponse(
                     "500",
                     ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
                     Instant.now().toString(),
                     ""
-            );
+            ));
         }
     }
 }

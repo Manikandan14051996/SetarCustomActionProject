@@ -15,6 +15,7 @@ import com.nokia.nsw.uiv.utils.Validations;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -55,12 +56,12 @@ public class ChangeResourceStatus implements HttpAction {
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             } catch (Exception bre) {
                 log.error("------------Test Trace # 2--------------- Missing param: " + bre.getMessage());
-                return new ChangeResourceStatusResponse(
+                return ResponseEntity.status(400).body(new ChangeResourceStatusResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
                         Instant.now().toString(),
                         "", "", "", "", ""
-                );
+                ));
             }
 
             String sn = req.getResourceSn();
@@ -78,12 +79,12 @@ public class ChangeResourceStatus implements HttpAction {
             Optional<LogicalDevice> devOpt = stbRepo.findByDiscoveredName(devName);
             if (!devOpt.isPresent()) {
                 log.error("------------Test Trace # 5--------------- Device not found: " + devName);
-                return new ChangeResourceStatusResponse(
+                return ResponseEntity.status(404).body(new ChangeResourceStatusResponse(
                         "404",
                         ERROR_PREFIX + type + sn + " not found",
                         Instant.now().toString(),
                         sn, "", "", "", type
-                );
+                ));
             }
 
             LogicalDevice device = devOpt.get();
@@ -96,12 +97,12 @@ public class ChangeResourceStatus implements HttpAction {
             // 5. Apply status change
             if (targetStatus.equalsIgnoreCase(currentStatus)) {
                 log.error("------------Test Trace # 7--------------- No change required");
-                return new ChangeResourceStatusResponse(
+                return ResponseEntity.status(404).body(new ChangeResourceStatusResponse(
                         "404",
                         ERROR_PREFIX + "No change required. Resource already in status " + targetStatus,
                         Instant.now().toString(),
                         sn, mac, currentStatus, model, type
-                );
+                ));
             }
 
             Map<String, Object> deviceProps = device.getProperties();
@@ -125,12 +126,12 @@ public class ChangeResourceStatus implements HttpAction {
 
         } catch (Exception ex) {
             log.error("Unhandled exception in ChangeResourceStatus", ex);
-            return new ChangeResourceStatusResponse(
+            return ResponseEntity.status(500).body(new ChangeResourceStatusResponse(
                     "500",
                     ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
                     Instant.now().toString(),
                     "", "", "", "", ""
-            );
+            ));
         }
     }
 }

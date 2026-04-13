@@ -25,6 +25,7 @@ import com.nokia.nsw.uiv.model.resource.logical.LogicalDevice;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.common.recycler.Recycler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
@@ -125,13 +126,13 @@ public class ChangeTechnology implements HttpAction {
                 Validations.validateMandatoryParams(cbmMac, "cbmMac");
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             } catch (BadRequestException bre) {
-                return new ChangeTechnologyResponse(
+                return ResponseEntity.status(400).body(new ChangeTechnologyResponse(
                         "400",
                         ERROR_PREFIX + bre.getMessage(),
                         Instant.now().toString(),
                         "",
                         ""
-                );
+                ));
             }
 
 
@@ -152,7 +153,7 @@ public class ChangeTechnology implements HttpAction {
             // 4. Update existing subscriber (only when productSubtype == Fibernet)
             if ("Fibernet".equalsIgnoreCase(productSubtype)) {
                 if (subscriberNameFibernet.length() > 100) {
-                    return new ChangeTechnologyResponse("400", ERROR_PREFIX + "Subscriber name too long", Instant.now().toString(), subscriptionName, ontName);
+                    return  ResponseEntity.status(400).body(new ChangeTechnologyResponse("400", ERROR_PREFIX + "Subscriber name too long", Instant.now().toString(), subscriptionName, ontName));
                 }
                 // Try find CBM-keyed subscriber
                 Optional<Customer> maybeCbmSubscriber = customerRepo.findByDiscoveredName(subscriberNameCbmKey);
@@ -178,7 +179,7 @@ public class ChangeTechnology implements HttpAction {
                 }
             }
             if (subscriptionName.length() > 100) {
-                return new ChangeTechnologyResponse("400", ERROR_PREFIX + "Subscription name too long", Instant.now().toString(), subscriptionName, "");
+                return ResponseEntity.status(400).body(new ChangeTechnologyResponse("400", ERROR_PREFIX + "Subscription name too long", Instant.now().toString(), subscriptionName, ""));
             }
             // 5. Update existing subscription (if exists)
             Optional<Subscription> maybeSubscription = subscriptionRepo.findByDiscoveredName(subscriptionName);
@@ -265,7 +266,7 @@ public class ChangeTechnology implements HttpAction {
 
             // validate ont name length
             if (ontName.length() > 100) {
-                return new ChangeTechnologyResponse("400", ERROR_PREFIX + "ONT name too long", Instant.now().toString(), "", "");
+                return ResponseEntity.status(400).body(new ChangeTechnologyResponse("400", ERROR_PREFIX + "ONT name too long", Instant.now().toString(), "", ""));
             }
 
             // 9. Prepare ONT device (create if missing)
@@ -302,7 +303,7 @@ public class ChangeTechnology implements HttpAction {
                     });
 
             if (mgmtVlanName.length() > 100) {
-                return new ChangeTechnologyResponse("400", ERROR_PREFIX + "Vlan name too long", Instant.now().toString(), "", "");
+                return ResponseEntity.status(400).body(new ChangeTechnologyResponse("400", ERROR_PREFIX + "Vlan name too long", Instant.now().toString(), "", ""));
             }
             // 10. Create or retrieve management VLAN interface
             vlanRepo.findByDiscoveredName(mgmtVlanName).orElseGet(() -> {
@@ -365,24 +366,24 @@ public class ChangeTechnology implements HttpAction {
 
 // Validate ONT CPE existence
             if (maybeCpeNew.isEmpty()) {
-                return new ChangeTechnologyResponse(
+                return ResponseEntity.status(500).body(new ChangeTechnologyResponse(
                         "500",
                         ERROR_PREFIX + "ONT name \"" + ontName + "\" is not found in CPEDevice",
                         Instant.now().toString(),
                         "",
                         ""
-                );
+                ));
             }
 
 // Validate CBM CPE existence
             if (maybeCpeOld.isEmpty()) {
-                return new ChangeTechnologyResponse(
+                return ResponseEntity.status(500).body(new ChangeTechnologyResponse(
                         "500",
                         ERROR_PREFIX + "CBM device \"" + cpeDeviceOldName + "\" is not found in CPEDevice",
                         Instant.now().toString(),
                         "",
                         ""
-                );
+                ));
             }
 
 // Retrieve devices
@@ -440,7 +441,7 @@ public class ChangeTechnology implements HttpAction {
 
         } catch (Exception ex) {
             log.error("Exception in ChangeTechnology", ex);
-            return new ChangeTechnologyResponse("500", ERROR_PREFIX + ex.getMessage(), Instant.now().toString(),"","");
+            return ResponseEntity.status(500).body(new ChangeTechnologyResponse("500", ERROR_PREFIX + ex.getMessage(), Instant.now().toString(),"",""));
         }
     }
 }
