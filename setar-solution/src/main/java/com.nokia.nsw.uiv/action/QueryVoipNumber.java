@@ -127,6 +127,7 @@ public class QueryVoipNumber implements HttpAction {
                         lastName = "";
                     }
 
+
                     if ("Cable_Modem".equals(linkType)) {
                         voipNumber1 = (String) subs.getProperties().get("voipNumber1");
                         voipNumber2 = (String) subs.getProperties().get("voipNumber2");
