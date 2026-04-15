@@ -14,6 +14,7 @@ import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -56,13 +57,13 @@ public class    QueryTemplateNameVLAN implements HttpAction {
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             } catch (BadRequestException bre) {
                 // Code5 -> Missing mandatory parameter
-                return createErrorResponse("400", ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage());
+                return ResponseEntity.status(400).body(createErrorResponse("400", ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage()));
             }
 
             // 2) Build ONT name and validate length (Code6)
             String ontName ="ONT" + request.getOntSN();
             if (ontName.length() > 100) {
-                return createErrorResponse("400", ERROR_PREFIX + "Identifier exceeds allowed character length");
+                return ResponseEntity.status(400).body(createErrorResponse("400", ERROR_PREFIX + "Identifier exceeds allowed character length"));
             }
 
             // 2a) Collect VPLS templates already used on this ONT
@@ -144,7 +145,7 @@ public class    QueryTemplateNameVLAN implements HttpAction {
             }
             if (freeVLAN.isEmpty()) {
                 // Code8 -> No free VLAN found
-                return createErrorResponse("404", ERROR_PREFIX + "No free VLAN found in the specified range");
+                return ResponseEntity.status(404).body(createErrorResponse("404", ERROR_PREFIX + "No free VLAN found in the specified range"));
             }
 
             // 6) Choose per-port EVPN template suffix (2..9), max usable 2..8 (8 templates)
@@ -169,7 +170,7 @@ public class    QueryTemplateNameVLAN implements HttpAction {
 
             if ("full".equals(success)) {
                 // Code7 -> More than 8 Vlans not allowed on port
-                return createErrorResponse("400", ERROR_PREFIX + "More than 8 Vlans not allowed on port.");
+                return ResponseEntity.status(400).body(createErrorResponse("400", ERROR_PREFIX + "More than 8 Vlans not allowed on port."));
             }
             log.error(Constants.ACTION_COMPLETED);
             // 7) Final response (success)
@@ -186,7 +187,7 @@ public class    QueryTemplateNameVLAN implements HttpAction {
 
         } catch (Exception ex) {
             log.error("Unhandled error in {}", ACTION_LABEL, ex);
-            return createErrorResponse("500", ERROR_PREFIX + ex.getMessage());
+            return ResponseEntity.status(500).body(createErrorResponse("500", ERROR_PREFIX + ex.getMessage()));
         }
     }
 

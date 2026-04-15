@@ -17,6 +17,7 @@ import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -95,7 +96,7 @@ public class CreateServiceCbmVoice implements HttpAction {
         String cpeDeviceName = "CBM" + Constants.UNDER_SCORE +request.getCbmMac();
         Optional<LogicalDevice> cpeOpt = cpeDeviceRepository.findByDiscoveredName(cpeDeviceName);
         if (!cpeOpt.isPresent()) {
-            return createErrorResponse(CODE_CPE_NOT_FOUND, "CPE device not found with cbmName: "+cpeDeviceName);
+            return ResponseEntity.status(404).body(createErrorResponse(CODE_CPE_NOT_FOUND, "CPE device not found with cbmName: "+cpeDeviceName));
         }
 
         // 2. Construct names
@@ -115,39 +116,39 @@ public class CreateServiceCbmVoice implements HttpAction {
         String cbmName = "CBM" +request.getServiceId();
 
         if (cbmName.length() > 100) {
-            return createErrorResponse(
+            return ResponseEntity.status(400).body(createErrorResponse(
                     CODE_NAME_TOO_LONG,
                     "CBM name value too long"
-            );
+            ));
         }
 
         if (rfsName.length() > 100) {
-            return createErrorResponse(
+            return ResponseEntity.status(400).body(createErrorResponse(
                     CODE_NAME_TOO_LONG,
                     "RFS name value too long"
-            );
+            ));
         }
 
         if (cfsName.length() > 100) {
-            return createErrorResponse(
+            return ResponseEntity.status(400).body(createErrorResponse(
                     CODE_NAME_TOO_LONG,
                     "CFS name value too long"
-            );
+            ));
         }
 
         if (subscriptionName.length() > 100) {
-            return createErrorResponse(
+            return ResponseEntity.status(400).body(createErrorResponse(
                     CODE_NAME_TOO_LONG,
                     "Subscription name value too long"
-            );
+            ));
         }
 
         // name length checks
         if (subscriberNameString.length() > 100) {
-            return createErrorResponse(
+            return ResponseEntity.status(400).body(createErrorResponse(
                     CODE_NAME_TOO_LONG,
                     "Subscriber name value too long"
-            );
+            ));
         }
 
         try {
@@ -197,7 +198,7 @@ public class CreateServiceCbmVoice implements HttpAction {
                 subscriberRepository.save(subscriber, 2);
             } catch (Exception e) {
                 log.error("Persistence error updating subscriber properties", e);
-                return createErrorResponse(CODE_PERSISTENCE_ERROR, "Persistence error while updating subscriber: " + e.getMessage());
+                return ResponseEntity.status(500).body(createErrorResponse(CODE_PERSISTENCE_ERROR, "Persistence error while updating subscriber: " + e.getMessage()));
             }
 
             // 4. Subscription logic
@@ -277,13 +278,13 @@ public class CreateServiceCbmVoice implements HttpAction {
                 subscriptionRepository.save(subscription, 2);
             } catch (Exception e) {
                 log.error("Persistence error updating subscription", e);
-                return createErrorResponse(CODE_PERSISTENCE_ERROR, "Persistence error while updating subscription: " + e.getMessage());
+                return ResponseEntity.status(500).body(createErrorResponse(CODE_PERSISTENCE_ERROR, "Persistence error while updating subscription: " + e.getMessage()));
             }
 
             // 5. Product logic
             String productNameStr = request.getSubscriberName() +Constants.UNDER_SCORE+ request.getProductSubtype() +Constants.UNDER_SCORE+ request.getServiceId();
             if (productNameStr.length() > 100) {
-                return createErrorResponse(CODE_NAME_TOO_LONG, "Product Name Value too Long");
+                return ResponseEntity.status(400).body(createErrorResponse(CODE_NAME_TOO_LONG, "Product Name Value too Long"));
             }
             Product product = productRepository.findByDiscoveredName(productNameStr)
                     .orElseGet(() -> {
@@ -315,7 +316,7 @@ public class CreateServiceCbmVoice implements HttpAction {
             subscriptionRepository.save(subscription, 2);
             if(isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()){
                 log.error("createServiceCbmVoice service already exist");
-                return new CreateServiceCbmVoiceResponse("409","Service already exist/Duplicate entry",Instant.now().toString(),subscriptionName,cbmName);
+                return ResponseEntity.status(409).body(new CreateServiceCbmVoiceResponse("409","Service already exist/Duplicate entry",Instant.now().toString(),subscriptionName,cbmName));
             }
             if(isSubscriptionExist.get()){
                 subscription = subscriptionRepository.findByDiscoveredName(subscription.getDiscoveredName()).get();
@@ -420,7 +421,7 @@ public class CreateServiceCbmVoice implements HttpAction {
                 String cpeDevice = "CBM" + Constants.UNDER_SCORE +request.getCbmMac();
                 Optional<LogicalDevice> cpeOpts = cpeDeviceRepository.findByDiscoveredName(cpeDevice);
                 if (!cpeOpts.isPresent()) {
-                    return createErrorResponse(CODE_CPE_NOT_FOUND, "CPE device not found with cbmName: "+cpeDeviceName);
+                    return ResponseEntity.status(404).body(createErrorResponse(CODE_CPE_NOT_FOUND, "CPE device not found with cbmName: "+cpeDeviceName));
                 }
 
                 try {
@@ -447,7 +448,7 @@ public class CreateServiceCbmVoice implements HttpAction {
                     cpeDeviceRepository.save(cpe, 2);
                 } catch (Exception e) {
                     log.error("Persistence error updating CPE device", e);
-                    return createErrorResponse(CODE_PERSISTENCE_ERROR, "Persistence error while updating CPE device: "+cpeDeviceName + e.getMessage());
+                    return ResponseEntity.status(500).body(createErrorResponse(CODE_PERSISTENCE_ERROR, "Persistence error while updating CPE device: "+cpeDeviceName + e.getMessage()));
                 }
             }
             log.error(Constants.ACTION_COMPLETED);
@@ -466,7 +467,7 @@ public class CreateServiceCbmVoice implements HttpAction {
             // If cause indicates duplicate key, return already exists
             Throwable cause = rte.getCause();
             if (cause != null && cause.getMessage() != null && cause.getMessage().toLowerCase().contains("duplicate")) {
-                return createErrorResponse(CODE_ALREADY_EXISTS, "Entity already exists: " + cause.getMessage());
+                return ResponseEntity.status(409).body(createErrorResponse(CODE_ALREADY_EXISTS, "Entity already exists: " + cause.getMessage()));
             }
             return createErrorResponse(CODE_EXCEPTION, "Exception - " + rte.getMessage());
         } catch (Exception ex) {

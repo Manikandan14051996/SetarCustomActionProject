@@ -13,6 +13,7 @@ import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -95,29 +96,29 @@ public class UpdateStatus implements HttpAction {
             // ---------------------------
             // Success response
             // ---------------------------
-            return new UpdateStatusResponse(
+            return ResponseEntity.status(201).body(new UpdateStatusResponse(
                     "201",
                     "Port Status Updated Successfully",
                     Instant.now().toString(),
                     portName,
                     portStatus
-            );
+            ));
 
         } catch (BadRequestException bre) {
             String msg = ERROR_PREFIX + bre.getMessage();
             log.error(msg);
-            return new UpdateStatusResponse(
+            return ResponseEntity.status(400).body(new UpdateStatusResponse(
                     "400",
                     msg,
                     Instant.now().toString(),
                     portName,
                     portStatus
-            );
+            ));
 
         }catch (Exception ex) {
             String msg = "UIV action UpdateStatus execution failed - Internal server error occurred";
-            return new UpdateStatusResponse("500", msg + " - " + ex.getMessage(),
-                    Instant.now().toString(), "", "");
+            return ResponseEntity.status(500).body(new UpdateStatusResponse("500", msg + " - " + ex.getMessage(),
+                    Instant.now().toString(), "", ""));
         }
     }
 }

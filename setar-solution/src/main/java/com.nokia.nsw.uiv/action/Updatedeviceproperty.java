@@ -14,6 +14,7 @@ import com.nokia.nsw.uiv.utils.Validations;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -53,12 +54,12 @@ public class Updatedeviceproperty implements HttpAction {
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             } catch (Exception bre) {
                 log.error("------------Test Trace # 2--------------- Missing param: " + bre.getMessage());
-                return new UpdatedevicepropertyResponse(
+                return ResponseEntity.status(400).body(new UpdatedevicepropertyResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
                         Instant.now().toString(),
                         "", ""
-                );
+                ));
             }
 
             String stbSn = req.getStbSn1();
@@ -73,13 +74,13 @@ public class Updatedeviceproperty implements HttpAction {
             Optional<LogicalDevice> stbOpt = stbRepo.findByDiscoveredName(stbName);
             if (!stbOpt.isPresent()) {
                 log.error("------------Test Trace # 5--------------- STB not found: " + stbName);
-                return new UpdatedevicepropertyResponse(
+                return ResponseEntity.status(404).body(new UpdatedevicepropertyResponse(
                         "404",
                         ERROR_PREFIX + "Error, No STB found with Allocated state to update.",
                         Instant.now().toString(),
                         stbSn,
                         custGroupId
-                );
+                ));
             }
 
             LogicalDevice stb = stbOpt.get();
@@ -97,31 +98,31 @@ public class Updatedeviceproperty implements HttpAction {
                 log.error(Constants.ACTION_COMPLETED);
             }else{
                 log.error("------------Test Trace # 7--------------- STB not in Allocated state");
-                return new UpdatedevicepropertyResponse(
+                return ResponseEntity.status(404).body(new UpdatedevicepropertyResponse(
                         "404",
                         ERROR_PREFIX + "Error, No STB found with Allocated state to update.",
                         Instant.now().toString(),
                         stbSn,
                         custGroupId
-                );
+                ));
             }
             // 6. Success response
-            return new UpdatedevicepropertyResponse(
+            return ResponseEntity.status(200).body(new UpdatedevicepropertyResponse(
                     "200",
                     "UIV action Updatedeviceproperty executed successfully.",
                     Instant.now().toString(),
                     stbSn,
                     custGroupId
-            );
+            ));
 
         } catch (Exception ex) {
             log.error("Unhandled exception in Updatedeviceproperty", ex);
-            return new UpdatedevicepropertyResponse(
+            return ResponseEntity.status(500).body(new UpdatedevicepropertyResponse(
                     "500",
                     ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
                     Instant.now().toString(),
                     "", ""
-            );
+            ));
         }
     }
 }

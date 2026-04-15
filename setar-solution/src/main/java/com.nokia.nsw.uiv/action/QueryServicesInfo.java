@@ -19,6 +19,7 @@ import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -71,8 +72,8 @@ public class QueryServicesInfo implements HttpAction {
                 Validations.validateMandatoryParams(request.getOntSn(), "ontSn");
             } catch (BadRequestException bre) {
                 log.error("QueryServicesInfo start: subscriberName='{}', ontSN='{}'", request.getSubscriberName(), request.getOntSn());
-                return new CreateServiceIPTVResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                        Instant.now().toString(), "", "");
+                return ResponseEntity.status(400).body(new CreateServiceIPTVResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
+                        Instant.now().toString(), "", ""));
             }
             // 1) Input validations (both optional but at least one required)
             String accno = request.getSubscriberName();
@@ -151,7 +152,7 @@ public class QueryServicesInfo implements HttpAction {
 
             if (setarRFSs.isEmpty()) {
                 log.error("No candidate RFS found for inputs subscriber='{}' ontSN='{}'", accno, ontSN);
-                return createErrorResponse("404", ERROR_PREFIX + "Error, No Service Details Available.");
+                return ResponseEntity.status(404).body(createErrorResponse("404", ERROR_PREFIX + "Error, No Service Details Available."));
             }
 
             // 4) Prepare working space (collectors & flags)
@@ -643,7 +644,7 @@ public class QueryServicesInfo implements HttpAction {
             // 9) Package the result
             if (!success || allvalues.isEmpty()) {
                 log.error("No service details could be collected (success={}, keys={})", success, allvalues.size());
-                return createErrorResponse("404", ERROR_PREFIX + "Error, No Service Details Available.");
+                return ResponseEntity.status(404).body(createErrorResponse("404", ERROR_PREFIX + "Error, No Service Details Available."));
             }
 
             QueryServicesInfoResponse resp = new QueryServicesInfoResponse();
@@ -655,7 +656,7 @@ public class QueryServicesInfo implements HttpAction {
 
         } catch (Exception ex) {
             log.error("Unhandled error in QueryServicesInfo", ex);
-            return createErrorResponse("500", ERROR_PREFIX + ex.getMessage());
+            return ResponseEntity.status(500).body(createErrorResponse("500", ERROR_PREFIX + ex.getMessage()));
         }
     }
 

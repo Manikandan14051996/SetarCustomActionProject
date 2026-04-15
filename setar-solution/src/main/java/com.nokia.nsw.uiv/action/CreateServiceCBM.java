@@ -16,6 +16,7 @@ import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -71,8 +72,8 @@ public class CreateServiceCBM implements HttpAction {
             Validations.validateMandatoryParams(request.getServiceId(), "serviceId");
             log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
         }catch (BadRequestException bre) {
-            return new CreateServiceCBMResponse("400", ERROR_PREFIX +  bre.getMessage(),
-                    Instant.now().toString(), "","");
+            return ResponseEntity.status(400).body(new CreateServiceCBMResponse("400", ERROR_PREFIX +  bre.getMessage(),
+                    Instant.now().toString(), "",""));
         }
 
 
@@ -105,7 +106,7 @@ public class CreateServiceCBM implements HttpAction {
         }
 
         if (subscriberName.length() > 100) {
-            return createErrorResponse("Subscriber name too long", 400);
+            return ResponseEntity.status(400).body(createErrorResponse("Subscriber name too long", 400));
         }
 
 
@@ -153,13 +154,13 @@ public class CreateServiceCBM implements HttpAction {
             subscriberRepository.save(subscriber, 2);
         } catch (Exception e) {
             log.error("Persistence error updating subscriber properties", e);
-            return createErrorResponse("Persistence error while updating subscriber: " + e.getMessage(),400);
+            return ResponseEntity.status(400).body(createErrorResponse("Persistence error while updating subscriber: " + e.getMessage(),400));
         }
 
         // --- 3. Subscription Logic ---
         String subscriptionName = request.getSubscriberName() + Constants.UNDER_SCORE + request.getServiceId();
         if (subscriptionName.length() > 100) {
-            return createErrorResponse("Subscription name too long", 400);
+            return ResponseEntity.status(400).body(createErrorResponse("Subscription name too long", 400));
         }
         Subscription subscription = subscriptionRepository.findByDiscoveredName(subscriptionName)
                 .orElseGet(() -> {
@@ -202,7 +203,7 @@ public class CreateServiceCBM implements HttpAction {
         // --- 4. Product Logic ---
         String productName = request.getSubscriberName() +Constants.UNDER_SCORE+ request.getProductSubtype() +Constants.UNDER_SCORE+ request.getServiceId();
         if (productName.length() > 100) {
-            return createErrorResponse("Product name too long", 400);
+            return ResponseEntity.status(400).body(createErrorResponse("Product name too long", 400));
         }
 
         Product product = productRepository.findByDiscoveredName(productName)
@@ -240,7 +241,7 @@ public class CreateServiceCBM implements HttpAction {
 //        subscriptionRepository.save(subscription, 2);
         if(isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()){
             log.error("creatServiceCBM service already exist");
-            return new CreateServiceCBMResponse("409","Service already exist/Duplicate entry",Instant.now().toString(),subscriberName,"CBM"+ request.getCbmSN());
+            return ResponseEntity.status(409).body(new CreateServiceCBMResponse("409","Service already exist/Duplicate entry",Instant.now().toString(),subscriberName,"CBM"+ request.getCbmSN()));
         }
         if(isSubscriptionExist.get()){
             subscription = subscriptionRepository.findByDiscoveredName(subscription.getDiscoveredName()).get();
@@ -287,7 +288,7 @@ public class CreateServiceCBM implements HttpAction {
         // --- 7. CBM Device Logic ---
         String cbmName = "CBM" +request.getCbmSN();
         if (cbmName.length() > 100) {
-            return createErrorResponse("CBM name too long", 400);
+            return ResponseEntity.status(400).body(createErrorResponse("CBM name too long", 400));
         }
         // --- 6. RFS Logic ---
         String rfsName = "RFS" +Constants.UNDER_SCORE + subscriptionName;

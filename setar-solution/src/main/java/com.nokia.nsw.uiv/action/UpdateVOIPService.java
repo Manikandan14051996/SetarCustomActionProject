@@ -18,6 +18,7 @@ import com.nokia.nsw.uiv.model.service.SubscriptionRepository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -56,13 +57,13 @@ public class UpdateVOIPService implements HttpAction {
                 Validations.validateMandatoryParams(req.getSimaSubsId(), "simaSubsId");
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             } catch (BadRequestException bre) {
-                return new UpdateVOIPServiceResponse(
+                return ResponseEntity.status(400).body(new UpdateVOIPServiceResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
                         Instant.now().toString(),
                         null,
                         null
-                );
+                ));
             }
 
             // Step 2: Construct Names
@@ -76,13 +77,13 @@ public class UpdateVOIPService implements HttpAction {
             Optional<Customer> subscriberOpt = customerRepo.findByDiscoveredName(subscriberNameStr);
 
             if (subscriptionOpt.isEmpty() && subscriberOpt.isEmpty()) {
-                return new UpdateVOIPServiceResponse(
+                return ResponseEntity.status(404).body(new UpdateVOIPServiceResponse(
                         "404",
                         ERROR_PREFIX + "No entry found for update",
                         Instant.now().toString(),
                         null,
                         null
-                );
+                ));
             }
 
             // Step 5: Update Subscriber
@@ -95,13 +96,13 @@ public class UpdateVOIPService implements HttpAction {
                     customerRepo.save(subscriber);
                     updatedFlag = true;
                 } catch (Exception e) {
-                    return new UpdateVOIPServiceResponse(
+                    return ResponseEntity.status(500).body(new UpdateVOIPServiceResponse(
                             "500",
                             ERROR_PREFIX + "Persistence error while saving subscriber",
                             Instant.now().toString(),
                             null,
                             null
-                    );
+                    ));
                 }
             }
 
@@ -129,45 +130,45 @@ public class UpdateVOIPService implements HttpAction {
                 try {
                     subscriptionRepo.save(subs);
                 } catch (Exception e) {
-                    return new UpdateVOIPServiceResponse(
+                    return ResponseEntity.status(500).body( new UpdateVOIPServiceResponse(
                             "500",
                             ERROR_PREFIX + "Persistence error while saving subscription",
                             Instant.now().toString(),
                             null,
                             null
-                    );
+                    ));
                 }
             }
 
             // Step 8: Final Response
             if (updatedFlag) {
                 log.error(Constants.ACTION_COMPLETED);
-                return new UpdateVOIPServiceResponse(
+                return ResponseEntity.status(200).body(new UpdateVOIPServiceResponse(
                         "200",
                         "UIV action UpdateVOIPService executed successfully.",
                         Instant.now().toString(),
                         req.getSubscriberName(),
                         req.getServiceId()
-                );
+                ));
             } else {
-                return new UpdateVOIPServiceResponse(
+                return ResponseEntity.status(404).body(new UpdateVOIPServiceResponse(
                         "404",
                         ERROR_PREFIX + "No subscription or subscriber found to update",
                         Instant.now().toString(),
                         null,
                         null
-                );
+                ));
             }
 
         } catch (Exception ex) {
             log.error("Exception in UpdateVOIPService", ex);
-            return new UpdateVOIPServiceResponse(
+            return ResponseEntity.status(500).body(new UpdateVOIPServiceResponse(
                     "500",
                     ERROR_PREFIX + "Error occurred during update - " + ex.getMessage(),
                     Instant.now().toString(),
                     null,
                     null
-            );
+            ));
         }
     }
 }
