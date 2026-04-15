@@ -40,6 +40,7 @@ import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.net.bsd.RLoginClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -85,12 +86,12 @@ public class DeleteSPR implements HttpAction {
             log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
         } catch (BadRequestException bre) {
             // Code5
-            return new DeleteSPRResponse(
+            return ResponseEntity.status(400).body(new DeleteSPRResponse(
                     "400",
                     ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
                     now(),
                     "", ""
-            );
+            ));
         }
 
         // -----------------------------
@@ -105,13 +106,14 @@ public class DeleteSPR implements HttpAction {
 
         if (ontName.length() > 100) {
             // Code6
-            return new DeleteSPRResponse(
+            return ResponseEntity.status(400).body(new DeleteSPRResponse(
                     "400",
                     ERROR_PREFIX + "ONT name too long",
                     now(),
                     ontName,
                     subscriptionName
-            );
+            ));
+
         }
 
         try {
@@ -342,13 +344,14 @@ public class DeleteSPR implements HttpAction {
         } catch (Exception ex) {
             log.error("Unhandled exception in DeleteSPR", ex);
             // Code1
-            return new DeleteSPRResponse(
+            return  ResponseEntity.status(500).body(new DeleteSPRResponse(
                     "500",
                     ERROR_PREFIX + "Internal server error occurred",
                     now(),
                     ontName,
                     subscriptionName
-            );
+            ));
+
         }
     }
 

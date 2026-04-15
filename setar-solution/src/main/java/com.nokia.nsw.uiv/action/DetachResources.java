@@ -22,6 +22,7 @@ import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -88,8 +89,8 @@ public class DetachResources implements HttpAction {
             Optional<Service> rfs = serviceCustomRepository.findByDiscoveredName(rfsName);
 
             if (!subscriber.isPresent() || !subscription.isPresent() || !product.isPresent() || !cfs.isPresent() || !rfs.isPresent()) {
-                return new DetachResourcesResponse("404", ERROR_PREFIX + "No entry found for Delete.",
-                        getCurrentTimestamp(), subscriptionName);
+                return ResponseEntity.status(404).body( new DetachResourcesResponse("404", ERROR_PREFIX + "No entry found for Delete.",
+                        getCurrentTimestamp(), subscriptionName));
             }
 
             Service rfsEntity = rfs.get();
@@ -129,18 +130,18 @@ public class DetachResources implements HttpAction {
                         getCurrentTimestamp(),
                         subscriptionName);
             } else {
-                return new DetachResourcesResponse("409", ERROR_PREFIX + "Error, Resources not detached.",
-                        getCurrentTimestamp(), subscriptionName);
+                return ResponseEntity.status(409).body(new DetachResourcesResponse("409", ERROR_PREFIX + "Error, Resources not detached.",
+                        getCurrentTimestamp(), subscriptionName));
             }
 
         } catch (BadRequestException bre) {
             log.error("Validation error: {}", bre.getMessage());
-            return new DetachResourcesResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                    getCurrentTimestamp(), "");
+            return ResponseEntity.status(400).body(new DetachResourcesResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
+                    getCurrentTimestamp(), ""));
         } catch (Exception ex) {
             log.error("Unhandled exception in DetachResources", ex);
-            return new DetachResourcesResponse("500", ERROR_PREFIX + "Internal server error occurred",
-                    getCurrentTimestamp(), "");
+            return ResponseEntity.status(500).body(new DetachResourcesResponse("500", ERROR_PREFIX + "Internal server error occurred",
+                    getCurrentTimestamp(), ""));
         }
     }
 

@@ -27,6 +27,7 @@ import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -79,8 +80,8 @@ public class DeleteCBM implements HttpAction {
             log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);// <-- added
             // serviceFlag was previously validated in your code; it's optional in spec — validate only if required.
         } catch (BadRequestException bre) {
-            return new DeleteCBMResponse("400", ERROR_PREFIX  + bre.getMessage(),
-                    Instant.now().toString(), "", "");
+            return ResponseEntity.status(400).body(new DeleteCBMResponse("400", ERROR_PREFIX  + bre.getMessage(),
+                    Instant.now().toString(), "", ""));
         }
 
         // 2. Construct names
@@ -93,8 +94,8 @@ public class DeleteCBM implements HttpAction {
 
         // 6. Validate CBM name length early
         if (cbmName.length() > 100) {
-            return new DeleteCBMResponse("400", ERROR_PREFIX + "CBM name too long",
-                    Instant.now().toString(), cbmName, subscriptionName);
+            return ResponseEntity.status(400).body( new DeleteCBMResponse("400", ERROR_PREFIX + "CBM name too long",
+                    Instant.now().toString(), cbmName, subscriptionName));
         }
 
         try {
@@ -138,22 +139,22 @@ public class DeleteCBM implements HttpAction {
                     if (!optCbmDevice.isPresent()) {
                         log.error("CBM device required to derive subscriber name for non-IPTV product but CBM not found: {}", cbmName);
                         // If CBM required, return or continue depending on business decision.
-                        return new DeleteCBMResponse("404", ERROR_PREFIX + "No entry found for delete, CBMDevice not found: "+cbmName,
-                                Instant.now().toString(), cbmName, subscriptionName);
+                        return ResponseEntity.status(404).body(new DeleteCBMResponse("404", ERROR_PREFIX + "No entry found for delete, CBMDevice not found: "+cbmName,
+                                Instant.now().toString(), cbmName, subscriptionName));
                     }
                     LogicalDevice cbm = optCbmDevice.get();
                     Object macObj = cbm.getProperties() != null ? cbm.getProperties().get("macAddress") : null;
                     if (macObj == null) {
                         log.error("CBM {} has no macAddress property", cbmName);
-                        return new DeleteCBMResponse("400", ERROR_PREFIX + "CBM missing macAddress",
-                                Instant.now().toString(), cbmName, subscriptionName);
+                        return ResponseEntity.status(400).body(new DeleteCBMResponse("400", ERROR_PREFIX + "CBM missing macAddress",
+                                Instant.now().toString(), cbmName, subscriptionName));
                     }
                     String cbmMacAddr = macObj.toString();
                     String macWithoutColons = cbmMacAddr.replaceAll(":", "");
                     String newSubscriberName = subscriberName + Constants.UNDER_SCORE + macWithoutColons;
                     if (newSubscriberName.length() > 100) {
-                        return new DeleteCBMResponse("400", ERROR_PREFIX + "Subscriber name too long",
-                                Instant.now().toString(), cbmName, subscriptionName);
+                        return ResponseEntity.status(400).body( new DeleteCBMResponse("400", ERROR_PREFIX + "Subscriber name too long",
+                                Instant.now().toString(), cbmName, subscriptionName));
                     }
                     Optional<Customer> subscriberOpt = subscriberRepository.findByDiscoveredName(newSubscriberName);
                     if (subscriberOpt.isPresent()) {
@@ -205,13 +206,13 @@ public class DeleteCBM implements HttpAction {
                     || !optCfs.isPresent()
                     || !optRfs.isPresent()) {
 
-                return new DeleteCBMResponse(
+                return ResponseEntity.status(404).body(new DeleteCBMResponse(
                         "404",
                         ERROR_PREFIX + "No entry found for delete",
                         Instant.now().toString(),
                         cbmName,
                         subscriptionName
-                );
+                ));
             }
 
 
@@ -389,8 +390,8 @@ public class DeleteCBM implements HttpAction {
             }
             log.error(Constants.ACTION_COMPLETED);
             // --- 11. Return success response ---
-            return new DeleteCBMResponse("200", "CBM objects Deleted", Instant.now().toString(),
-                    cbmName, subscriptionName);
+            return ResponseEntity.status(200).body( new DeleteCBMResponse("200", "CBM objects Deleted", Instant.now().toString(),
+                    cbmName, subscriptionName));
 
         } catch (Exception e) {
             log.error("DeleteCBM action failed", e);

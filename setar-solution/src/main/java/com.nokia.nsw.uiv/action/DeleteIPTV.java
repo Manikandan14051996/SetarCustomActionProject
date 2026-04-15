@@ -19,6 +19,7 @@ import com.nokia.nsw.uiv.response.DeleteIPTVResponse;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -67,8 +68,8 @@ public class DeleteIPTV implements HttpAction {
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
 
             }catch (BadRequestException bre) {
-                return new DeleteIPTVResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                        Instant.now().toString(), "","");
+                return ResponseEntity.status(400).body(new DeleteIPTVResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
+                        Instant.now().toString(), "",""));
             }
             // Step 2: Prepare entity names
             String subscriptionName = subscriberName + Constants.UNDER_SCORE  + serviceId;
@@ -78,15 +79,15 @@ public class DeleteIPTV implements HttpAction {
             String ontName ="ONT" + ontSN;
 
             if (ontName.length() > 100) {
-                return errorResponse("400", ERROR_PREFIX + "ONT name too long");
+                return ResponseEntity.status(400).body(errorResponse("400", ERROR_PREFIX + "ONT name too long"));
             }
 
             if (subscriptionName.length() > 100) {
-                return errorResponse("400", ERROR_PREFIX + "Subscription name too long");
+                return  ResponseEntity.status(400).body(errorResponse("400", ERROR_PREFIX + "Subscription name too long"));
             }
 
             if (productName.length() > 100) {
-                return errorResponse("400", ERROR_PREFIX + "Product name too long");
+                return ResponseEntity.status(400).body(errorResponse("400", ERROR_PREFIX + "Product name too long"));
             }
 
             // Step 3: Retrieve entities
@@ -98,7 +99,7 @@ public class DeleteIPTV implements HttpAction {
             Optional<LogicalDevice> optOnt = deviceRepository.findByDiscoveredName(ontName);
 
             if (optCust.isEmpty() || optSub.isEmpty()) {
-                return successResponse(subscriptionName, ontName, "No entry found for Delete.");
+                return ResponseEntity.status(404).body(successResponse(subscriptionName, ontName, "No entry found for Delete."));
             }
 
 
@@ -190,10 +191,10 @@ public class DeleteIPTV implements HttpAction {
             }
             log.error(Constants.ACTION_COMPLETED);
             // Step 9: Return success
-            return successResponse(subscriptionName, ontName, "UIV action DeleteIPTV executed successfully.");
+            return ResponseEntity.status(200).body(successResponse(subscriptionName, ontName, "UIV action DeleteIPTV executed successfully."));
 
         } catch (Exception ex) {
-            return errorResponse("500", ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage());
+            return ResponseEntity.status(500).body(errorResponse("500", ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage()));
         }
     }
 
@@ -202,6 +203,6 @@ public class DeleteIPTV implements HttpAction {
     }
 
     private DeleteIPTVResponse successResponse(String subscriptionId, String ontName, String message) {
-        return new DeleteIPTVResponse("200", message, Instant.now().toString(), subscriptionId,ontName);
+        return ResponseEntity.status(200).body(new DeleteIPTVResponse("200", message, Instant.now().toString(), subscriptionId,ontName)).getBody();
     }
 }

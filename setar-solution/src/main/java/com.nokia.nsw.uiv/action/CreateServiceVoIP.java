@@ -16,6 +16,7 @@ import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -72,23 +73,23 @@ public class CreateServiceVoIP implements HttpAction {
                 Validations.validateMandatoryParams(req.getVoipServiceCode(), "voipServiceCode");
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             } catch (BadRequestException bre) {
-                return new CreateServiceVoIPResponse(
+                return ResponseEntity.status(400).body(new CreateServiceVoIPResponse(
                         "400",
                         ERROR_PREFIX  + bre.getMessage(),
                         Instant.now().toString(),
                         null,
                         null
-                );
+                ));
             }
             String ontName = "ONT" + req.getOntSN();
             if (ontName.length() > 100) {
-                return new CreateServiceVoIPResponse(
+                return ResponseEntity.status(400).body(new CreateServiceVoIPResponse(
                         "400",
                         ERROR_PREFIX + "ONT name too long",
                         Instant.now().toString(),
                         null,
                         null
-                );
+                ));
             }
             LogicalDevice cpeDevice = null;
             Optional<LogicalDevice> optCpeDevice = logicalDeviceRepo.findByDiscoveredName("ONT" + Constants.UNDER_SCORE + req.getOntSN());
@@ -103,13 +104,13 @@ public class CreateServiceVoIP implements HttpAction {
             // Step 2 & 3: Subscriber
             String subscriberNameStr = req.getSubscriberName() + Constants.UNDER_SCORE + req.getOntSN();
             if (subscriberNameStr.length() > 100) {
-                return new CreateServiceVoIPResponse(
+                return ResponseEntity.status(400).body(new CreateServiceVoIPResponse(
                         "400",
                         ERROR_PREFIX + "Subscriber name too long",
                         Instant.now().toString(),
                         null,
                         null
-                );
+                ));
             }
             Customer subscriber = null;
             Optional<Customer> subscriberOpt = customerRepo.findByDiscoveredName(subscriberNameStr);
@@ -145,13 +146,13 @@ public class CreateServiceVoIP implements HttpAction {
             // Step 4: Subscription
             String subscriptionName = req.getSubscriberName() + Constants.UNDER_SCORE + req.getServiceId() + Constants.UNDER_SCORE + req.getOntSN();
             if (subscriptionName.length() > 100) {
-                return new CreateServiceVoIPResponse(
+                return ResponseEntity.status(400).body(new CreateServiceVoIPResponse(
                         "400",
                         ERROR_PREFIX + "Subscription name too long",
                         Instant.now().toString(),
                         null,
                         null
-                );
+                ));
             }
             Subscription subscription = null;
             Optional<Subscription> subscriptionOpt = subscriptionRepo.findByDiscoveredName(subscriptionName);
@@ -237,13 +238,13 @@ public class CreateServiceVoIP implements HttpAction {
             // Step 7: Product
             String productNameStr = req.getSubscriberName() + Constants.UNDER_SCORE + req.getProductSubtype() + Constants.UNDER_SCORE + req.getServiceId();
             if (productNameStr.length() > 100) {
-                return new CreateServiceVoIPResponse(
+                return ResponseEntity.status(400).body(new CreateServiceVoIPResponse(
                         "400",
                         ERROR_PREFIX + "Product name too long",
                         Instant.now().toString(),
                         null,
                         null
-                );
+                ));
             }
             Product product = null;
             Optional<Product> productOpt = productRepo.findByDiscoveredName(productNameStr);
@@ -277,7 +278,7 @@ public class CreateServiceVoIP implements HttpAction {
             }
             if (isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()) {
                 log.error("createServiceVOIP service already exist");
-                return new CreateServiceVoIPResponse("409", "Service already exist/Duplicate entry", Instant.now().toString(), subscriptionName, "ONT" + req.getOntSN());
+                return ResponseEntity.status(409).body( new CreateServiceVoIPResponse("409", "Service already exist/Duplicate entry", Instant.now().toString(), subscriptionName, "ONT" + req.getOntSN()));
             }
             if (isSubscriptionExist.get()) {
                 subscription = subscriptionRepo.findByDiscoveredName(subscription.getDiscoveredName()).get();
@@ -446,23 +447,23 @@ public class CreateServiceVoIP implements HttpAction {
             logicalDeviceRepo.save(cpeDevice);
 
             log.error(Constants.ACTION_COMPLETED);
-            return new CreateServiceVoIPResponse(
+            return ResponseEntity.status(201).body(new CreateServiceVoIPResponse(
                     "201",
                     "UIV action CreateServiceVoIP executed successfully.",
                     Instant.now().toString(),
                     subscriptionName,
                     ontName
-            );
+            ));
 
         } catch (Exception ex) {
             log.error("Exception in CreateServiceVoIP", ex);
-            return new CreateServiceVoIPResponse(
+            return ResponseEntity.status(500).body(new CreateServiceVoIPResponse(
                     "500",
                     ERROR_PREFIX + "Error occurred while creating service VOIP - " + ex.getMessage(),
                     Instant.now().toString(),
                     null,
                     null
-            );
+            ));
         }
     }
 }

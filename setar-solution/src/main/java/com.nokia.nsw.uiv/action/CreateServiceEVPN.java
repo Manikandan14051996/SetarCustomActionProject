@@ -25,6 +25,7 @@ import com.nokia.nsw.uiv.model.resource.logical.LogicalDeviceRepository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -91,13 +92,13 @@ public class CreateServiceEVPN implements HttpAction {
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             } catch (Exception bre) {
                 log.error("------------Trace # 2--------------- Missing mandatory param: " + bre.getMessage());
-                return new CreateServiceEVPNResponse(
+                return ResponseEntity.status(400).body(new CreateServiceEVPNResponse(
                         "400",
                         ERROR_PREFIX + bre.getMessage(),
                         Instant.now().toString(),
                         null,
                         null
-                );
+                ));
             }
             AtomicBoolean isSubscriberExist = new AtomicBoolean(true);
             AtomicBoolean isSubscriptionExist = new AtomicBoolean(true);
@@ -107,48 +108,48 @@ public class CreateServiceEVPN implements HttpAction {
             String ontName = "ONT" + req.getOntSN();
             if (ontName.length() > 100) {
                 log.error("------------Trace # 6--------------- ONT name too long");
-                return new CreateServiceEVPNResponse(
+                return ResponseEntity.status(400).body(new CreateServiceEVPNResponse(
                         "400",
                         ERROR_PREFIX + "ONT name too long",
                         Instant.now().toString(),
                         null,
                         null
-                );
+                ));
             }
             String subscriberNameStr = req.getSubscriberName() + Constants.UNDER_SCORE + req.getOntSN();
             if (subscriberNameStr.length() > 100) {
                 log.error("------------Trace # 3--------------- Subscriber name too long");
-                return new CreateServiceEVPNResponse(
+                return ResponseEntity.status(400).body(new CreateServiceEVPNResponse(
                         "400",
                         ERROR_PREFIX + "Subscriber name too long",
                         Instant.now().toString(),
                         null,
                         null
-                );
+                ));
             }
 
             String subscriptionName = req.getSubscriberName() + Constants.UNDER_SCORE + req.getServiceId() + Constants.UNDER_SCORE + req.getOntSN();
             if (subscriptionName.length() > 100) {
                 log.error("------------Trace # 4-------V-------- Subscription name too long");
-                return new CreateServiceEVPNResponse(
+                return ResponseEntity.status(400).body(new CreateServiceEVPNResponse(
                         "400",
                         ERROR_PREFIX + "Subscription name too long",
                         Instant.now().toString(),
                         null,
                         null
-                );
+                ));
             }
 
             String productNameStr = req.getSubscriberName() + Constants.UNDER_SCORE + req.getProductSubtype() + Constants.UNDER_SCORE + req.getServiceId();
             if (productNameStr.length() > 100) {
                 log.error("------------Trace # 5--------------- Product name too long");
-                return new CreateServiceEVPNResponse(
+                return ResponseEntity.status(400).body( new CreateServiceEVPNResponse(
                         "400",
                         ERROR_PREFIX + "Product name too long",
                         Instant.now().toString(),
                         null,
                         null
-                );
+                ));
             }
 
             String cfsName = "CFS" + Constants.UNDER_SCORE + subscriptionName;
@@ -292,7 +293,7 @@ public class CreateServiceEVPN implements HttpAction {
             }
             if (isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()) {
                 log.error("createServiceEVPN service already exist");
-                return new CreateServiceEVPNResponse("409", "Service already exist/Duplicate entry", Instant.now().toString(), subscriberNameStr, ontName);
+                return ResponseEntity.status(409).body(new CreateServiceEVPNResponse("409", "Service already exist/Duplicate entry", Instant.now().toString(), subscriberNameStr, ontName));
             }
             if (isSubscriptionExist.get()) {
                 subscription = subscriptionRepo.findByDiscoveredName(subscription.getDiscoveredName()).get();
@@ -727,23 +728,23 @@ public class CreateServiceEVPN implements HttpAction {
             // final response
             log.error(Constants.ACTION_COMPLETED);
             log.error("------------Trace # 19--------------- CreateServiceEVPN completed successfully");
-            return new CreateServiceEVPNResponse(
+            return ResponseEntity.status(201).body(new CreateServiceEVPNResponse(
                     "201",
                     "UIV action CreateServiceEVPN executed successfully.",
                     Instant.now().toString(),
                     subscription.getDiscoveredName(),
                     ont.getDiscoveredName()
-            );
+            ));
 
         } catch (Exception ex) {
             log.error("Exception in CreateServiceEVPN", ex);
-            return new CreateServiceEVPNResponse(
+            return ResponseEntity.status(500).body(new CreateServiceEVPNResponse(
                     "500",
                     ERROR_PREFIX + "Error occurred while creating service EVPN - " + ex.getMessage(),
                     Instant.now().toString(),
                     null,
                     null
-            );
+            ));
         }
     }
 

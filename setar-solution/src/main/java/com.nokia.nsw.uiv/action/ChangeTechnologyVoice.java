@@ -18,6 +18,7 @@ import com.nokia.nsw.uiv.model.resource.logical.LogicalDeviceRepository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -82,8 +83,8 @@ public class ChangeTechnologyVoice implements HttpAction {
             } catch (Exception bre) {
                 // Missing mandatory param
                 log.error("------------Test Trace # 2--------------- Missing mandatory param: " + bre.getMessage());
-                return new ChangeTechnologyVoiceResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                        Instant.now().toString(), "", "");
+                return ResponseEntity.status(400).body(new ChangeTechnologyVoiceResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
+                        Instant.now().toString(), "", ""));
             }
 
             log.error("------------Test Trace # 3--------------- Validations OK");
@@ -107,8 +108,8 @@ public class ChangeTechnologyVoice implements HttpAction {
             // 3. Name length checks
             if (ontName.length() > 100) {
                 log.error("------------Test Trace # 5--------------- ONT name too long");
-                return new ChangeTechnologyVoiceResponse("400", ERROR_PREFIX + "ONT name too long",
-                        Instant.now().toString(), subscriptionName, ontName);
+                return ResponseEntity.status(400).body(new ChangeTechnologyVoiceResponse("400", ERROR_PREFIX + "ONT name too long",
+                        Instant.now().toString(), subscriptionName, ontName));
             }
 
             // 4. Update Subscription (must exist)
@@ -256,8 +257,8 @@ public class ChangeTechnologyVoice implements HttpAction {
                 String missing = !ontCpeOpt.isPresent() ? cpeDeviceName : (!cbmCpeOpt.isPresent() ? cpeDeviceOldName : "");
                 log.error("------------Test Trace # 28--------------- CPE missing: " + missing);
                 // Per spec: If either device is missing → return error about ONT name in CPEDevice
-                return new ChangeTechnologyVoiceResponse("404", ERROR_PREFIX + "ONT name \"" + cpeDeviceName + "\" is not found in CPEDevice",
-                        Instant.now().toString(), subscriptionName, ontName);
+                return ResponseEntity.status(404).body(new ChangeTechnologyVoiceResponse("404", ERROR_PREFIX + "ONT name \"" + cpeDeviceName + "\" is not found in CPEDevice",
+                        Instant.now().toString(), subscriptionName, ontName));
             }
 
             LogicalDevice ontCpe = ontCpeOpt.get();
@@ -341,11 +342,11 @@ public class ChangeTechnologyVoice implements HttpAction {
         } catch (Exception ex) {
             log.error("Unhandled exception in ChangeTechnologyVoice", ex);
             log.error("------------Test Trace # 99--------------- Exception: " + ex.getMessage());
-            return new ChangeTechnologyVoiceResponse("500",
+            return ResponseEntity.status(500).body(new ChangeTechnologyVoiceResponse("500",
                     ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
                     Instant.now().toString(),
                     "",
-                    "");
+                    ""));
         }
     }
 }

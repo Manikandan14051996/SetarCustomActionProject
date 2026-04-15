@@ -25,6 +25,7 @@ import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -87,8 +88,8 @@ public class CreateServiceIPTV implements HttpAction {
                 Validations.validateMandatoryParams(request.getCustomerGroupID(), "customerGroupId");
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             }catch (BadRequestException bre) {
-                return new CreateServiceIPTVResponse("400", ERROR_PREFIX  + bre.getMessage(),
-                        Instant.now().toString(), "","");
+                return ResponseEntity.status(400).body(new CreateServiceIPTVResponse("400", ERROR_PREFIX  + bre.getMessage(),
+                        Instant.now().toString(), "",""));
             }
             AtomicBoolean isSubscriberExist = new AtomicBoolean(true);
             AtomicBoolean isSubscriptionExist = new AtomicBoolean(true);
@@ -110,8 +111,8 @@ public class CreateServiceIPTV implements HttpAction {
                 Validations.validateLength(ontName, "ONTDevice");
                 Validations.validateLength(mgmtVlanName, "MgmtVlanName");
             }catch (BadRequestException bre){
-                return new CreateServiceIPTVResponse("400", ERROR_PREFIX +  bre.getMessage(),
-                        Instant.now().toString(), "","");
+                return ResponseEntity.status(400).body(new CreateServiceIPTVResponse("400", ERROR_PREFIX +  bre.getMessage(),
+                        Instant.now().toString(), "",""));
             }
             // ------------------- Subscriber -------------------
             Optional<Customer> optSubscriber = customerRepository.findByDiscoveredName(subscriberName);
@@ -217,7 +218,7 @@ public class CreateServiceIPTV implements HttpAction {
             }
             if(isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()){
                 log.error("createServiceIPTV service already exist");
-                return new CreateServiceIPTVResponse("409","Service already exist/Duplicate entry",Instant.now().toString(),subscriptionName,"ONT" + request.getOntSN());
+                return ResponseEntity.status(409).body(new CreateServiceIPTVResponse("409","Service already exist/Duplicate entry",Instant.now().toString(),subscriptionName,"ONT" + request.getOntSN()));
             }
             if(isSubscriptionExist.get()){
                 subscription = subscriptionRepository.findByDiscoveredName(subscription.getDiscoveredName()).get();
@@ -235,7 +236,7 @@ public class CreateServiceIPTV implements HttpAction {
             if (optCFS.isPresent()) {
                 cfs = optCFS.get();
                 log.error("CFS already exists: {}", cfsName);
-                return new CreateServiceIPTVResponse("409","CFS already exists/Duplicate entry",Instant.now().toString(),subscriptionName,"ONT" + request.getOntSN());
+                return ResponseEntity.status(409).body(new CreateServiceIPTVResponse("409","CFS already exists/Duplicate entry",Instant.now().toString(),subscriptionName,"ONT" + request.getOntSN()));
             } else {
                 cfs = new Service();
                 cfs.setLocalName(Validations.encryptName(cfsName));
@@ -266,7 +267,7 @@ public class CreateServiceIPTV implements HttpAction {
             if (optRFS.isPresent()) {
                 rfs = optRFS.get();
                 log.error("RFS already exists: {}", rfsName);
-                return new CreateServiceIPTVResponse("409","RFS already exists/Duplicate entry",Instant.now().toString(),subscriptionName,"ONT" + request.getOntSN());
+                return ResponseEntity.status(409).body(new CreateServiceIPTVResponse("409","RFS already exists/Duplicate entry",Instant.now().toString(),subscriptionName,"ONT" + request.getOntSN()));
             } else {
                 rfs = new Service();
                 rfs.setLocalName(Validations.encryptName(rfsName));
@@ -401,41 +402,41 @@ public class CreateServiceIPTV implements HttpAction {
 
             log.error(Constants.ACTION_COMPLETED);
 
-            return new CreateServiceIPTVResponse(
+            return ResponseEntity.status(201).body(new CreateServiceIPTVResponse(
                     "201",
                     "IPTV service created",
                     Instant.now().toString(),
                     subscriptionName,
                     ontName
-            );
+            ));
 
         } catch (BadRequestException bre) {
             log.error("Validation error: {}", bre.getMessage(), bre);
-            return new CreateServiceIPTVResponse(
+            return ResponseEntity.status(400).body(new CreateServiceIPTVResponse(
                     "400",
                     ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
                     String.valueOf(System.currentTimeMillis()),
                     "",
                     ""
-            );
+            ));
         } catch (AccessForbiddenException | ModificationNotAllowedException ex) {
             log.error("Access or modification error: {}", ex.getMessage(), ex);
-            return new CreateServiceIPTVResponse(
+            return ResponseEntity.status(403).body(new CreateServiceIPTVResponse(
                     "403",
                     ERROR_PREFIX + ex.getMessage(),
                     String.valueOf(System.currentTimeMillis()),
                     "",
                     ""
-            );
+            ));
         } catch (Exception ex) {
             log.error("Unhandled exception during CreateServiceIPTV", ex);
-            return new CreateServiceIPTVResponse(
+            return ResponseEntity.status(500).body(new CreateServiceIPTVResponse(
                     "500",
                     ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
                     String.valueOf(System.currentTimeMillis()),
                     "",
                     ""
-            );
+            ));
         }
     }
 }
