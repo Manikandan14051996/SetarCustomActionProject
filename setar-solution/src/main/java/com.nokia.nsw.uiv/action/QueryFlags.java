@@ -1188,8 +1188,8 @@ public class QueryFlags implements HttpAction {
                 String cardTpl = "5".equals(ontPort) ?
                         getOltProperty(oltGdn, "evpnOntCard5Template") :
                         getOltProperty(oltGdn, "evpnOntCardTemplate");
-
-                flags.put("SERVICE_EVPN_EXIST", exists(cardTpl));
+                templateNameCard = exists(cardTpl);
+                flags.put("SERVICE_EVPN_EXIST", templateNameCard);
                 flags.put("SERVICE_TEMPLATE_CARD", cardTpl);
 
             } else if (((productName.contains("EVPN")) || (productName.contains("ENTERPRISE")) || (productSubType.contains("Cloudstarter"))) && !actionType.contains("Configure")) {
@@ -1641,7 +1641,7 @@ public class QueryFlags implements HttpAction {
         flags.put("SERVICE_TEMPLATE_VLAN", tempVLAN);
         flags.put("SERVICE_TEMPLATE_VPLS", tempVPLS);
         flags.put("SERVICE_EXIST", templateNameOnt);
-        flags.put("SERVICE_EVPN_EXIST", templateNameCard);
+        flags.putIfAbsent("SERVICE_EVPN_EXIST", templateNameCard);
         flags.put("SERVICE_PORT_EXIST", templateNamePort);
         flags.put("SERVICE_VEIP_EXIST", templateNameVeip);
         flags.put("SERVICE_VOIP_EXIST", templateNameVoip);
