@@ -1,17 +1,28 @@
 package com.nokia.nsw.uiv.action;
-
-import com.nokia.nsw.uiv.exception.*;
-import com.nokia.nsw.uiv.framework.action.*;
+import com.nokia.nsw.uiv.exception.AccessForbiddenException;
+import com.nokia.nsw.uiv.exception.BadRequestException;
+import com.nokia.nsw.uiv.exception.ModificationNotAllowedException;
+import com.nokia.nsw.uiv.framework.action.Action;
+import com.nokia.nsw.uiv.framework.action.ActionContext;
+import com.nokia.nsw.uiv.framework.action.HttpAction;
 import com.nokia.nsw.uiv.model.common.party.Customer;
 import com.nokia.nsw.uiv.model.resource.logical.LogicalDevice;
-import com.nokia.nsw.uiv.model.service.*;
+import com.nokia.nsw.uiv.model.service.Product;
+import com.nokia.nsw.uiv.model.service.Service;
+import com.nokia.nsw.uiv.model.service.Subscription;
 import com.nokia.nsw.uiv.repository.*;
-import com.nokia.nsw.uiv.request.*;
+import com.nokia.nsw.uiv.request.CreateServiceCBMBulkRequest;
+import com.nokia.nsw.uiv.request.CreateServiceCBMRequest;
+import com.nokia.nsw.uiv.request.CreateServiceCbmVoiceBulkRequest;
+import com.nokia.nsw.uiv.request.CreateServiceCbmVoiceRequest;
+import com.nokia.nsw.uiv.response.CreateServiceCBMResponse;
 import com.nokia.nsw.uiv.response.CreateServiceCbmVoiceResponse;
 import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.utils.Validations;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -22,24 +33,35 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Action
 @Slf4j
 public class CreateServiceCbmVoice_Migration implements HttpAction {
-
     protected static final String ACTION_LABEL = Constants.CREATE_SERVICE_CBM_VOICE;
-
+    // Error code mappings (adjust if you use different codes)
     private static final String ERROR_PREFIX = "UIV action CreateServiceCBMVoice execution failed - ";
     private static final String CODE_SUCCESS = "201";
-    private static final String CODE_MISSING_PARAMS = "400";
-    private static final String CODE_ALREADY_EXISTS = "409";
-    private static final String CODE_PERSISTENCE_ERROR = "500";
-    private static final String CODE_CPE_NOT_FOUND = "404";
-    private static final String CODE_NAME_TOO_LONG = "400";
-    private static final String CODE_EXCEPTION = "500";
+    private static final String CODE_MISSING_PARAMS = "400"; // $code5
+    private static final String CODE_ALREADY_EXISTS = "409"; // $code2
+    private static final String CODE_PERSISTENCE_ERROR = "500"; // $code3
+    private static final String CODE_CPE_NOT_FOUND = "404"; // $code4
+    private static final String CODE_NAME_TOO_LONG = "400"; // $code6
+    private static final String CODE_EXCEPTION = "500"; // $code1
 
-    @Autowired private CustomerCustomRepository subscriberRepository;
-    @Autowired private SubscriptionCustomRepository subscriptionRepository;
-    @Autowired private ProductCustomRepository productRepository;
-    @Autowired private ServiceCustomRepository serviceCustomRepository;
-    @Autowired private LogicalDeviceCustomRepository cbmDeviceRepository;
-    @Autowired private LogicalDeviceCustomRepository cpeDeviceRepository;
+    @Autowired
+    private CustomerCustomRepository subscriberRepository;
+
+    @Autowired
+    private SubscriptionCustomRepository subscriptionRepository;
+
+    @Autowired
+    private ProductCustomRepository productRepository;
+
+    @Autowired
+    private ServiceCustomRepository serviceCustomRepository;
+
+    @Autowired
+    private LogicalDeviceCustomRepository cbmDeviceRepository;
+
+    @Autowired
+    private LogicalDeviceCustomRepository cpeDeviceRepository;
+
 
     @Override
     public Class<?> getActionClass() {
@@ -47,88 +69,130 @@ public class CreateServiceCbmVoice_Migration implements HttpAction {
     }
 
     @Override
-    public Object doPost(ActionContext ctx) {
-
-        CreateServiceCbmVoiceBulkRequest bulk =
-                (CreateServiceCbmVoiceBulkRequest) ctx.getObject();
-
+    public Object doPost(ActionContext actionContext) throws Exception {
+        log.error(Constants.EXECUTING_ACTION, ACTION_LABEL);
         List<CreateServiceCbmVoiceResponse> responses = new ArrayList<>();
+        CreateServiceCbmVoiceBulkRequest bulkRequest =
+                (CreateServiceCbmVoiceBulkRequest) actionContext.getObject();
 
-        for (CreateServiceCbmVoiceRequest request : bulk.getServices()) {
+        List<CreateServiceCbmVoiceRequest> requests = bulkRequest.getServices();
+
+        for (CreateServiceCbmVoiceRequest request : requests) {
+
+            // 1. Mandatory validations
+            try {
+                log.error(Constants.MANDATORY_PARAMS_VALIDATION_STARTED);
+                Validations.validateMandatoryParams(request.getSubscriberName(), "subscriberName");
+                Validations.validateMandatoryParams(request.getProductType(), "productType");
+                Validations.validateMandatoryParams(request.getCbmSN(), "cbmSN");
+                Validations.validateMandatoryParams(request.getCbmMac(), "cbmMac");
+                Validations.validateMandatoryParams(request.getCbmManufacturer(), "cbmManufacturer");
+                Validations.validateMandatoryParams(request.getCbmType(), "cbmType");
+                Validations.validateMandatoryParams(request.getCbmModel(), "cbmModel");
+                Validations.validateMandatoryParams(request.getHhid(), "hhid");
+                Validations.validateMandatoryParams(request.getServiceId(), "serviceId");
+                Validations.validateMandatoryParams(request.getVoipNumber1(), "voipNumber1");
+                Validations.validateMandatoryParams(request.getSimaCustId(), "simaCustId");
+                Validations.validateMandatoryParams(request.getSimaSubsId(), "simaSubsId");
+                Validations.validateMandatoryParams(request.getSimaEndpointId(), "simaEndpointId");
+                log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
+            } catch (BadRequestException bre) {
+                responses.add(createErrorResponse(CODE_MISSING_PARAMS,
+                        ERROR_PREFIX + bre.getMessage()));
+                continue;
+            }
+            AtomicBoolean isSubscriberExist = new AtomicBoolean(true);
+            AtomicBoolean isSubscriptionExist = new AtomicBoolean(true);
+            AtomicBoolean isProductExist = new AtomicBoolean(true);
+
+            String cpeDeviceName = "CBM" + Constants.UNDER_SCORE + request.getCbmMac();
+            Optional<LogicalDevice> cpeOpt = cpeDeviceRepository.findByDiscoveredName(cpeDeviceName);
+            if (!cpeOpt.isPresent()) {
+                responses.add(createErrorResponse(CODE_CPE_NOT_FOUND, "CPE device not found with cbmName: " + cpeDeviceName));
+                continue;
+            }
+
+            // 2. Construct names
+            String subscriberNameString;
+            String productSubtype = request.getProductSubtype();
+            if ("Broadband".equalsIgnoreCase(productSubtype) || "Voice".equalsIgnoreCase(productSubtype)) {
+                // remove colons if present
+                String macClean = request.getCbmMac() == null ? "" : request.getCbmMac().replace(":", "");
+                subscriberNameString = request.getSubscriberName() + Constants.UNDER_SCORE + macClean;
+            } else {
+                subscriberNameString = request.getSubscriberName();
+            }
+
+            String subscriptionName = request.getSubscriberName() + Constants.UNDER_SCORE + request.getServiceId();
+            String cfsName = "CFS" + Constants.UNDER_SCORE + subscriptionName;
+            String rfsName = "RFS" + Constants.UNDER_SCORE + subscriptionName;
+            String cbmName = "CBM" + request.getServiceId();
+
+            if (cbmName.length() > 100) {
+                responses.add(createErrorResponse(
+                        CODE_NAME_TOO_LONG,
+                        "CBM name value too long"
+                ));
+                continue;
+            }
+
+            if (rfsName.length() > 100) {
+                responses.add(createErrorResponse(
+                        CODE_NAME_TOO_LONG,
+                        "RFS name value too long"
+                ));
+                continue;
+            }
+
+            if (cfsName.length() > 100) {
+                responses.add(createErrorResponse(
+                        CODE_NAME_TOO_LONG,
+                        "CFS name value too long"
+                ));
+                continue;
+            }
+
+            if (subscriptionName.length() > 100) {
+                responses.add(createErrorResponse(
+                        CODE_NAME_TOO_LONG,
+                        "Subscription name value too long"
+                ));
+                continue;
+            }
+
+            // name length checks
+            if (subscriberNameString.length() > 100) {
+                responses.add(createErrorResponse(
+                        CODE_NAME_TOO_LONG,
+                        "Subscriber name value too long"
+                ));
+                continue;
+            }
 
             try {
-                log.error("Processing request: {}", request.getServiceId());
-
-                /* ================= VALIDATION ================= */
-                try {
-                    Validations.validateMandatoryParams(request.getSubscriberName(), "subscriberName");
-                    Validations.validateMandatoryParams(request.getProductType(), "productType");
-                    Validations.validateMandatoryParams(request.getCbmSN(), "cbmSN");
-                    Validations.validateMandatoryParams(request.getCbmMac(), "cbmMac");
-                    Validations.validateMandatoryParams(request.getCbmManufacturer(), "cbmManufacturer");
-                    Validations.validateMandatoryParams(request.getCbmType(), "cbmType");
-                    Validations.validateMandatoryParams(request.getCbmModel(), "cbmModel");
-                    Validations.validateMandatoryParams(request.getHhid(), "hhid");
-                    Validations.validateMandatoryParams(request.getServiceId(), "serviceId");
-                    Validations.validateMandatoryParams(request.getVoipNumber1(), "voipNumber1");
-                    Validations.validateMandatoryParams(request.getSimaCustId(), "simaCustId");
-                    Validations.validateMandatoryParams(request.getSimaSubsId(), "simaSubsId");
-                    Validations.validateMandatoryParams(request.getSimaEndpointId(), "simaEndpointId");
-                } catch (BadRequestException bre) {
-                    responses.add(error(CODE_MISSING_PARAMS, bre.getMessage()));
-                    continue;
-                }
-
-                /* ================= CPE CHECK ================= */
-                String cpeDeviceName = "CBM_" + request.getCbmMac();
-                Optional<LogicalDevice> cpeOpt = cpeDeviceRepository.findByDiscoveredName(cpeDeviceName);
-                if (!cpeOpt.isPresent()) {
-                    responses.add(error(CODE_CPE_NOT_FOUND, "CPE not found: " + cpeDeviceName));
-                    continue;
-                }
-
-                /* ================= NAME BUILD ================= */
-                String macClean = request.getCbmMac().replace(":", "");
-                String subscriberName = request.getSubscriberName() + "_" + macClean;
-
-                String subscriptionName = request.getSubscriberName() + "_" + request.getServiceId();
-                String productName = request.getSubscriberName() + "_" + request.getProductSubtype() + "_" + request.getServiceId();
-                String cfsName = "CFS_" + subscriptionName;
-                String rfsName = "RFS_" + subscriptionName;
-                String cbmName = "CBM" + request.getServiceId();
-
-                if (subscriberName.length() > 100 || subscriptionName.length() > 100 ||
-                        cfsName.length() > 100 || rfsName.length() > 100 || cbmName.length() > 100) {
-                    responses.add(error(CODE_NAME_TOO_LONG, "Name length exceeded"));
-                    continue;
-                }
-
-                AtomicBoolean subExist = new AtomicBoolean(true);
-                AtomicBoolean subsExist = new AtomicBoolean(true);
-                AtomicBoolean prodExist = new AtomicBoolean(true);
-
-                /* ================= SUBSCRIBER ================= */
-                Customer subscriber = subscriberRepository.findByDiscoveredName(subscriberName)
+                // 3. Subscriber logic
+                Customer subscriber = subscriberRepository.findByDiscoveredName(subscriberNameString)
                         .orElseGet(() -> {
-                            subExist.set(false);
                             Customer s = new Customer();
+                            isSubscriberExist.set(false);
                             try {
-                                s.setLocalName(Validations.encryptName(subscriberName));
-                                s.setDiscoveredName(subscriberName);
+                                s.setLocalName(Validations.encryptName(subscriberNameString));
+                                s.setDiscoveredName(subscriberNameString);
                                 s.setContext(Constants.SETAR);
                                 s.setKind(Constants.SETAR_KIND_SETAR_SUBSCRIBER);
-                            } catch (Exception e) { throw new RuntimeException(e); }
-
+                                s.setDiscoveredName(subscriberNameString);
+                            } catch (AccessForbiddenException | BadRequestException |
+                                     ModificationNotAllowedException e) {
+                                throw new RuntimeException(e);
+                            }
                             Map<String, Object> subProps = new HashMap<>();
                             subProps.put("subscriberStatus", "Active");
                             subProps.put("subscriberType", "Regular");
                             subProps.put("accountNumber", request.getSubscriberName());
                             subProps.put("houseHoldId", request.getHhid());
-
                             if (request.getUserName() != null && !request.getUserName().trim().isEmpty()) {
                                 subProps.put("userName", request.getUserName());
                             }
-
                             subProps.put("createdBy",
                                     request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
                                             ? request.getCreatedBy()
@@ -136,22 +200,46 @@ public class CreateServiceCbmVoice_Migration implements HttpAction {
                             );
                             subProps.put("actionName", ACTION_LABEL);
                             s.setProperties(subProps);
-
-                            subscriberRepository.save(s,2);
+                            // save with depth 2 as in your codebase
+                            subscriberRepository.save(s, 2);
                             return s;
                         });
 
-                /* ================= SUBSCRIPTION ================= */
+                // update optional subscriber fields properly
+                try {
+                    Map<String, Object> sp = subscriber.getProperties() == null ? new HashMap<>() : subscriber.getProperties();
+                    if (request.getFirstName() != null && !request.getFirstName().trim().isEmpty())
+                        sp.put("subscriberFirstName", request.getFirstName());
+                    if (request.getLastName() != null && !request.getLastName().trim().isEmpty())
+                        sp.put("subscriberLastName", request.getLastName());
+                    if (request.getCompanyName() != null && !request.getCompanyName().trim().isEmpty())
+                        sp.put("companyName", request.getCompanyName());
+                    if (request.getContactPhone() != null && !request.getContactPhone().trim().isEmpty())
+                        sp.put("contactPhoneNumber", request.getContactPhone());
+                    if (request.getSubsAddress() != null && !request.getSubsAddress().trim().isEmpty())
+                        sp.put("subscriberAddress", request.getSubsAddress());
+                    subscriber.setProperties(sp);
+                    subscriberRepository.save(subscriber, 2);
+                } catch (Exception e) {
+                    log.error("Persistence error updating subscriber properties", e);
+                    responses.add(createErrorResponse(CODE_PERSISTENCE_ERROR, "Persistence error while updating subscriber: " + e.getMessage()));
+                    continue;
+                }
+
+                // 4. Subscription logic
                 Subscription subscription = subscriptionRepository.findByDiscoveredName(subscriptionName)
                         .orElseGet(() -> {
-                            subsExist.set(false);
-                            Subscription s = new Subscription();
+                            isSubscriptionExist.set(false);
+                            Subscription sub = new Subscription();
                             try {
-                                s.setLocalName(Validations.encryptName(subscriptionName));
-                                s.setDiscoveredName(subscriptionName);
-                                s.setContext(Constants.SETAR);
-                                s.setKind(Constants.SETAR_KIND_SETAR_SUBSCRIPTION);
-                            } catch (Exception e) { throw new RuntimeException(e); }
+                                sub.setLocalName(Validations.encryptName(subscriptionName));
+                                sub.setDiscoveredName(subscriptionName);
+                                sub.setContext(Constants.SETAR);
+                                sub.setKind(Constants.SETAR_KIND_SETAR_SUBSCRIPTION);
+                            } catch (AccessForbiddenException | BadRequestException |
+                                     ModificationNotAllowedException e) {
+                                throw new RuntimeException(e);
+                            }
 
                             Map<String, Object> props = new HashMap<>();
                             props.put("subscriptionStatus", "Active");
@@ -160,19 +248,13 @@ public class CreateServiceCbmVoice_Migration implements HttpAction {
                             props.put("serviceSN", request.getCbmSN());
                             props.put("serviceMAC", request.getCbmMac());
                             props.put("serviceID", request.getServiceId());
+                            if (request.getQosProfile() != null) props.put("qosProfile", request.getQosProfile());
                             props.put("householdId", request.getHhid());
-
-                            if (request.getQosProfile() != null)
-                                props.put("qosProfile", request.getQosProfile());
-
                             if (request.getCustomerGroupId() != null && !"NA".equalsIgnoreCase(request.getCustomerGroupId()))
                                 props.put("customerGroupId", request.getCustomerGroupId());
-
                             if (request.getSubscriberId() != null)
                                 props.put("subscriberID_CableModem", request.getSubscriberId());
-
-                            if (request.getKenanUidNo() != null)
-                                props.put("billingId", request.getKenanUidNo());
+                            if (request.getKenanUidNo() != null) props.put("billingId", request.getKenanUidNo());
                             String voipPort = request.getVoipPort();
                             if (voipPort != null) {
                                 int port = Integer.parseInt(voipPort);
@@ -180,47 +262,77 @@ public class CreateServiceCbmVoice_Migration implements HttpAction {
                                 if (port == 1) {
                                     props.put("simaCustId1", request.getSimaCustId());
                                     props.put("voipNumber1", request.getVoipNumber1());
+                                    if (request.getServicePackage() != null)
+                                        props.put("voipPackage1", request.getServicePackage());
                                     props.put("simaSubsId1", request.getSimaSubsId());
                                     props.put("simaEndpointId1", request.getSimaEndpointId());
                                     props.put("voipServiceCode1", request.getVoipServiceCode());
-
-                                    if (request.getServicePackage() != null)
-                                        props.put("voipPackage1", request.getServicePackage());
-
+                                    props.put("servicePackage", request.getServicePackage());
                                 } else if (port == 2) {
                                     props.put("simaCustId2", request.getSimaCustId());
                                     props.put("voipNumber2", request.getVoipNumber1());
                                     props.put("simaSubsId2", request.getSimaSubsId());
-                                    props.put("simaEndpointId2", request.getSimaEndpointId());
-                                    props.put("voipServiceCode2", request.getVoipServiceCode());
-
                                     if (request.getServicePackage() != null)
                                         props.put("voipPackage2", request.getServicePackage());
+                                    props.put("simaEndpointId2", request.getSimaEndpointId());
+                                    props.put("voipServiceCode2", request.getVoipServiceCode());
+                                    props.put("servicePackage2", request.getServicePackage());
                                 }
                             }
-                            s.setProperties(props);
-                            s.setCustomer(subscriber);
+                            props.put("createdBy",
+                                    request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                            ? request.getCreatedBy()
+                                            : "CA"
+                            );
+                            props.put("actionName", ACTION_LABEL);
 
-                            subscriptionRepository.save(s,2);
-                            return s;
+                            // if both servicePackage and voipServiceCode provided, store them
+                            if (request.getServicePackage() != null && request.getServicePackage().trim().length() > 0
+                                    && request.getCpeMacAddressMTA() != null) {
+                                // nothing special, already stored servicePackage above; VOIP service code handled below if present in request
+                            }
+                            sub.setProperties(props);
+                            sub.setCustomer(subscriber);
+                            subscriptionRepository.save(sub, 2);
+                            return sub;
                         });
 
-                /* ================= PRODUCT ================= */
-                Product product = productRepository.findByDiscoveredName(productName)
+                // If voip package/code present, store them in subscription
+                try {
+                    Map<String, Object> subsProps = subscription.getProperties() == null ? new HashMap<>() : subscription.getProperties();
+                    if (request.getServicePackage() != null && request.getServicePackage().trim().length() > 0)
+//                    subsProps.put("voipPackage1", request.getServicePackage());
+                        // subsProps.put("voipServiceCodePrimary", request.getVoipServiceCode());
+                        subscription.setProperties(subsProps);
+                    subscriptionRepository.save(subscription, 2);
+                } catch (Exception e) {
+                    log.error("Persistence error updating subscription", e);
+                    responses.add(createErrorResponse(CODE_PERSISTENCE_ERROR, "Persistence error while updating subscription: " + e.getMessage()));
+                    continue;
+                }
+
+                // 5. Product logic
+                String productNameStr = request.getSubscriberName() + Constants.UNDER_SCORE + request.getProductSubtype() + Constants.UNDER_SCORE + request.getServiceId();
+                if (productNameStr.length() > 100) {
+                    responses.add(createErrorResponse(CODE_NAME_TOO_LONG, "Product Name Value too Long"));
+                    continue;
+                }
+                Product product = productRepository.findByDiscoveredName(productNameStr)
                         .orElseGet(() -> {
-                            prodExist.set(false);
+                            isProductExist.set(false);
                             Product p = new Product();
                             try {
-                                p.setLocalName(Validations.encryptName(productName));
-                                p.setDiscoveredName(productName);
+                                p.setLocalName(Validations.encryptName(productNameStr));
+                                p.setDiscoveredName(productNameStr);
                                 p.setContext(Constants.SETAR);
                                 p.setKind(Constants.SETAR_KIND_SETAR_PRODUCT);
-                            } catch (Exception e) { throw new RuntimeException(e); }
-
+                            } catch (AccessForbiddenException | BadRequestException |
+                                     ModificationNotAllowedException e) {
+                                throw new RuntimeException(e);
+                            }
                             Map<String, Object> prodProps = new HashMap<>();
                             prodProps.put("productStatus", "Active");
                             prodProps.put("productType", request.getProductType());
-
                             prodProps.put("createdBy",
                                     request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
                                             ? request.getCreatedBy()
@@ -229,114 +341,187 @@ public class CreateServiceCbmVoice_Migration implements HttpAction {
                             prodProps.put("actionName", ACTION_LABEL);
                             p.setProperties(prodProps);
                             p.setCustomer(subscriber);
-
-                            productRepository.save(p,2);
+                            productRepository.save(p, 2);
                             return p;
                         });
-
-                if (subExist.get() && subsExist.get() && prodExist.get()) {
-                    responses.add(new CreateServiceCbmVoiceResponse(
-                            CODE_ALREADY_EXISTS,
-                            "Duplicate entry",
-                            Instant.now().toString(),
-                            subscriptionName,
-                            cbmName
-                    ));
+                subscription.setService(new HashSet<>(List.of(product)));
+                subscriptionRepository.save(subscription, 2);
+                if (isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()) {
+                    log.error("createServiceCbmVoice service already exist");
+                    responses.add(new CreateServiceCbmVoiceResponse("409", "Service already exist/Duplicate entry", Instant.now().toString(), subscriptionName, cbmName));
                     continue;
                 }
-
-                subscription.setService(new HashSet<>(List.of(product)));
-                subscriptionRepository.save(subscription,2);
-
-                /* ================= CFS ================= */
-                Service cfs = new Service();
-                cfs.setDiscoveredName(cfsName);
-                Map<String, Object> cfsProps = new HashMap<>();
-                cfsProps.put("serviceStatus", "Active");
-                cfsProps.put("serviceType", request.getProductType());
-                cfsProps.put("serviceStartDate", Instant.now().toString());
-
-                if (request.getFxOrderID() != null)
-                    cfsProps.put("transactionId", request.getFxOrderID());
-
-                cfsProps.put("createdBy",
-                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
-                                ? request.getCreatedBy()
-                                : "CA"
-                );
-                cfsProps.put("actionName", ACTION_LABEL);
-                cfs.setProperties(cfsProps);
-                cfs.setUsingService(Set.of(product));
-                serviceCustomRepository.save(cfs,2);
-
-                /* ================= RFS ================= */
-                Service rfs = new Service();
-                rfs.setDiscoveredName(rfsName);
-                Map<String, Object> rfsProps = new HashMap<>();
-                rfsProps.put("serviceStatus", "Active");
-                rfsProps.put("serviceType", request.getProductType());
-                rfsProps.put("createdBy",
-                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
-                                ? request.getCreatedBy()
-                                : "CA"
-                );
-                rfsProps.put("actionName", ACTION_LABEL);
-                rfs.setProperties(rfsProps);
-                rfs.setUsedService(Set.of(cfs));
-                serviceCustomRepository.save(rfs,2);
-
-                /* ================= DEVICE ================= */
-                LogicalDevice device = new LogicalDevice();
-                device.setDiscoveredName(cbmName);
-                Map<String, Object> deviceProps = new HashMap<>();
-                deviceProps.put("serialNo", request.getCbmSN());
-                deviceProps.put("macAddress", request.getCbmMac());
-                deviceProps.put("createdBy",
-                        request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
-                                ? request.getCreatedBy()
-                                : "CA"
-                );
-                deviceProps.put("actionName", ACTION_LABEL);
-                if (request.getCbmGatewayMac() != null) deviceProps.put("gatewayMacAddress", request.getCbmGatewayMac());
-                if (request.getCbmType() != null) deviceProps.put("deviceType", request.getCbmType());
-                if (request.getCbmManufacturer() != null) deviceProps.put("manufacturer", request.getCbmManufacturer());
-                if (request.getCbmModel() != null) deviceProps.put("deviceModel", request.getCbmModel());
-                deviceProps.put("OperationalState", "Active");
-                device.setProperties(deviceProps);
-                device.setUsingService(Set.of(rfs));
-                cbmDeviceRepository.save(device,2);
-
-                /* ================= VOICE UPDATE ================= */
-                if ("Voice".equalsIgnoreCase(request.getProductSubtype())) {
-                    LogicalDevice cpe = cpeOpt.get();
-                    Map<String,Object> props = cpe.getProperties()==null?new HashMap<>():cpe.getProperties();
-                    props.put("voipPort1",request.getVoipNumber1());
-                    cpe.setProperties(props);
-                    cpeDeviceRepository.save(cpe,2);
+                if (isSubscriptionExist.get()) {
+                    subscription = subscriptionRepository.findByDiscoveredName(subscription.getDiscoveredName()).get();
+                    Set<Service> existingServices = subscription.getService();
+                    existingServices.add(product);
+                    subscription.setService(existingServices);
+                } else {
+                    subscription.setService(new HashSet<>(List.of(product)));
                 }
 
-                responses.add(new CreateServiceCbmVoiceResponse(
-                        CODE_SUCCESS,
-                        "Success",
-                        Instant.now().toString(),
-                        subscriptionName,
-                        cbmName
-                ));
+                // 6. CFS logic
+                Service cfs = serviceCustomRepository.findByDiscoveredName(cfsName)
+                        .orElseGet(() -> {
+                            Service c = new Service();
+                            try {
+                                c.setLocalName(cfsName);
+                                c.setDiscoveredName(cfsName);
+                                c.setContext(Constants.SETAR);
+                                c.setKind(Constants.SETAR_KIND_SETAR_CFS);
+                            } catch (AccessForbiddenException | BadRequestException |
+                                     ModificationNotAllowedException e) {
+                                throw new RuntimeException(e);
+                            }
 
+                            Map<String, Object> cfsProps = new HashMap<>();
+                            cfsProps.put("serviceStatus", "Active");
+                            cfsProps.put("serviceType", request.getProductType());
+                            cfsProps.put("serviceStartDate", Instant.now().toString());
+                            cfsProps.put("createdBy",
+                                    request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                            ? request.getCreatedBy()
+                                            : "CA"
+                            );
+                            cfsProps.put("actionName", ACTION_LABEL);
+                            if (request.getFxOrderID() != null) cfsProps.put("transactionId", request.getFxOrderID());
+                            c.setProperties(cfsProps);
+                            c.setUsingService(new HashSet<>(List.of(product)));
+                            serviceCustomRepository.save(c, 2);
+                            return c;
+                        });
+
+                // 7. RFS logic
+                Service rfs = serviceCustomRepository.findByDiscoveredName(rfsName)
+                        .orElseGet(() -> {
+                            Service r = new Service();
+                            try {
+                                r.setLocalName(Validations.encryptName(rfsName));
+                                r.setDiscoveredName(rfsName);
+                                r.setContext(Constants.SETAR);
+                                r.setKind(Constants.SETAR_KIND_SETAR_RFS);
+                            } catch (AccessForbiddenException | BadRequestException |
+                                     ModificationNotAllowedException e) {
+                                throw new RuntimeException(e);
+                            }
+                            Map<String, Object> rfsProps = new HashMap<>();
+                            rfsProps.put("serviceStatus", "Active");
+                            rfsProps.put("serviceType", request.getProductType());
+                            rfsProps.put("createdBy",
+                                    request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                            ? request.getCreatedBy()
+                                            : "CA"
+                            );
+                            rfsProps.put("actionName", ACTION_LABEL);
+                            r.setProperties(rfsProps);
+                            r.setUsedService(new HashSet<>(List.of(cfs)));
+                            serviceCustomRepository.save(r, 2);
+                            return r;
+                        });
+
+                // 8. CBM device logic
+                LogicalDevice cbmDevice = cbmDeviceRepository.findByDiscoveredName(cbmName)
+                        .orElseGet(() -> {
+                            LogicalDevice d = new LogicalDevice();
+                            try {
+                                d.setLocalName(Validations.encryptName(cbmName));
+                                d.setDiscoveredName(cbmName);
+                                d.setContext(Constants.SETAR);
+                                d.setKind(Constants.SETAR_KIND_STB_AP_CM_DEVICE);
+                            } catch (AccessForbiddenException | BadRequestException |
+                                     ModificationNotAllowedException e) {
+                                throw new RuntimeException(e);
+                            }
+                            Map<String, Object> deviceProps = new HashMap<>();
+                            deviceProps.put("serialNo", request.getCbmSN());
+                            deviceProps.put("macAddress", request.getCbmMac());
+                            deviceProps.put("createdBy",
+                                    request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
+                                            ? request.getCreatedBy()
+                                            : "CA"
+                            );
+                            deviceProps.put("actionName", ACTION_LABEL);
+                            if (request.getCbmGatewayMac() != null)
+                                deviceProps.put("gatewayMacAddress", request.getCbmGatewayMac());
+                            if (request.getCbmType() != null) deviceProps.put("deviceType", request.getCbmType());
+                            if (request.getCbmManufacturer() != null)
+                                deviceProps.put("manufacturer", request.getCbmManufacturer());
+                            if (request.getCbmModel() != null) deviceProps.put("deviceModel", request.getCbmModel());
+                            deviceProps.put("OperationalState", "Active");
+                            d.setProperties(deviceProps);
+                            d.setUsingService(new HashSet<>(List.of(rfs)));
+                            cbmDeviceRepository.save(d, 2);
+                            return d;
+                        });
+
+                // 9. CPE Voice Port Update (only when productSubtype == "Voice")
+                if ("Voice".equalsIgnoreCase(request.getProductSubtype())) {
+                    String cpeDevice = "CBM" + Constants.UNDER_SCORE + request.getCbmMac();
+                    Optional<LogicalDevice> cpeOpts = cpeDeviceRepository.findByDiscoveredName(cpeDevice);
+                    if (!cpeOpts.isPresent()) {
+                        responses.add(createErrorResponse(CODE_CPE_NOT_FOUND, "CPE device not found with cbmName: " + cpeDeviceName));
+                        continue;
+                    }
+
+                    try {
+                        LogicalDevice cpe = cpeOpts.get();
+
+                        Map<String, Object> props = cpe.getProperties() == null ? new HashMap<>() : cpe.getProperties();
+
+                        if (request.getCpeMacAddressMTA() != null && !request.getCpeMacAddressMTA().trim().isEmpty()) {
+                            props.put("macAddressMta", request.getCpeMacAddressMTA());
+                        }
+
+                        String voipPort = request.getVoipPort();
+                        if (voipPort != null) {
+                            int port = Integer.parseInt(voipPort);
+
+                            if (port == 1) {
+                                props.put("voipPort1", request.getVoipNumber1());
+                            } else if (port == 2) {
+                                props.put("voipPort2", request.getVoipNumber1());
+                            }
+                        }
+
+                        cpe.setProperties(props);
+                        cpeDeviceRepository.save(cpe, 2);
+                    } catch (Exception e) {
+                        log.error("Persistence error updating CPE device", e);
+                        return ResponseEntity.status(500).body(createErrorResponse(CODE_PERSISTENCE_ERROR, "Persistence error while updating CPE device: " + cpeDeviceName + e.getMessage()));
+                    }
+                }
+                log.error(Constants.ACTION_COMPLETED);
+                // 10. Final success response
+                CreateServiceCbmVoiceResponse response = new CreateServiceCbmVoiceResponse();
+                response.setStatus(CODE_SUCCESS);
+                response.setMessage("UIV action CreateServiceCbmVoice executed successfully");
+                response.setTimestamp(new Date().toString());
+                response.setSubscriptionName(subscriptionName);
+                response.setCbmName(cbmName);
+                responses.add(response);
+
+            } catch (RuntimeException rte) {
+                // handle thrown runtime exceptions (wrapped checked exceptions)
+                log.error("Runtime exception", rte);
+                // If cause indicates duplicate key, return already exists
+                Throwable cause = rte.getCause();
+                if (cause != null && cause.getMessage() != null && cause.getMessage().toLowerCase().contains("duplicate")) {
+                    return ResponseEntity.status(409).body(createErrorResponse(CODE_ALREADY_EXISTS, "Entity already exists: " + cause.getMessage()));
+                }
+                return createErrorResponse(CODE_EXCEPTION, "Exception - " + rte.getMessage());
             } catch (Exception ex) {
-                log.error("Error", ex);
-                responses.add(error(CODE_EXCEPTION, ex.getMessage()));
+                log.error("Unexpected exception", ex);
+                return createErrorResponse(CODE_EXCEPTION, "Exception - " + ex.getMessage());
             }
         }
-
         return responses;
     }
 
-    private CreateServiceCbmVoiceResponse error(String code, String msg) {
-        CreateServiceCbmVoiceResponse r = new CreateServiceCbmVoiceResponse();
-        r.setStatus(code);
-        r.setMessage(ERROR_PREFIX + msg);
-        r.setTimestamp(new Date().toString());
-        return r;
+    private CreateServiceCbmVoiceResponse createErrorResponse(String code, String message) {
+        CreateServiceCbmVoiceResponse resp = new CreateServiceCbmVoiceResponse();
+        resp.setStatus(code);
+        resp.setMessage("UIV action CreateServiceCbmVoice execution failed - " + message);
+        resp.setTimestamp(new Date().toString());
+        return resp;
     }
 }
