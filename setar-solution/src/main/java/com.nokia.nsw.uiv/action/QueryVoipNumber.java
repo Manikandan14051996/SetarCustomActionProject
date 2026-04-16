@@ -18,6 +18,7 @@ import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -56,13 +57,13 @@ public class QueryVoipNumber implements HttpAction {
                 Validations.validateMandatoryParams(req.getOntSN(), "ontSN");
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             } catch (BadRequestException bre) {
-                return new QueryVoipNumberResponse(
+                return ResponseEntity.status(400).body(new QueryVoipNumberResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
                         Instant.now().toString(),
                         "",
                         "","","","","","","","","","","","",""
-                );
+                ));
             }
 
             // Step 2: Service link
@@ -90,7 +91,7 @@ public class QueryVoipNumber implements HttpAction {
             if ("ONT".equals(linkType)) {
                 Optional<LogicalDevice> ontOpt = logicalDeviceRepo.findByDiscoveredName(ontName);
                 if (ontOpt.isEmpty()) {
-                    return errorResponse("404", "ONT device not found: " + ontName);
+                    return ResponseEntity.status(404).body(errorResponse("404", "ONT device not found: " + ontName));
                 }
                 LogicalDevice ont = ontOpt.get();
                 voipNumber1 = ont.getProperties().getOrDefault("potsPort1Number", "").toString();
@@ -175,7 +176,7 @@ public class QueryVoipNumber implements HttpAction {
 
                     // 0 → No SIMA ID found
                     if (matchedSubs.isEmpty()) {
-                        return errorResponse("404", "No SIMA Customer ID found");
+                        return ResponseEntity.status(404).body(errorResponse("404", "No SIMA Customer ID found"));
                     }
 
                     // 1 → Capture primary record
@@ -240,7 +241,7 @@ public class QueryVoipNumber implements HttpAction {
             log.error(Constants.ACTION_COMPLETED);
             // Step 7: Final response
             if (simaCustId != null && !simaCustId.isEmpty() || simaCustId2 != null && !simaCustId2.isEmpty()) {
-                return new QueryVoipNumberResponse(
+                return ResponseEntity.status(200).body(new QueryVoipNumberResponse(
                         "200",
                         "UIV action QueryVoipNumber executed successfully.",
                         Instant.now().toString(),
@@ -258,14 +259,14 @@ public class QueryVoipNumber implements HttpAction {
                         Objects.toString(voipPackage2, ""),
                         Objects.toString(firstName, ""),
                         Objects.toString(lastName, "")
-                );
+                ));
             } else {
-                return errorResponse("404", "No SIMA Customer ID found");
+                return ResponseEntity.status(404).body(errorResponse("404", "No SIMA Customer ID found"));
             }
 
         } catch (Exception ex) {
             log.error("Exception in QueryVoipNumber", ex);
-            return errorResponse("500", "Error occurred while retrieving VoIP details — " + ex.getMessage());
+            return ResponseEntity.status(500).body(errorResponse("500", "Error occurred while retrieving VoIP details — " + ex.getMessage()));
         }
     }
 

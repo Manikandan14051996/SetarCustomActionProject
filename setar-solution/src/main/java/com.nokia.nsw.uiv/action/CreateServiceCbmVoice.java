@@ -459,7 +459,7 @@ public class CreateServiceCbmVoice implements HttpAction {
             response.setTimestamp(new Date().toString());
             response.setSubscriptionName(subscriptionName);
             response.setCbmName(cbmName);
-            return response;
+            return ResponseEntity.status(201).body(response);
 
         } catch (RuntimeException rte) {
             // handle thrown runtime exceptions (wrapped checked exceptions)

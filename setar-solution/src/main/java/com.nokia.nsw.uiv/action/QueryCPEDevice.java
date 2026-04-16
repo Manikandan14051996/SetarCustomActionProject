@@ -15,6 +15,7 @@ import com.nokia.nsw.uiv.response.QueryCPEDeviceResponse;
 import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.utils.Validations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,8 +53,8 @@ public class QueryCPEDevice implements HttpAction {
             validateMandatory(request.getResourceType(), "resourceType");
             log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
         } catch (BadRequestException bre) {
-            return new QueryCPEDeviceResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                    java.time.Instant.now().toString());
+            return ResponseEntity.status(400).body(new QueryCPEDeviceResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
+                    java.time.Instant.now().toString()));
         }
 
         String resourceType = request.getResourceType();
@@ -64,7 +65,7 @@ public class QueryCPEDevice implements HttpAction {
         String devName = resourceType + Constants.UNDER_SCORE + request.getResourceSN();
         Optional<LogicalDevice> deviceOpt = cpeDeviceRepository.findByDiscoveredName(devName);
         if (!deviceOpt.isPresent()) {
-            return new QueryCPEDeviceResponse("404", "CPE Details Not Found", String.valueOf(System.currentTimeMillis()));
+            return ResponseEntity.status(404).body(new QueryCPEDeviceResponse("404", "CPE Details Not Found", String.valueOf(System.currentTimeMillis())));
         }
 
         LogicalDevice device = deviceOpt.get();

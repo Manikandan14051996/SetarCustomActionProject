@@ -18,6 +18,7 @@ import com.nokia.nsw.uiv.utils.Validations;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -59,11 +60,11 @@ public class QueryAccountCPE implements HttpAction {
                 Validations.validateMandatory(req.getServiceId(), "serviceId");
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             } catch (BadRequestException bre) {
-                return new QueryAccountCPEResponse(
+                return ResponseEntity.status(400).body(new QueryAccountCPEResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
                         Instant.now().toString(), "", "", "", "", "", "", "", "", "", "", "", ""
-                );
+                ));
 
             }
 
@@ -102,11 +103,11 @@ public class QueryAccountCPE implements HttpAction {
             }
 
             if (matchedSub == null) {
-                return new QueryAccountCPEResponse(
+                return ResponseEntity.status(404).body(new QueryAccountCPEResponse(
                         "404",
                         ERROR_PREFIX + "Service Details Not Found.",
                         Instant.now().toString(), "", "", "", "", "", "", "", "", "", "", "", ""
-                );
+                ));
             }
 
             String serviceLink = safeStr(matchedSub.getProperties().get("serviceLink"));
@@ -157,7 +158,7 @@ public class QueryAccountCPE implements HttpAction {
             }
             log.error(Constants.ACTION_COMPLETED);
             // Step 7: Build response
-            return new QueryAccountCPEResponse(
+            return ResponseEntity.status(200).body(new QueryAccountCPEResponse(
                     "200",
                     "UIV action QueryAccountCPE executed successfully.",
                     Instant.now().toString(),
@@ -173,15 +174,15 @@ public class QueryAccountCPE implements HttpAction {
                     mtaMac.isEmpty() ? null : mtaMac,
                     v1.isEmpty() ? null : v1,
                     v2.isEmpty() ? null : v2
-            );
+            ));
 
         } catch (Exception ex) {
             log.error("Exception in QueryAccountCPE", ex);
-            return new QueryAccountCPEResponse(
+            return ResponseEntity.status(500).body(new QueryAccountCPEResponse(
                     "500",
                     ERROR_PREFIX + ex.getMessage(),
                     Instant.now().toString(), "", "", "", "", "", "", "", "", "", "", "", ""
-            );
+            ));
 
         }
     }

@@ -18,6 +18,7 @@ import com.nokia.nsw.uiv.model.common.party.CustomerRepository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -61,11 +62,11 @@ public class ModifySubscriber implements HttpAction {
                 Validations.validateMandatory(req.getSubscriberNameOld(), "subscriberNameOld");
             } catch (Exception bre) {
                 log.error("------------Test Trace # 2--------------- Missing mandatory param: " + bre.getMessage());
-                return new ModifySubscriberResponse(
+                return ResponseEntity.status(400).body(new ModifySubscriberResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
                         Instant.now().toString()
-                );
+                ));
             }
 
             String oldSubscriberName = req.getSubscriberNameOld();
@@ -75,11 +76,11 @@ public class ModifySubscriber implements HttpAction {
                 Validations.validateLength(newSubscriberName, "New Subscriber");
             } catch (Exception bre) {
                 log.error("------------Test Trace # 2--------------- Missing mandatory param: " + bre.getMessage());
-                return new ModifySubscriberResponse(
+                return ResponseEntity.status(400).body(new ModifySubscriberResponse(
                         "400",
                         ERROR_PREFIX + bre.getMessage(),
                         Instant.now().toString()
-                );
+                ));
             }
 
             log.error("------------Test Trace # 3--------------- old=" + oldSubscriberName + ", new=" + newSubscriberName);
@@ -223,20 +224,20 @@ public class ModifySubscriber implements HttpAction {
 
             // 5. Generate response
             if (updatesApplied) {
-                return new ModifySubscriberResponse("200",
+                return ResponseEntity.status(200).body(new ModifySubscriberResponse("200",
                         "AccountNumber successfully updated",
-                        Instant.now().toString());
+                        Instant.now().toString()));
             } else {
-                return new ModifySubscriberResponse("404",
+                return ResponseEntity.status(404).body(new ModifySubscriberResponse("404",
                         ERROR_PREFIX + "Error, No Account found.",
-                        Instant.now().toString());
+                        Instant.now().toString()));
             }
 
         } catch (Exception ex) {
             log.error("Unhandled exception in ModifySubscriber", ex);
-            return new ModifySubscriberResponse("500",
+            return ResponseEntity.status(500).body(new ModifySubscriberResponse("500",
                     ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
-                    Instant.now().toString());
+                    Instant.now().toString()));
         }
     }
 }

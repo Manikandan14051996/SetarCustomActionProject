@@ -14,6 +14,7 @@ import com.nokia.nsw.uiv.model.resource.logical.LogicalDevice;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -55,12 +56,12 @@ public class QueryAllEquipment implements HttpAction {
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             } catch (BadRequestException bre) {
 
-                return new QueryAllEquipmentResponse(
+                return ResponseEntity.status(400).body(new QueryAllEquipmentResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
                         Instant.now().toString(),
                         deviceData
-                );
+                ));
             }
 
             // Step 2: Build RFS Name
@@ -69,12 +70,12 @@ public class QueryAllEquipment implements HttpAction {
             // Step 4: Fetch RFS
             Optional<Service> optRfs = serviceCustomRepository.findByDiscoveredName(rfsName);
             if (!optRfs.isPresent()) {
-                return new QueryAllEquipmentResponse(
+                return ResponseEntity.status(404).body(new QueryAllEquipmentResponse(
                         "404",
                         ERROR_PREFIX + "No entry found for delete",
                         Instant.now().toString(),
                         deviceData
-                );
+                ));
             }
             Service rfs = optRfs.get();
 
@@ -114,12 +115,12 @@ public class QueryAllEquipment implements HttpAction {
             }
 
             if (!successFlag) {
-                return new QueryAllEquipmentResponse(
+                return ResponseEntity.status(500).body(new QueryAllEquipmentResponse(
                         "500",
                         ERROR_PREFIX + "Error, Equipment Not Queried",
                         Instant.now().toString(),
                         deviceData
-                );
+                ));
             }
             log.error(Constants.ACTION_COMPLETED);
             response.setEquipmentsInfo(deviceData);
@@ -127,12 +128,12 @@ public class QueryAllEquipment implements HttpAction {
 
         } catch (Exception ex) {
             log.error("Unhandled exception in QueryAllEquipment", ex);
-            return new QueryAllEquipmentResponse(
+            return ResponseEntity.status(500).body(new QueryAllEquipmentResponse(
                     "500",
                     ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
                     Instant.now().toString(),
                     deviceData
-            );
+            ));
         }
     }
 }

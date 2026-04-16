@@ -17,6 +17,7 @@ import com.nokia.nsw.uiv.model.service.Subscription;
 import com.nokia.nsw.uiv.model.resource.logical.LogicalDevice;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -59,8 +60,8 @@ public class QueryService implements HttpAction {
             try {
                 Validations.validateMandatory(request.getServiceId(), "serviceId");
             } catch (BadRequestException bre) {
-                return new QueryServiceResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                        Instant.now().toString(), false, "Missing parameter");
+                return ResponseEntity.status(400).body(new QueryServiceResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
+                        Instant.now().toString(), false, "Missing parameter"));
             }
 
             String serviceId = request.getServiceId().trim();
@@ -92,8 +93,8 @@ public class QueryService implements HttpAction {
 
             if (cfsNameSet.isEmpty()) {
                 log.error("No matching CFS found for serviceId {}", serviceId);
-                return new QueryServiceResponse("404", "No IPTV Service Details Found.",
-                        Instant.now().toString(), false, "No CFS match found");
+                return ResponseEntity.status(404).body(new QueryServiceResponse("404", "No IPTV Service Details Found.",
+                        Instant.now().toString(), false, "No CFS match found"));
             }
 
             // Step 3: For each CFS, fetch linked data
@@ -122,8 +123,8 @@ public class QueryService implements HttpAction {
                     if (prod.getSubscription() != null && prod.getCustomer() != null)
                         optCust = Optional.ofNullable(prod.getCustomer());
                 }else {
-                    return new QueryServiceResponse("404", "No entry found to update.",
-                            Instant.now().toString(), true, iptvinfo);
+                    return ResponseEntity.status(404).body(new QueryServiceResponse("404", "No entry found to update.",
+                            Instant.now().toString(), true, iptvinfo));
                 }
 
                 // Step 4: Populate Subscription details
@@ -288,13 +289,13 @@ public class QueryService implements HttpAction {
             }
 
             // Step 7: Build final success response
-            return new QueryServiceResponse("200", "IPTV Service Details Found.",
-                    Instant.now().toString(), true, iptvinfo);
+            return ResponseEntity.status(200).body(new QueryServiceResponse("200", "IPTV Service Details Found.",
+                    Instant.now().toString(), true, iptvinfo));
 
         } catch (Exception ex) {
             log.error("Error executing QueryService", ex);
-            return new QueryServiceResponse("500", ERROR_PREFIX + "Internal server error - " + ex.getMessage(),
-                    Instant.now().toString(), false, null);
+            return ResponseEntity.status(500).body(new QueryServiceResponse("500", ERROR_PREFIX + "Internal server error - " + ex.getMessage(),
+                    Instant.now().toString(), false, null));
         }
     }
 }

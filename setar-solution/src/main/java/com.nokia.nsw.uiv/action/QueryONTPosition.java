@@ -14,6 +14,7 @@ import com.nokia.nsw.uiv.utils.Validations;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -52,12 +53,12 @@ public class QueryONTPosition implements HttpAction {
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             } catch (Exception bre) {
                 log.error("------------Trace # 2--------------- Missing param: " + bre.getMessage());
-                return new QueryONTPositionResponse(
+                return ResponseEntity.status(400).body(new QueryONTPositionResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
                         Instant.now().toString(),
                         ""
-                );
+                ));
             }
 
             String ontSn = req.getOntSn();
@@ -69,24 +70,24 @@ public class QueryONTPosition implements HttpAction {
 
             if (ontName.length() > 100) {
                 log.error("------------Trace # 5--------------- ONT name too long");
-                return new QueryONTPositionResponse(
+                return ResponseEntity.status(400).body(new QueryONTPositionResponse(
                         "400",
                         ERROR_PREFIX + "ONT name too long.",
                         Instant.now().toString(),
                         ""
-                );
+                ));
             }
 
             // 3. Locate ONT
             Optional<LogicalDevice> ontOpt = ontRepo.findByDiscoveredName(ontName);
             if (!ontOpt.isPresent()) {
                 log.error("------------Trace # 6--------------- No ONT found with name=" + ontName);
-                return new QueryONTPositionResponse(
+                return ResponseEntity.status(404).body(new QueryONTPositionResponse(
                         "404",
                         ERROR_PREFIX + "No ONT found.",
                         Instant.now().toString(),
                         ""
-                );
+                ));
             }
 
             LogicalDevice ont = ontOpt.get();
@@ -97,21 +98,21 @@ public class QueryONTPosition implements HttpAction {
             try {
                 olt= managingDevices.stream().findFirst().get();
             } catch (Exception e) {
-                return new QueryONTPositionResponse(
+                return ResponseEntity.status(404).body(new QueryONTPositionResponse(
                         "404",
                         ERROR_PREFIX + "No ONT Object ID found.",
                         Instant.now().toString(),
                         ""
-                );
+                ));
             }
             if (olt == null) {
                 log.error("------------Trace # 8--------------- No OLT linked to ONT=" + ontName);
-                return new QueryONTPositionResponse(
+                return ResponseEntity.status(404).body(new QueryONTPositionResponse(
                         "404",
                         ERROR_PREFIX + "No ONT Object ID found.",
                         Instant.now().toString(),
                         ""
-                );
+                ));
             }
 
             // 4. Determine OLT Object ID
@@ -122,33 +123,33 @@ public class QueryONTPosition implements HttpAction {
 
             if (objectId == null || objectId.isEmpty()) {
                 log.error("------------Trace # 9--------------- OLT Object ID is empty");
-                return new QueryONTPositionResponse(
+                return ResponseEntity.status(404).body(new QueryONTPositionResponse(
                         "404",
                         ERROR_PREFIX + "No ONT Object ID found.",
                         Instant.now().toString(),
                         ""
-                );
+                ));
             }
 
             log.error("------------Trace # 10--------------- Resolved OLT Object ID=" + objectId);
 
             // 5. Success response
             log.error(Constants.ACTION_COMPLETED);
-            return new QueryONTPositionResponse(
+            return ResponseEntity.status(200).body(new QueryONTPositionResponse(
                     "200",
                     "UIV action QueryONTPosition executed successfully.",
                     Instant.now().toString(),
                     objectId
-            );
+            ));
 
         } catch (Exception ex) {
             log.error("Unhandled exception in QueryONTPosition", ex);
-            return new QueryONTPositionResponse(
+            return ResponseEntity.status(500).body(new QueryONTPositionResponse(
                     "500",
                     ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
                     Instant.now().toString(),
                     ""
-            );
+            ));
         }
     }
 }

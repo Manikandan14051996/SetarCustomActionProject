@@ -15,6 +15,7 @@ import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -51,8 +52,8 @@ public class QueryProductSubscription implements HttpAction {
                 Validations.validateMandatoryParams(request.getProductType(), "productType");
                 Validations.validateMandatoryParams(request.getComponentName(), "componentName");
             }catch (BadRequestException bre) {
-                return new QueryProductSubscriptionResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                        java.time.Instant.now().toString(), "","");
+                return ResponseEntity.status(400).body(new QueryProductSubscriptionResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
+                        java.time.Instant.now().toString(), "",""));
             }
 
 
@@ -76,30 +77,30 @@ public class QueryProductSubscription implements HttpAction {
 
                 log.error("Product Subscription found: {} with ID {}", productName, productId);
 
-                return new QueryProductSubscriptionResponse(
+                return ResponseEntity.status(200).body(new QueryProductSubscriptionResponse(
                         "200",
                         "UIV action QueryProductSubscription executed successfully.",
                         java.time.Instant.now().toString(),
                         productName,
                         productId
-                );
+                ));
             } else {
                 log.error("Product Subscription not found: {}", productName);
                 String msg = "UIV action QueryProductSubscription execution failed - " +
                         "Error, Product Subscription with name " + productName + " not found.";
-                return new QueryProductSubscriptionResponse("404", msg,
-                        java.time.Instant.now().toString(), "", "");
+                return ResponseEntity.status(404).body(new QueryProductSubscriptionResponse("404", msg,
+                        java.time.Instant.now().toString(), "", ""));
             }
 
         } catch (BadRequestException bre) {
             String msg = "UIV action QueryProductSubscription execution failed - "+bre.getMessage();
-            return new QueryProductSubscriptionResponse("400",msg,
-                    java.time.Instant.now().toString(), "", "");
+            return ResponseEntity.status(400).body(new QueryProductSubscriptionResponse("400",msg,
+                    java.time.Instant.now().toString(), "", ""));
         } catch (Exception ex) {
             log.error("Unhandled exception during QueryProductSubscription", ex);
             String msg = "UIV action QueryProductSubscription execution failed - Internal server error occurred";
-            return new QueryProductSubscriptionResponse("500", msg + " - " + ex.getMessage(),
-                    java.time.Instant.now().toString(), "", "");
+            return ResponseEntity.status(500).body(new QueryProductSubscriptionResponse("500", msg + " - " + ex.getMessage(),
+                    java.time.Instant.now().toString(), "", ""));
         }
     }
 }
