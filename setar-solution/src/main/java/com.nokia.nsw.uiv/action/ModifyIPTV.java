@@ -21,6 +21,7 @@ import com.nokia.nsw.uiv.utils.Validations;
 import com.nokia.nsw.uiv.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -79,8 +80,8 @@ public class ModifyIPTV implements HttpAction {
                 Validations.validateMandatoryParams(request.getModifyType(), "modifyType");
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             }catch (BadRequestException bre) {
-                return new ModifyIPTVResponse("400", ERROR_PREFIX + bre.getMessage(),
-                        java.time.Instant.now().toString(), "","");
+                return ResponseEntity.status(400).body(new ModifyIPTVResponse("400", ERROR_PREFIX + bre.getMessage(),
+                        java.time.Instant.now().toString(), "",""));
             }
             String subscriberName = request.getSubscriberName();
             String subscriptionName = subscriberName + Constants.UNDER_SCORE  + request.getServiceId();
@@ -91,35 +92,35 @@ public class ModifyIPTV implements HttpAction {
 
             if (subscriptionName.length() > 100) {
                 log.warn("Subscription name too long: {}", subscriptionName.length());
-                return new ModifyIPTVResponse(
+                return ResponseEntity.status(400).body(new ModifyIPTVResponse(
                         "400",
                         ERROR_PREFIX + "Subscription name too long",
                         String.valueOf(System.currentTimeMillis()),
                         "",
                         ""
-                );
+                ));
             }
 
             if (productName.length() > 100) {
                 log.warn("Product name too long: {}", productName.length());
-                return new ModifyIPTVResponse(
+                return ResponseEntity.status(400).body(new ModifyIPTVResponse(
                         "400",
                         ERROR_PREFIX + "Product name too long",
                         String.valueOf(System.currentTimeMillis()),
                         "",
                         ""
-                );
+                ));
             }
 
             if (cbmDeviceName.length() > 100) {
                 log.warn("CBM Device name too long: {}", cbmDeviceName.length());
-                return new ModifyIPTVResponse(
+                return ResponseEntity.status(400).body(new ModifyIPTVResponse(
                         "400",
                         ERROR_PREFIX + "CBM device name too long",
                         String.valueOf(System.currentTimeMillis()),
                         "",
                         ""
-                );
+                ));
             }
             // -------------------- Fetch entities --------------------
             Optional<Customer> optSubscriber = customerRepository.findByDiscoveredName(subscriberName);
@@ -129,13 +130,13 @@ public class ModifyIPTV implements HttpAction {
             Optional<Service> optRFS = serviceCustomRepository.findByDiscoveredName(rfsName);
 
             if (optSubscriber.isEmpty() || optSubscription.isEmpty() || optProduct.isEmpty() || optCFS.isEmpty() || optRFS.isEmpty()) {
-                return new ModifyIPTVResponse(
+                return ResponseEntity.status(404).body(new ModifyIPTVResponse(
                         "404",
                         ERROR_PREFIX + "One or more required objects (Subscriber, Subscription, Product, CFS, RFS) not found",
                         String.valueOf(System.currentTimeMillis()),
                         "",
                         ""
-                );
+                ));
             }
 
             Customer subscriber = optSubscriber.get();
@@ -265,22 +266,22 @@ public class ModifyIPTV implements HttpAction {
 
         } catch (IllegalArgumentException ex) {
             log.error("Mandatory validation failed", ex);
-            return new ModifyIPTVResponse(
+            return ResponseEntity.status(400).body(new ModifyIPTVResponse(
                     "400",
                     ERROR_PREFIX + "Missing mandatory parameter: " + ex.getMessage(),
                     String.valueOf(System.currentTimeMillis()),
                     "",
                     ""
-            );
+            ));
         } catch (Exception ex) {
             log.error("ModifyIPTV failed", ex);
-            return new ModifyIPTVResponse(
+            return ResponseEntity.status(500).body(new ModifyIPTVResponse(
                     "500",
                     ERROR_PREFIX + "IPTV request " + request.getModifyType() + " not executed",
                     String.valueOf(System.currentTimeMillis()),
                     "",
                     ""
-            );
+            ));
         }
     }
 }

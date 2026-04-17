@@ -27,6 +27,7 @@ import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.jcodings.util.Hash;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -96,8 +97,8 @@ public class ModifySPR implements HttpAction {
                 Validations.validateLength(subscriberName, "Subscriber");
                 Validations.validateLength(subscriptionName, "Subscription");
             } catch (BadRequestException bre) {
-                return new ModifySPRResponse("400", ERROR_PREFIX + bre.getMessage(),
-                        Instant.now().toString(), "", "");
+                return ResponseEntity.status(400).body(new ModifySPRResponse("400", ERROR_PREFIX + bre.getMessage(),
+                        Instant.now().toString(), "", ""));
             }
 
 
@@ -131,7 +132,7 @@ public class ModifySPR implements HttpAction {
             } catch (BadRequestException bre) {
                 log.error("Validation or not found error: {}", bre.getMessage(), bre);
                 String msg = ERROR_PREFIX + bre.getMessage();
-                return new ModifySPRResponse("400", msg, getCurrentTimestamp(), "", "");
+                return  ResponseEntity.status(400).body(new ModifySPRResponse("400", msg, getCurrentTimestamp(), "", ""));
             }
             Subscription updatedSubscription = subscriptionRepository.findById(subscription.getUuid())
                     .orElse(subscription); // fallback to original if somehow missing
@@ -154,15 +155,15 @@ public class ModifySPR implements HttpAction {
         } catch (BadRequestException bre) {
             log.error("Validation or not found error: {}", bre.getMessage(), bre);
             String msg = ERROR_PREFIX + bre.getMessage();
-            return new ModifySPRResponse("400", msg, getCurrentTimestamp(), "", "");
+            return ResponseEntity.status(400).body(new ModifySPRResponse("400", msg, getCurrentTimestamp(), "", ""));
         } catch (ModificationNotAllowedException ex) {
             log.error("Persistence error: {}", ex.getMessage(), ex);
             String msg = ERROR_PREFIX + ex.getMessage();
-            return new ModifySPRResponse("500", msg, getCurrentTimestamp(), "", "");
+            return ResponseEntity.status(500).body(new ModifySPRResponse("500", msg, getCurrentTimestamp(), "", ""));
         } catch (Exception ex) {
             log.error("Unhandled exception during ModifySPR", ex);
             String msg = ERROR_PREFIX + "Internal server error occurred";
-            return new ModifySPRResponse("500", msg, getCurrentTimestamp(), "", "");
+            return ResponseEntity.status(500).body(new ModifySPRResponse("500", msg, getCurrentTimestamp(), "", ""));
         }
     }
 

@@ -18,6 +18,7 @@ import com.nokia.nsw.uiv.model.common.party.CustomerRepository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -67,21 +68,21 @@ public class ModifyServiceId implements HttpAction {
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             } catch (Exception bre) {
                 log.error("------------Test Trace # 2--------------- Missing mandatory param: " + bre.getMessage());
-                return new ModifyServiceIdResponse(
+                return ResponseEntity.status(400).body(new ModifyServiceIdResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
                         Instant.now().toString()
-                );
+                ));
             }
             try {
                 Validations.validateLength(req.getServiceId(), "Existing Entity");
                 Validations.validateLength(req.getServiceIdNew(), "New Entity");
             } catch (Exception bre) {
-                return new ModifyServiceIdResponse(
+                return ResponseEntity.status(400).body( new ModifyServiceIdResponse(
                         "400",
                         ERROR_PREFIX  + bre.getMessage(),
                         Instant.now().toString()
-                );
+                ));
             }
             String oldServiceId = req.getServiceId();
             String newServiceId = req.getServiceIdNew();
@@ -247,16 +248,16 @@ public class ModifyServiceId implements HttpAction {
                         "ServiceID successfully updated",
                         Instant.now().toString());
             } else {
-                return new ModifyServiceIdResponse("404",
+                return ResponseEntity.status(404).body(new ModifyServiceIdResponse("404",
                         ERROR_PREFIX + "Error, No Service found.",
-                        Instant.now().toString());
+                        Instant.now().toString()));
             }
 
         } catch (Exception ex) {
             log.error("Unhandled exception in ModifyServiceId", ex);
-            return new ModifyServiceIdResponse("500",
+            return ResponseEntity.status(500).body(new ModifyServiceIdResponse("500",
                     ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
-                    Instant.now().toString());
+                    Instant.now().toString()));
         }
     }
 }
