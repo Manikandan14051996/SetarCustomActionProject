@@ -157,7 +157,7 @@ public class QueryServicesInfo implements HttpAction {
 
             // 4) Prepare working space (collectors & flags)
             boolean success = true;
-            int p = 1, q = 1, r = 1, s = 1, u = 1; // counters
+            int p = 1, q = 1, r = 1, s = 1, u = 1,b=1; // counters
             Map<String, Object> allvalues = new LinkedHashMap<>();
 
             // 5) For each service
@@ -373,8 +373,8 @@ public class QueryServicesInfo implements HttpAction {
                     }
 
                     // 5.4 Choose sname and ordinal t
-                    String sname;
-                    int t;
+                    String sname = "";
+                    int t = 0;
                     String serviceSubType = (setarSubscription == null) ? "" : String.valueOf(setarSubscription.getProperties() == null ? "" : setarSubscription.getProperties().getOrDefault("serviceSubType", ""));
                     String serviceSubTypeLower = serviceSubType == null ? "" : serviceSubType.toLowerCase();
                     String serviceTypeLower = serviceType == null ? "" : serviceType.toLowerCase();
@@ -400,9 +400,9 @@ public class QueryServicesInfo implements HttpAction {
                     } else if (serviceSubTypeLower.contains("cloudstarter")) {
                         sname = "CLOUDSTARTER";
                         t = u;
-                    } else {
-                        sname = "SERVICE";
-                        t = 1;
+                    } else if(serviceSubTypeLower.contains("bridged")){
+                        sname = "BRIDGED";
+                        t = b;
                     }
 
                     String prefix = sname + Constants.UNDER_SCORE + t + Constants.UNDER_SCORE;
@@ -415,7 +415,8 @@ public class QueryServicesInfo implements HttpAction {
                             serviceTypeLower.contains("voice") ||
                             serviceTypeLower.contains("evpn") ||
                             serviceTypeLower.contains("enterprise") ||
-                            serviceSubTypeLower.contains("cloudstarter");
+                            serviceSubTypeLower.contains("cloudstarter")||
+                            serviceSubTypeLower.contains("bridged");
 
                     if (!applicableType) {
                         log.debug("Service type/subtype not in output set; skipping detailed output for RFS '{}'", rfsnameget);
@@ -426,6 +427,7 @@ public class QueryServicesInfo implements HttpAction {
                         else if (serviceTypeLower.contains("voip") || serviceType.equalsIgnoreCase("Voice")) r++;
                         else if (serviceTypeLower.contains("evpn") || serviceTypeLower.contains("enterprise")) s++;
                         else if (serviceSubTypeLower.contains("cloudstarter")) u++;
+                        else if (serviceSubTypeLower.contains("bridged")) b++;
                         continue;
                     }
 
@@ -549,7 +551,7 @@ public class QueryServicesInfo implements HttpAction {
                     }
 
                     // EVPN / Enterprise / Cloudstarter
-                    if (serviceTypeLower.contains("evpn") || serviceTypeLower.contains("enterprise") && serviceSubTypeLower.contains("cloudstarter")) {
+                    if (serviceTypeLower.contains("evpn") || serviceTypeLower.contains("enterprise") && serviceSubTypeLower.contains("cloudstarter")||serviceSubTypeLower.contains("bridged")) {
                         if (setarServiceLink != null && setarServiceLink.equalsIgnoreCase("ONT")) {
                             // Evpn templates on oltDevice
                             if (oltDevice != null && oltDevice.getProperties() != null) {
@@ -634,6 +636,7 @@ public class QueryServicesInfo implements HttpAction {
                     else if (serviceTypeLower.contains("voip") || serviceType.equalsIgnoreCase("Voice")) r++;
                     else if (serviceTypeLower.contains("evpn") || serviceTypeLower.contains("enterprise")) s++;
                     else if (serviceSubTypeLower.contains("cloudstarter")) u++;
+                    else if (serviceSubTypeLower.contains("bridged")) b++;
 
                 } catch (Exception svcEx) {
                     log.error("Error processing RFS {}", rfs.getDiscoveredName(), svcEx);
