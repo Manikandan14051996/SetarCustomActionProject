@@ -17,6 +17,7 @@ import com.nokia.nsw.uiv.repository.*;
 import com.nokia.nsw.uiv.request.QueryEquipmentRequest;
 import com.nokia.nsw.uiv.response.QueryEquipmentResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -183,7 +184,7 @@ public class QueryEquipment implements HttpAction {
             // 5. Prepare response
             QueryEquipmentResponse response = new QueryEquipmentResponse();
             response.setSubscriptionId(subscriptionName);
-            response.setTimestamp(new Date().toString());
+            response.setTimestamp(DateTimeUtil.now());
 
 
             // Map APs
@@ -234,7 +235,7 @@ public class QueryEquipment implements HttpAction {
         QueryEquipmentResponse resp = new QueryEquipmentResponse();
         resp.setStatus(code);
         resp.setMessage("QueryEquipment execution failed - " + message);
-        resp.setTimestamp(new Date().toString());
+        resp.setTimestamp(DateTimeUtil.now());
         resp.setSubscriptionId(null);
         resp.setApSn1(null);
         resp.setApSn2(null);

@@ -16,6 +16,7 @@ import com.nokia.nsw.uiv.repository.SubscriptionCustomRepository;
 import com.nokia.nsw.uiv.request.CreateProductSubscriptionRequest;
 import com.nokia.nsw.uiv.response.CreateProductSubscriptionResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +71,7 @@ public class CreateProductSubscription implements HttpAction {
                 Validations.validateMandatoryParams(request.getReferenceID(), "referenceID");
             } catch (BadRequestException bre) {
                 return ResponseEntity.status(400).body(new CreateProductSubscriptionResponse("400", ERROR_PREFIX + bre.getMessage(),
-                        Instant.now().toString(), "", ""));
+                        DateTimeUtil.now(), "", ""));
             }
 
             log.error("Mandatory parameter validation completed");
@@ -181,7 +182,7 @@ public class CreateProductSubscription implements HttpAction {
             }
             if (isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()) {
                 log.error("createServiceEVPN service already exist");
-                return ResponseEntity.status(409).body(new CreateProductSubscriptionResponse("409", "Service already exist/Duplicate entry", Instant.now().toString(), subscriptionName, productName));
+                return ResponseEntity.status(409).body(new CreateProductSubscriptionResponse("409", "Service already exist/Duplicate entry", DateTimeUtil.now(), subscriptionName, productName));
             }
             if(isSubscriptionExist.get()){
                 subscription = subscriptionRepository.findByDiscoveredName(subscription.getDiscoveredName()).get();
@@ -197,21 +198,21 @@ public class CreateProductSubscription implements HttpAction {
             return ResponseEntity.status(201).body(new CreateProductSubscriptionResponse(
                     "201",
                     "ProductSubscription created",
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     subscriptionName,
                     productName
             ));
 
         } catch (BadRequestException bre) {
             String msg = "UIV action CreateProductSubscription execution failed - " + bre.getMessage();
-            return ResponseEntity.status(400).body(new CreateProductSubscriptionResponse("400", msg, Instant.now().toString(), "", ""));
+            return ResponseEntity.status(400).body(new CreateProductSubscriptionResponse("400", msg, DateTimeUtil.now(), "", ""));
         } catch (AccessForbiddenException | ModificationNotAllowedException ex) {
             String msg = "UIV action CreateProductSubscription execution failed - " + ex.getMessage();
-            return ResponseEntity.status(403).body(new CreateProductSubscriptionResponse("403", msg, Instant.now().toString(), "", ""));
+            return ResponseEntity.status(403).body(new CreateProductSubscriptionResponse("403", msg, DateTimeUtil.now(), "", ""));
         } catch (Exception ex) {
             String msg = "UIV action CreateProductSubscription execution failed - Internal server error occurred";
             return ResponseEntity.status(500).body(new CreateProductSubscriptionResponse("500", msg + " - " + ex.getMessage(),
-                    Instant.now().toString(), "", ""));
+                    DateTimeUtil.now(), "", ""));
         }
     }
 }

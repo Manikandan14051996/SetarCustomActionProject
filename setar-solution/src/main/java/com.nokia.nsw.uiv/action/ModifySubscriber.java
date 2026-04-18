@@ -9,6 +9,7 @@ import com.nokia.nsw.uiv.repository.*;
 import com.nokia.nsw.uiv.request.ModifySubscriberRequest;
 import com.nokia.nsw.uiv.response.ModifySubscriberResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 
 import com.nokia.nsw.uiv.model.service.Subscription;
@@ -65,7 +66,7 @@ public class ModifySubscriber implements HttpAction {
                 return ResponseEntity.status(400).body(new ModifySubscriberResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
-                        Instant.now().toString()
+                        DateTimeUtil.now()
                 ));
             }
 
@@ -79,7 +80,7 @@ public class ModifySubscriber implements HttpAction {
                 return ResponseEntity.status(400).body(new ModifySubscriberResponse(
                         "400",
                         ERROR_PREFIX + bre.getMessage(),
-                        Instant.now().toString()
+                        DateTimeUtil.now()
                 ));
             }
 
@@ -226,18 +227,18 @@ public class ModifySubscriber implements HttpAction {
             if (updatesApplied) {
                 return ResponseEntity.status(200).body(new ModifySubscriberResponse("200",
                         "AccountNumber successfully updated",
-                        Instant.now().toString()));
+                        DateTimeUtil.now()));
             } else {
                 return ResponseEntity.status(404).body(new ModifySubscriberResponse("404",
                         ERROR_PREFIX + "Error, No Account found.",
-                        Instant.now().toString()));
+                        DateTimeUtil.now()));
             }
 
         } catch (Exception ex) {
             log.error("Unhandled exception in ModifySubscriber", ex);
             return ResponseEntity.status(500).body(new ModifySubscriberResponse("500",
                     ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
-                    Instant.now().toString()));
+                    DateTimeUtil.now()));
         }
     }
 }

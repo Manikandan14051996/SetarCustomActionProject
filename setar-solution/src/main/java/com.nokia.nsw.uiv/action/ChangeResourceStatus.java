@@ -10,6 +10,7 @@ import com.nokia.nsw.uiv.repository.LogicalDeviceCustomRepository;
 import com.nokia.nsw.uiv.request.ChangeResourceStatusRequest;
 import com.nokia.nsw.uiv.response.ChangeResourceStatusResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 
 
@@ -59,7 +60,7 @@ public class ChangeResourceStatus implements HttpAction {
                 return ResponseEntity.status(400).body(new ChangeResourceStatusResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         "", "", "", "", ""
                 ));
             }
@@ -82,7 +83,7 @@ public class ChangeResourceStatus implements HttpAction {
                 return ResponseEntity.status(404).body(new ChangeResourceStatusResponse(
                         "404",
                         ERROR_PREFIX + type + sn + " not found",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         sn, "", "", "", type
                 ));
             }
@@ -100,7 +101,7 @@ public class ChangeResourceStatus implements HttpAction {
                 return ResponseEntity.status(404).body(new ChangeResourceStatusResponse(
                         "404",
                         ERROR_PREFIX + "No change required. Resource already in status " + targetStatus,
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         sn, mac, currentStatus, model, type
                 ));
             }
@@ -116,7 +117,7 @@ public class ChangeResourceStatus implements HttpAction {
             return new ChangeResourceStatusResponse(
                     "200",
                     "UIV action ChangeResourceStatus executed successfully.",
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     sn,
                     mac,
                     targetStatus,
@@ -129,7 +130,7 @@ public class ChangeResourceStatus implements HttpAction {
             return ResponseEntity.status(500).body(new ChangeResourceStatusResponse(
                     "500",
                     ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     "", "", "", "", ""
             ));
         }

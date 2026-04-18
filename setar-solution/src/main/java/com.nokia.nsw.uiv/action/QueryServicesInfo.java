@@ -16,6 +16,7 @@ import com.nokia.nsw.uiv.request.QueryServicesInfoRequest;
 import com.nokia.nsw.uiv.response.CreateServiceIPTVResponse;
 import com.nokia.nsw.uiv.response.QueryServicesInfoResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +74,7 @@ public class QueryServicesInfo implements HttpAction {
             } catch (BadRequestException bre) {
                 log.error("QueryServicesInfo start: subscriberName='{}', ontSN='{}'", request.getSubscriberName(), request.getOntSn());
                 return ResponseEntity.status(400).body(new CreateServiceIPTVResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                        Instant.now().toString(), "", ""));
+                        DateTimeUtil.now(), "", ""));
             }
             // 1) Input validations (both optional but at least one required)
             String accno = request.getSubscriberName();
@@ -653,7 +654,7 @@ public class QueryServicesInfo implements HttpAction {
             QueryServicesInfoResponse resp = new QueryServicesInfoResponse();
             resp.setStatus("200");
             resp.setMessage("Service Details Found.");
-            resp.setTimestamp(Instant.now().toString());
+            resp.setTimestamp(DateTimeUtil.now());
             resp.setStructuredObject(allvalues);
             return resp;
 
@@ -667,7 +668,7 @@ public class QueryServicesInfo implements HttpAction {
         QueryServicesInfoResponse resp = new QueryServicesInfoResponse();
         resp.setStatus(status);
         resp.setMessage(message);
-        resp.setTimestamp(Instant.now().toString());
+        resp.setTimestamp(DateTimeUtil.now());
         resp.setStructuredObject(Collections.emptyMap());
         return resp;
     }

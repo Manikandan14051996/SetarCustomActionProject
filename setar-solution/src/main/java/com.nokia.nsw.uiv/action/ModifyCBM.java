@@ -13,6 +13,7 @@ import com.nokia.nsw.uiv.repository.*;
 import com.nokia.nsw.uiv.request.ModifyCBMRequest;
 import com.nokia.nsw.uiv.response.ModifyCBMResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +72,7 @@ public class ModifyCBM implements HttpAction {
             } catch (BadRequestException bre) {
                 return ResponseEntity.status(400).body(new ModifyCBMResponse("400",
                         ERROR_PREFIX + bre.getMessage(),
-                        getCurrentTimestamp(), "", ""));
+                        DateTimeUtil.now(), "", ""));
             }
 
             //Extract optional parameters
@@ -134,16 +135,16 @@ public class ModifyCBM implements HttpAction {
                         customerCustomRepository.save(customer);
                         subscriber = Optional.of(customer);
                     } else {
-                        return ResponseEntity.status(409).body(new ModifyCBMResponse("409", ERROR_PREFIX + "Customer not active", String.valueOf(System.currentTimeMillis()), "", ""));
+                        return ResponseEntity.status(409).body(new ModifyCBMResponse("409", ERROR_PREFIX + "Customer not active", DateTimeUtil.now(), "", ""));
                     }
                 } else {
-                    return ResponseEntity.status(409).body(new ModifyCBMResponse("409", ERROR_PREFIX + "No entry found to modify Customer", String.valueOf(System.currentTimeMillis()), "", ""));
+                    return ResponseEntity.status(409).body(new ModifyCBMResponse("409", ERROR_PREFIX + "No entry found to modify Customer", DateTimeUtil.now(), "", ""));
                 }
             }
 
             Optional<Subscription> optSubsc = subscriptionRepository.findByDiscoveredName(subscriptionName);
             if (optSubsc.isEmpty()) {
-                return ResponseEntity.status(409).body(new ModifyCBMResponse("409", ERROR_PREFIX + "No entry found to modify Subscription: " + subscriptionName, String.valueOf(System.currentTimeMillis()), "", ""));
+                return ResponseEntity.status(409).body(new ModifyCBMResponse("409", ERROR_PREFIX + "No entry found to modify Subscription: " + subscriptionName, DateTimeUtil.now(), "", ""));
             }
             Subscription subscription = optSubsc.get();
 
@@ -155,13 +156,13 @@ public class ModifyCBM implements HttpAction {
 
             Optional<Service> optRfs = serviceCustomRepository.findByDiscoveredName(rfsName);
             if (optRfs.isEmpty()) {
-                return ResponseEntity.status(409).body(new ModifyCBMResponse("409", ERROR_PREFIX + "No entry found to modify RFS: " + rfsName, String.valueOf(System.currentTimeMillis()), "", ""));
+                return ResponseEntity.status(409).body(new ModifyCBMResponse("409", ERROR_PREFIX + "No entry found to modify RFS: " + rfsName, DateTimeUtil.now(), "", ""));
             }
             Service rfs = optRfs.get();
 
             Optional<LogicalDevice> optCbm = logicalDeviceRepository.findByDiscoveredName(cbmDeviceName);
             if (optCbm.isEmpty()) {
-                return new ModifyCBMResponse("409", ERROR_PREFIX + "No entry found to modify CBM device: " + cbmDeviceName, String.valueOf(System.currentTimeMillis()), "", "");
+                return new ModifyCBMResponse("409", ERROR_PREFIX + "No entry found to modify CBM device: " + cbmDeviceName, DateTimeUtil.now(), "", "");
             }
             LogicalDevice cbmDevice = optCbm.get();
 
@@ -265,7 +266,7 @@ public class ModifyCBM implements HttpAction {
                     } catch (Exception ex) {
                         log.error("Error updating MAC/Gateway", ex);
                         String msg = ERROR_PREFIX + "Error, ModifyCableModem request " + input.getModifyType() + " not executed";
-                        return ResponseEntity.status(500).body(new ModifyCBMResponse("500", msg + " - " + ex.getMessage(), String.valueOf(Instant.now().toEpochMilli()), "", ""));
+                        return ResponseEntity.status(500).body(new ModifyCBMResponse("500", msg + " - " + ex.getMessage(), DateTimeUtil.now(), "", ""));
                     }
                 }
 
@@ -311,7 +312,7 @@ public class ModifyCBM implements HttpAction {
                     } catch (Exception ex) {
                         log.error("Error migrating broadband ports", ex);
                         String msg = ERROR_PREFIX + "Error while migrating broadband ports";
-                        return ResponseEntity.status(500).body(new ModifyCBMResponse("500", msg + " - " + ex.getMessage(), String.valueOf(Instant.now().toEpochMilli()), "", ""));
+                        return ResponseEntity.status(500).body(new ModifyCBMResponse("500", msg + " - " + ex.getMessage(), DateTimeUtil.now(), "", ""));
                     }
                 }
 
@@ -330,7 +331,7 @@ public class ModifyCBM implements HttpAction {
                     } catch (Exception ex) {
                         log.error("Error updating package/components", ex);
                         String msg = ERROR_PREFIX + "Error updating package/components";
-                        return ResponseEntity.status(500).body(new ModifyCBMResponse("500", msg + " - " + ex.getMessage(), String.valueOf(Instant.now().toEpochMilli()), "", ""));
+                        return ResponseEntity.status(500).body(new ModifyCBMResponse("500", msg + " - " + ex.getMessage(),DateTimeUtil.now(), "", ""));
                     }
                 }
 
@@ -350,12 +351,12 @@ public class ModifyCBM implements HttpAction {
                             customerCustomRepository.save(customer);
                         } else {
                             String msg = ERROR_PREFIX + "Subscriber not found for password update";
-                            return ResponseEntity.status(409).body(new ModifyCBMResponse("409", msg, String.valueOf(Instant.now().toEpochMilli()), "", ""));
+                            return ResponseEntity.status(409).body(new ModifyCBMResponse("409", msg, DateTimeUtil.now(), "", ""));
                         }
                     } catch (Exception ex) {
                         log.error("Error updating email password", ex);
                         String msg = ERROR_PREFIX + "Error updating email password";
-                        return ResponseEntity.status(500).body(new ModifyCBMResponse("500", msg + " - " + ex.getMessage(), String.valueOf(Instant.now().toEpochMilli()), "", ""));
+                        return ResponseEntity.status(500).body(new ModifyCBMResponse("500", msg + " - " + ex.getMessage(), DateTimeUtil.now(), "", ""));
                     }
                 }
 
@@ -453,7 +454,7 @@ public class ModifyCBM implements HttpAction {
                     } catch (Exception ex) {
                         log.error("Error modifying service ID", ex);
                         String msg = ERROR_PREFIX + "Error modifying service ID";
-                        return ResponseEntity.status(500).body(new ModifyCBMResponse("500", msg + " - " + ex.getMessage(), String.valueOf(Instant.now().toEpochMilli()), "", ""));
+                        return ResponseEntity.status(500).body(new ModifyCBMResponse("500", msg + " - " + ex.getMessage(), DateTimeUtil.now(), "", ""));
                     }
                 }
             }
@@ -471,7 +472,7 @@ public class ModifyCBM implements HttpAction {
 
             return new ModifyCBMResponse("200",
                     "UIV action ModifyCBM executed successfully.",
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     outSubscriberId,
                     outSubscriptionId
             );
@@ -479,7 +480,7 @@ public class ModifyCBM implements HttpAction {
         } catch (Exception ex) {
             log.error("Unhandled exception during ModifyCBM", ex);
             String msg = ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage();
-            return ResponseEntity.status(500).body(new ModifyCBMResponse("500", msg, Instant.now().toString(), "", ""));
+            return ResponseEntity.status(500).body(new ModifyCBMResponse("500", msg, DateTimeUtil.now(), "", ""));
         }
     }
 
@@ -487,7 +488,7 @@ public class ModifyCBM implements HttpAction {
         return new ModifyCBMResponse(
                 String.valueOf(status),
                 ERROR_PREFIX + message,
-                Instant.now().toString(),
+                DateTimeUtil.now(),
                 "",
                 ""
         );

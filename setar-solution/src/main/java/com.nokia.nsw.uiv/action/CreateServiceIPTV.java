@@ -22,6 +22,7 @@ import com.nokia.nsw.uiv.model.resource.logical.LogicalInterfaceRepository;
 import com.nokia.nsw.uiv.request.CreateServiceIPTVRequest;
 import com.nokia.nsw.uiv.response.CreateServiceIPTVResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +90,7 @@ public class CreateServiceIPTV implements HttpAction {
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             }catch (BadRequestException bre) {
                 return ResponseEntity.status(400).body(new CreateServiceIPTVResponse("400", ERROR_PREFIX  + bre.getMessage(),
-                        Instant.now().toString(), "",""));
+                        DateTimeUtil.now(), "",""));
             }
             AtomicBoolean isSubscriberExist = new AtomicBoolean(true);
             AtomicBoolean isSubscriptionExist = new AtomicBoolean(true);
@@ -112,7 +113,7 @@ public class CreateServiceIPTV implements HttpAction {
                 Validations.validateLength(mgmtVlanName, "MgmtVlanName");
             }catch (BadRequestException bre){
                 return ResponseEntity.status(400).body(new CreateServiceIPTVResponse("400", ERROR_PREFIX +  bre.getMessage(),
-                        Instant.now().toString(), "",""));
+                        DateTimeUtil.now(), "",""));
             }
             // ------------------- Subscriber -------------------
             Optional<Customer> optSubscriber = customerRepository.findByDiscoveredName(subscriberName);
@@ -218,7 +219,7 @@ public class CreateServiceIPTV implements HttpAction {
             }
             if(isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()){
                 log.error("createServiceIPTV service already exist");
-                return ResponseEntity.status(409).body(new CreateServiceIPTVResponse("409","Service already exist/Duplicate entry",Instant.now().toString(),subscriptionName,"ONT" + request.getOntSN()));
+                return ResponseEntity.status(409).body(new CreateServiceIPTVResponse("409","Service already exist/Duplicate entry",DateTimeUtil.now(),subscriptionName,"ONT" + request.getOntSN()));
             }
             if(isSubscriptionExist.get()){
                 subscription = subscriptionRepository.findByDiscoveredName(subscription.getDiscoveredName()).get();
@@ -236,7 +237,7 @@ public class CreateServiceIPTV implements HttpAction {
             if (optCFS.isPresent()) {
                 cfs = optCFS.get();
                 log.error("CFS already exists: {}", cfsName);
-                return ResponseEntity.status(409).body(new CreateServiceIPTVResponse("409","CFS already exists/Duplicate entry",Instant.now().toString(),subscriptionName,"ONT" + request.getOntSN()));
+                return ResponseEntity.status(409).body(new CreateServiceIPTVResponse("409","CFS already exists/Duplicate entry",DateTimeUtil.now(),subscriptionName,"ONT" + request.getOntSN()));
             } else {
                 cfs = new Service();
                 cfs.setLocalName(Validations.encryptName(cfsName));
@@ -267,7 +268,7 @@ public class CreateServiceIPTV implements HttpAction {
             if (optRFS.isPresent()) {
                 rfs = optRFS.get();
                 log.error("RFS already exists: {}", rfsName);
-                return ResponseEntity.status(409).body(new CreateServiceIPTVResponse("409","RFS already exists/Duplicate entry",Instant.now().toString(),subscriptionName,"ONT" + request.getOntSN()));
+                return ResponseEntity.status(409).body(new CreateServiceIPTVResponse("409","RFS already exists/Duplicate entry",DateTimeUtil.now(),subscriptionName,"ONT" + request.getOntSN()));
             } else {
                 rfs = new Service();
                 rfs.setLocalName(Validations.encryptName(rfsName));
@@ -405,7 +406,7 @@ public class CreateServiceIPTV implements HttpAction {
             return ResponseEntity.status(201).body(new CreateServiceIPTVResponse(
                     "201",
                     "IPTV service created",
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     subscriptionName,
                     ontName
             ));
@@ -415,7 +416,7 @@ public class CreateServiceIPTV implements HttpAction {
             return ResponseEntity.status(400).body(new CreateServiceIPTVResponse(
                     "400",
                     ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                    String.valueOf(System.currentTimeMillis()),
+                    DateTimeUtil.now(),
                     "",
                     ""
             ));
@@ -424,7 +425,7 @@ public class CreateServiceIPTV implements HttpAction {
             return ResponseEntity.status(403).body(new CreateServiceIPTVResponse(
                     "403",
                     ERROR_PREFIX + ex.getMessage(),
-                    String.valueOf(System.currentTimeMillis()),
+                    DateTimeUtil.now(),
                     "",
                     ""
             ));
@@ -433,7 +434,7 @@ public class CreateServiceIPTV implements HttpAction {
             return ResponseEntity.status(500).body(new CreateServiceIPTVResponse(
                     "500",
                     ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
-                    String.valueOf(System.currentTimeMillis()),
+                    DateTimeUtil.now(),
                     "",
                     ""
             ));

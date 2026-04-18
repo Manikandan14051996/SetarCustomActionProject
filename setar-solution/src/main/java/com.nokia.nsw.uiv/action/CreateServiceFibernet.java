@@ -14,6 +14,7 @@ import com.nokia.nsw.uiv.repository.*;
 import com.nokia.nsw.uiv.request.CreateServiceFibernetRequest;
 import com.nokia.nsw.uiv.response.CreateServiceFibernetResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +82,7 @@ public class CreateServiceFibernet implements HttpAction {
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             }catch (BadRequestException bre) {
                 return ResponseEntity.status(400).body(new CreateServiceFibernetResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                        Instant.now().toString(), "",""));
+                        DateTimeUtil.now(), "",""));
             }
             // optional: template names etc.
 
@@ -214,7 +215,7 @@ public class CreateServiceFibernet implements HttpAction {
             }
             if(isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()){
                 log.error("createServiceFibernate service already exist");
-                return ResponseEntity.status(409).body(new CreateServiceFibernetResponse("409","Service already exist/Duplicate entry",Instant.now().toString(),subscriptionName,ontName));
+                return ResponseEntity.status(409).body(new CreateServiceFibernetResponse("409","Service already exist/Duplicate entry",DateTimeUtil.now(),subscriptionName,ontName));
             }
             if(isSubscriptionExist.get()){
                 subscription = subscriptionRepository.findByDiscoveredName(subscription.getDiscoveredName()).get();
@@ -427,7 +428,7 @@ public class CreateServiceFibernet implements HttpAction {
             CreateServiceFibernetResponse response = new CreateServiceFibernetResponse();
             response.setStatus("201");
             response.setMessage("Fibernet service created");
-            response.setTimestamp(Instant.now().toString());
+            response.setTimestamp(DateTimeUtil.now());
             response.setSubscriptionName(subscriptionName);
             response.setOntName(ontNameResp);
             return ResponseEntity.status(201).body(response);

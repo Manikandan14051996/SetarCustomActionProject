@@ -12,6 +12,7 @@ import com.nokia.nsw.uiv.request.QueryProductSubscriptionRequest;
 import com.nokia.nsw.uiv.response.CreateServiceCBMResponse;
 import com.nokia.nsw.uiv.response.QueryProductSubscriptionResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,7 @@ public class QueryProductSubscription implements HttpAction {
                 Validations.validateMandatoryParams(request.getComponentName(), "componentName");
             }catch (BadRequestException bre) {
                 return ResponseEntity.status(400).body(new QueryProductSubscriptionResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                        java.time.Instant.now().toString(), "",""));
+                        DateTimeUtil.now(), "",""));
             }
 
 
@@ -89,18 +90,18 @@ public class QueryProductSubscription implements HttpAction {
                 String msg = "UIV action QueryProductSubscription execution failed - " +
                         "Error, Product Subscription with name " + productName + " not found.";
                 return ResponseEntity.status(404).body(new QueryProductSubscriptionResponse("404", msg,
-                        java.time.Instant.now().toString(), "", ""));
+                        DateTimeUtil.now(), "", ""));
             }
 
         } catch (BadRequestException bre) {
             String msg = "UIV action QueryProductSubscription execution failed - "+bre.getMessage();
             return ResponseEntity.status(400).body(new QueryProductSubscriptionResponse("400",msg,
-                    java.time.Instant.now().toString(), "", ""));
+                    DateTimeUtil.now(), "", ""));
         } catch (Exception ex) {
             log.error("Unhandled exception during QueryProductSubscription", ex);
             String msg = "UIV action QueryProductSubscription execution failed - Internal server error occurred";
             return ResponseEntity.status(500).body(new QueryProductSubscriptionResponse("500", msg + " - " + ex.getMessage(),
-                    java.time.Instant.now().toString(), "", ""));
+                    DateTimeUtil.now(), "", ""));
         }
     }
 }

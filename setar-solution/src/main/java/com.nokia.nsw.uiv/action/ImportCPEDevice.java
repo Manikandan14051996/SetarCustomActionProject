@@ -15,6 +15,7 @@ import com.nokia.nsw.uiv.repository.LogicalInterfaceCustomRepository;
 import com.nokia.nsw.uiv.request.ImportCPEDeviceRequest;
 import com.nokia.nsw.uiv.response.ImportCPEDeviceResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +64,7 @@ public class ImportCPEDevice implements HttpAction {
                 Validations.validateMandatoryParams(request.getCpeGwMacAddress(), "cpeGwMacAddress");
             } catch (BadRequestException bre) {
                 return ResponseEntity.status(400).body(new ImportCPEDeviceResponse("400", ERROR_PREFIX +  bre.getMessage(),
-                        Instant.now().toString()));
+                        DateTimeUtil.now()));
             }
 
             log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
@@ -74,14 +75,14 @@ public class ImportCPEDevice implements HttpAction {
                 Validations.validateLength(devName, "CPEDevice");
             } catch (BadRequestException bre) {
                 return ResponseEntity.status(400).body(new ImportCPEDeviceResponse("400", ERROR_PREFIX + " : " + bre.getMessage(),
-                        Instant.now().toString()));
+                        DateTimeUtil.now()));
             }
             Optional<LogicalDevice> optDevice = cpeDeviceRepository.findByDiscoveredName(devName);
             LogicalDevice cpeDevice;
             if (optDevice.isPresent()) {
                 cpeDevice = optDevice.get();
                 log.error("Found existing CPE device: {}", devName);
-                return ResponseEntity.status(409).body(new ImportCPEDeviceResponse("409", "Service already exist/Duplicate entry", Instant.now().toString()));
+                return ResponseEntity.status(409).body(new ImportCPEDeviceResponse("409", "Service already exist/Duplicate entry", DateTimeUtil.now()));
             } else {
                 log.error("Creating new CPE device: {}", devName);
                 cpeDevice = new LogicalDevice();
@@ -128,20 +129,20 @@ public class ImportCPEDevice implements HttpAction {
             }
 
             log.error(Constants.ACTION_COMPLETED);
-            return ResponseEntity.status(201).body(new ImportCPEDeviceResponse("201", "CPE Device created: "+cpeDevice.getDiscoveredName(), getCurrentTimestamp()));
+            return ResponseEntity.status(201).body(new ImportCPEDeviceResponse("201", "CPE Device created: "+cpeDevice.getDiscoveredName(), DateTimeUtil.now()));
 
         } catch (BadRequestException bre) {
             log.error("Validation error: {}", bre.getMessage(), bre);
             String msg = "UIV action ImportCPEDevice execution failed - Missing mandatory parameter : " + bre.getMessage();
-            return ResponseEntity.status(400).body(new ImportCPEDeviceResponse("400", msg, String.valueOf(System.currentTimeMillis())));
+            return ResponseEntity.status(400).body(new ImportCPEDeviceResponse("400", msg, DateTimeUtil.now()));
         } catch (AccessForbiddenException | ModificationNotAllowedException ex) {
             log.error("Access or modification error: {}", ex.getMessage(), ex);
             String msg = "UIV action ImportCPEDevice execution failed - " + ex.getMessage();
-            return ResponseEntity.status(403).body(new ImportCPEDeviceResponse("403", msg, String.valueOf(System.currentTimeMillis())));
+            return ResponseEntity.status(403).body(new ImportCPEDeviceResponse("403", msg, DateTimeUtil.now()));
         } catch (Exception ex) {
             log.error("Unhandled exception during ImportCPEDevice", ex);
             String msg = "UIV action ImportCPEDevice execution failed - Internal server error occurred";
-            return ResponseEntity.status(500).body(new ImportCPEDeviceResponse("500", msg + " - " + ex.getMessage(), String.valueOf(System.currentTimeMillis())));
+            return ResponseEntity.status(500).body(new ImportCPEDeviceResponse("500", msg + " - " + ex.getMessage(), DateTimeUtil.now()));
         }
     }
 

@@ -13,6 +13,7 @@ import com.nokia.nsw.uiv.repository.SubscriptionCustomRepository;
 import com.nokia.nsw.uiv.request.QueryAccountCPERequest;
 import com.nokia.nsw.uiv.response.QueryAccountCPEResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 
 
@@ -63,7 +64,7 @@ public class QueryAccountCPE implements HttpAction {
                 return ResponseEntity.status(400).body(new QueryAccountCPEResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
-                        Instant.now().toString(), "", "", "", "", "", "", "", "", "", "", "", ""
+                        DateTimeUtil.now(), "", "", "", "", "", "", "", "", "", "", "", ""
                 ));
 
             }
@@ -106,7 +107,7 @@ public class QueryAccountCPE implements HttpAction {
                 return ResponseEntity.status(404).body(new QueryAccountCPEResponse(
                         "404",
                         ERROR_PREFIX + "Service Details Not Found.",
-                        Instant.now().toString(), "", "", "", "", "", "", "", "", "", "", "", ""
+                        DateTimeUtil.now(), "", "", "", "", "", "", "", "", "", "", "", ""
                 ));
             }
 
@@ -161,7 +162,7 @@ public class QueryAccountCPE implements HttpAction {
             return ResponseEntity.status(200).body(new QueryAccountCPEResponse(
                     "200",
                     "UIV action QueryAccountCPE executed successfully.",
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     "ONT".equalsIgnoreCase(serviceLink) ? ontSN : null,
                     "SRX".equalsIgnoreCase(serviceLink) ? ontSN : null,
                     cbmMac.isEmpty() ? null : cbmMac,
@@ -181,7 +182,7 @@ public class QueryAccountCPE implements HttpAction {
             return ResponseEntity.status(500).body(new QueryAccountCPEResponse(
                     "500",
                     ERROR_PREFIX + ex.getMessage(),
-                    Instant.now().toString(), "", "", "", "", "", "", "", "", "", "", "", ""
+                    DateTimeUtil.now(), "", "", "", "", "", "", "", "", "", "", "", ""
             ));
 
         }

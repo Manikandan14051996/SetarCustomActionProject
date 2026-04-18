@@ -14,6 +14,7 @@ import com.nokia.nsw.uiv.response.CreateServiceCBMResponse;
 import com.nokia.nsw.uiv.response.CreateServiceCbmVoiceResponse;
 import com.nokia.nsw.uiv.response.CreateServiceEVPNResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 
 import com.nokia.nsw.uiv.model.common.party.Customer;
@@ -95,7 +96,7 @@ public class CreateServiceEVPN implements HttpAction {
                 return ResponseEntity.status(400).body(new CreateServiceEVPNResponse(
                         "400",
                         ERROR_PREFIX + bre.getMessage(),
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         null,
                         null
                 ));
@@ -111,7 +112,7 @@ public class CreateServiceEVPN implements HttpAction {
                 return ResponseEntity.status(400).body(new CreateServiceEVPNResponse(
                         "400",
                         ERROR_PREFIX + "ONT name too long",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         null,
                         null
                 ));
@@ -122,7 +123,7 @@ public class CreateServiceEVPN implements HttpAction {
                 return ResponseEntity.status(400).body(new CreateServiceEVPNResponse(
                         "400",
                         ERROR_PREFIX + "Subscriber name too long",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         null,
                         null
                 ));
@@ -134,7 +135,7 @@ public class CreateServiceEVPN implements HttpAction {
                 return ResponseEntity.status(400).body(new CreateServiceEVPNResponse(
                         "400",
                         ERROR_PREFIX + "Subscription name too long",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         null,
                         null
                 ));
@@ -146,7 +147,7 @@ public class CreateServiceEVPN implements HttpAction {
                 return ResponseEntity.status(400).body( new CreateServiceEVPNResponse(
                         "400",
                         ERROR_PREFIX + "Product name too long",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         null,
                         null
                 ));
@@ -293,7 +294,7 @@ public class CreateServiceEVPN implements HttpAction {
             }
             if (isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()) {
                 log.error("createServiceEVPN service already exist");
-                return ResponseEntity.status(409).body(new CreateServiceEVPNResponse("409", "Service already exist/Duplicate entry", Instant.now().toString(), subscriberNameStr, ontName));
+                return ResponseEntity.status(409).body(new CreateServiceEVPNResponse("409", "Service already exist/Duplicate entry", DateTimeUtil.now(), subscriberNameStr, ontName));
             }
             if (isSubscriptionExist.get()) {
                 subscription = subscriptionRepo.findByDiscoveredName(subscription.getDiscoveredName()).get();
@@ -731,7 +732,7 @@ public class CreateServiceEVPN implements HttpAction {
             return ResponseEntity.status(201).body(new CreateServiceEVPNResponse(
                     "201",
                     "UIV action CreateServiceEVPN executed successfully.",
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     subscription.getDiscoveredName(),
                     ont.getDiscoveredName()
             ));
@@ -741,7 +742,7 @@ public class CreateServiceEVPN implements HttpAction {
             return ResponseEntity.status(500).body(new CreateServiceEVPNResponse(
                     "500",
                     ERROR_PREFIX + "Error occurred while creating service EVPN - " + ex.getMessage(),
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     null,
                     null
             ));

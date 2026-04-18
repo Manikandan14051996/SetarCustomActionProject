@@ -15,6 +15,7 @@ import com.nokia.nsw.uiv.request.QueryVoipNumberRequest;
 import com.nokia.nsw.uiv.response.QueryVoipNumberResponse;
 import com.nokia.nsw.uiv.response.UpdateVOIPServiceResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,7 @@ public class QueryVoipNumber implements HttpAction {
                 return ResponseEntity.status(400).body(new QueryVoipNumberResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         "",
                         "","","","","","","","","","","","",""
                 ));
@@ -244,7 +245,7 @@ public class QueryVoipNumber implements HttpAction {
                 return ResponseEntity.status(200).body(new QueryVoipNumberResponse(
                         "200",
                         "UIV action QueryVoipNumber executed successfully.",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         Objects.toString(voipNumber1, ""),
                         Objects.toString(voipNumber2, ""),
                         Objects.toString(simaCustId, ""),
@@ -274,7 +275,7 @@ public class QueryVoipNumber implements HttpAction {
         return new QueryVoipNumberResponse(
                 status,
                 ERROR_PREFIX + msg,
-                Instant.now().toString(),
+                DateTimeUtil.now(),
                 "", "", "", "", "", "",
                 "", "", "", "", "","", "", ""
         );

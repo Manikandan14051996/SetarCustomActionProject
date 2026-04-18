@@ -15,6 +15,7 @@ import com.nokia.nsw.uiv.response.AccountTransferByServiceIDResponse;
 
 import com.nokia.nsw.uiv.response.QueryAllServicesByCPEResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import com.nokia.nsw.uiv.model.service.Subscription;
 import com.nokia.nsw.uiv.model.service.SubscriptionRepository;
@@ -84,7 +85,7 @@ public class AccountTransferByServiceID implements HttpAction {
 
             cfsList.removeIf(cfs -> !cfs.getDiscoveredName().contains(req.getServiceId()));
             if (cfsList.isEmpty()) {
-                return ResponseEntity.status(404).body(errorResponse("404", "No entry found for update",getCurrentTimestamp()));
+                return ResponseEntity.status(404).body(errorResponse("404", "No entry found for update", DateTimeUtil.now()));
             }
             log.error("------Trace #3: Matching CFS found count=" + cfsList.size());
 
@@ -236,18 +237,18 @@ public class AccountTransferByServiceID implements HttpAction {
             }
 
             if (!updated) {
-                return ResponseEntity.status(404).body(errorResponse("404", "Error, No Account found", getCurrentTimestamp()));
+                return ResponseEntity.status(404).body(errorResponse("404", "Error, No Account found", DateTimeUtil.now()));
             }
             log.error(Constants.ACTION_COMPLETED);
             AccountTransferByServiceIDResponse resp = new AccountTransferByServiceIDResponse();
             resp.setStatus("200");
             resp.setMessage("AccountNumber successfully updated.");
-            resp.setTimestamp(Instant.now().toString());
+            resp.setTimestamp(DateTimeUtil.now());
             return ResponseEntity.status(200).body(resp);
 
         } catch (Exception ex) {
             log.error("Exception in AccountTransferByServiceID", ex);
-            return ResponseEntity.status(500).body(errorResponse("500", "Unexpected error - " + ex.getMessage(), getCurrentTimestamp()));
+            return ResponseEntity.status(500).body(errorResponse("500", "Unexpected error - " + ex.getMessage(), DateTimeUtil.now()));
         }
     }
 

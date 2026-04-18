@@ -10,6 +10,7 @@ import com.nokia.nsw.uiv.repository.LogicalDeviceCustomRepository;
 import com.nokia.nsw.uiv.request.QueryResourceRequest;
 import com.nokia.nsw.uiv.response.QueryResourceResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,7 +92,7 @@ public class QueryResource implements HttpAction {
             return new QueryResourceResponse(
                     "200",
                     "UIV action QueryResource executed successfully.",
-                    getCurrentTimestamp(),
+                    DateTimeUtil.now(),
                     devSN,
                     devMAC,
                     devStatus,
@@ -116,7 +117,7 @@ public class QueryResource implements HttpAction {
         return new QueryResourceResponse(
                 code,
                 message,
-                getCurrentTimestamp(),
+                DateTimeUtil.now(),
                 "", "", "", "", "", "", "", "", "", "", ""
         );
     }

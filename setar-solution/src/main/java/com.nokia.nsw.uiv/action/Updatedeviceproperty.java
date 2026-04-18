@@ -9,6 +9,7 @@ import com.nokia.nsw.uiv.repository.LogicalDeviceCustomRepository;
 import com.nokia.nsw.uiv.request.UpdatedevicepropertyRequest;
 import com.nokia.nsw.uiv.response.UpdatedevicepropertyResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 
 
@@ -57,7 +58,7 @@ public class Updatedeviceproperty implements HttpAction {
                 return ResponseEntity.status(400).body(new UpdatedevicepropertyResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         "", ""
                 ));
             }
@@ -77,7 +78,7 @@ public class Updatedeviceproperty implements HttpAction {
                 return ResponseEntity.status(404).body(new UpdatedevicepropertyResponse(
                         "404",
                         ERROR_PREFIX + "Error, No STB found with Allocated state to update.",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         stbSn,
                         custGroupId
                 ));
@@ -101,7 +102,7 @@ public class Updatedeviceproperty implements HttpAction {
                 return ResponseEntity.status(404).body(new UpdatedevicepropertyResponse(
                         "404",
                         ERROR_PREFIX + "Error, No STB found with Allocated state to update.",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         stbSn,
                         custGroupId
                 ));
@@ -110,7 +111,7 @@ public class Updatedeviceproperty implements HttpAction {
             return ResponseEntity.status(200).body(new UpdatedevicepropertyResponse(
                     "200",
                     "UIV action Updatedeviceproperty executed successfully.",
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     stbSn,
                     custGroupId
             ));
@@ -120,7 +121,7 @@ public class Updatedeviceproperty implements HttpAction {
             return ResponseEntity.status(500).body(new UpdatedevicepropertyResponse(
                     "500",
                     ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     "", ""
             ));
         }

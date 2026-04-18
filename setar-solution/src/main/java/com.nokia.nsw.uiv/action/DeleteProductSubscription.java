@@ -13,6 +13,7 @@ import com.nokia.nsw.uiv.repository.ServiceCustomRepository;
 import com.nokia.nsw.uiv.request.DeleteProductSubscriptionRequest;
 import com.nokia.nsw.uiv.response.DeleteProductSubscriptionResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +59,7 @@ public class DeleteProductSubscription implements HttpAction {
                 Validations.validateMandatoryParams(request.getComponentName(), "componentName");
             }catch (BadRequestException bre) {
                 return ResponseEntity.status(400).body(new DeleteProductSubscriptionResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                        Instant.now().toString(), ""));
+                        DateTimeUtil.now(), ""));
             }
             log.error("Mandatory parameter validation completed");
 
@@ -99,25 +100,25 @@ public class DeleteProductSubscription implements HttpAction {
                 return new DeleteProductSubscriptionResponse(
                         "200",
                         "UIV action DeleteProductSubscription executed successfully. Product Subscription Deleted.",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         productName
                 );
             } else {
                 String msg = "UIV action DeleteProductSubscription execution failed - " +
                         "Error, Product Subscription with name " + productName + " not found.";
                 return ResponseEntity.status(404).body(new DeleteProductSubscriptionResponse("404", msg,
-                        Instant.now().toString(), ""));
+                        DateTimeUtil.now(), ""));
             }
 
         } catch (BadRequestException bre) {
             String msg = "UIV action DeleteProductSubscription execution failed - " + bre.getMessage();
             return ResponseEntity.status(400).body(new DeleteProductSubscriptionResponse("400", msg,
-                    Instant.now().toString(), ""));
+                    DateTimeUtil.now(), ""));
         } catch (Exception ex) {
             log.error("Unhandled exception during DeleteProductSubscription", ex);
             String msg = "UIV action DeleteProductSubscription execution failed - Error while deleting Product Subscription " + ex.getMessage();
             return ResponseEntity.status(400).body(new DeleteProductSubscriptionResponse("500", msg,
-                    Instant.now().toString(), ""));
+                    DateTimeUtil.now(), ""));
         }
     }
 }

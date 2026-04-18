@@ -8,6 +8,7 @@ import com.nokia.nsw.uiv.repository.*;
 import com.nokia.nsw.uiv.request.ChangeTechnologyVoiceRequest;
 import com.nokia.nsw.uiv.response.ChangeTechnologyVoiceResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 
 import com.nokia.nsw.uiv.model.common.party.Customer;
@@ -84,7 +85,7 @@ public class ChangeTechnologyVoice implements HttpAction {
                 // Missing mandatory param
                 log.error("------------Test Trace # 2--------------- Missing mandatory param: " + bre.getMessage());
                 return ResponseEntity.status(400).body(new ChangeTechnologyVoiceResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                        Instant.now().toString(), "", ""));
+                        DateTimeUtil.now(), "", ""));
             }
 
             log.error("------------Test Trace # 3--------------- Validations OK");
@@ -109,7 +110,7 @@ public class ChangeTechnologyVoice implements HttpAction {
             if (ontName.length() > 100) {
                 log.error("------------Test Trace # 5--------------- ONT name too long");
                 return ResponseEntity.status(400).body(new ChangeTechnologyVoiceResponse("400", ERROR_PREFIX + "ONT name too long",
-                        Instant.now().toString(), subscriptionName, ontName));
+                        DateTimeUtil.now(), subscriptionName, ontName));
             }
 
             // 4. Update Subscription (must exist)
@@ -258,7 +259,7 @@ public class ChangeTechnologyVoice implements HttpAction {
                 log.error("------------Test Trace # 28--------------- CPE missing: " + missing);
                 // Per spec: If either device is missing → return error about ONT name in CPEDevice
                 return ResponseEntity.status(404).body(new ChangeTechnologyVoiceResponse("404", ERROR_PREFIX + "ONT name \"" + cpeDeviceName + "\" is not found in CPEDevice",
-                        Instant.now().toString(), subscriptionName, ontName));
+                        DateTimeUtil.now(), subscriptionName, ontName));
             }
 
             LogicalDevice ontCpe = ontCpeOpt.get();
@@ -335,7 +336,7 @@ public class ChangeTechnologyVoice implements HttpAction {
             // Return success
             return new ChangeTechnologyVoiceResponse("200",
                     "UIV action ChangeTechnologyVoice executed successfully.",
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     subscriptionName,
                     ontName);
 
@@ -344,7 +345,7 @@ public class ChangeTechnologyVoice implements HttpAction {
             log.error("------------Test Trace # 99--------------- Exception: " + ex.getMessage());
             return ResponseEntity.status(500).body(new ChangeTechnologyVoiceResponse("500",
                     ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     "",
                     ""));
         }

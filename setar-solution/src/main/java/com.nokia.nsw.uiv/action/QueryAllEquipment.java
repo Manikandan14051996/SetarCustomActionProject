@@ -9,6 +9,7 @@ import com.nokia.nsw.uiv.repository.ServiceCustomRepository;
 import com.nokia.nsw.uiv.request.QueryAllEquipmentRequest;
 import com.nokia.nsw.uiv.response.QueryAllEquipmentResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import com.nokia.nsw.uiv.model.resource.logical.LogicalDevice;
 
@@ -59,7 +60,7 @@ public class QueryAllEquipment implements HttpAction {
                 return ResponseEntity.status(400).body(new QueryAllEquipmentResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         deviceData
                 ));
             }
@@ -73,7 +74,7 @@ public class QueryAllEquipment implements HttpAction {
                 return ResponseEntity.status(404).body(new QueryAllEquipmentResponse(
                         "404",
                         ERROR_PREFIX + "No entry found for delete",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         deviceData
                 ));
             }
@@ -88,7 +89,7 @@ public class QueryAllEquipment implements HttpAction {
             QueryAllEquipmentResponse response = new QueryAllEquipmentResponse();
             response.setStatus("200");
             response.setMessage("UIV action QueryAllEquipment executed successfully.");
-            response.setTimestamp(Instant.now().toString());
+            response.setTimestamp(DateTimeUtil.now());
 
             for (com.nokia.nsw.uiv.model.resource.Resource res : resources) {
                 if (res instanceof LogicalDevice) {
@@ -118,7 +119,7 @@ public class QueryAllEquipment implements HttpAction {
                 return ResponseEntity.status(500).body(new QueryAllEquipmentResponse(
                         "500",
                         ERROR_PREFIX + "Error, Equipment Not Queried",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         deviceData
                 ));
             }
@@ -131,7 +132,7 @@ public class QueryAllEquipment implements HttpAction {
             return ResponseEntity.status(500).body(new QueryAllEquipmentResponse(
                     "500",
                     ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     deviceData
             ));
         }

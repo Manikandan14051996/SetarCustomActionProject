@@ -19,6 +19,7 @@ import com.nokia.nsw.uiv.repository.*;
 import com.nokia.nsw.uiv.request.DetachResourcesRequest;
 import com.nokia.nsw.uiv.response.DetachResourcesResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +91,7 @@ public class DetachResources implements HttpAction {
 
             if (!subscriber.isPresent() || !subscription.isPresent() || !product.isPresent() || !cfs.isPresent() || !rfs.isPresent()) {
                 return ResponseEntity.status(404).body( new DetachResourcesResponse("404", ERROR_PREFIX + "No entry found for Delete.",
-                        getCurrentTimestamp(), subscriptionName));
+                        DateTimeUtil.now(), subscriptionName));
             }
 
             Service rfsEntity = rfs.get();
@@ -127,21 +128,21 @@ public class DetachResources implements HttpAction {
                 serviceCustomRepository.save(rfsEntity, 2);
                 return new DetachResourcesResponse("200",
                         "UIV action DetachResources executed successfully.",
-                        getCurrentTimestamp(),
+                        DateTimeUtil.now(),
                         subscriptionName);
             } else {
                 return ResponseEntity.status(409).body(new DetachResourcesResponse("409", ERROR_PREFIX + "Error, Resources not detached.",
-                        getCurrentTimestamp(), subscriptionName));
+                        DateTimeUtil.now(), subscriptionName));
             }
 
         } catch (BadRequestException bre) {
             log.error("Validation error: {}", bre.getMessage());
             return ResponseEntity.status(400).body(new DetachResourcesResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                    getCurrentTimestamp(), ""));
+                    DateTimeUtil.now(), ""));
         } catch (Exception ex) {
             log.error("Unhandled exception in DetachResources", ex);
             return ResponseEntity.status(500).body(new DetachResourcesResponse("500", ERROR_PREFIX + "Internal server error occurred",
-                    getCurrentTimestamp(), ""));
+                    DateTimeUtil.now(), ""));
         }
     }
 

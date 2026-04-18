@@ -13,6 +13,7 @@ import com.nokia.nsw.uiv.repository.*;
 import com.nokia.nsw.uiv.request.CreateServiceVoIPRequest;
 import com.nokia.nsw.uiv.response.CreateServiceVoIPResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +77,7 @@ public class CreateServiceVoIP implements HttpAction {
                 return ResponseEntity.status(400).body(new CreateServiceVoIPResponse(
                         "400",
                         ERROR_PREFIX  + bre.getMessage(),
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         null,
                         null
                 ));
@@ -86,7 +87,7 @@ public class CreateServiceVoIP implements HttpAction {
                 return ResponseEntity.status(400).body(new CreateServiceVoIPResponse(
                         "400",
                         ERROR_PREFIX + "ONT name too long",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         null,
                         null
                 ));
@@ -107,7 +108,7 @@ public class CreateServiceVoIP implements HttpAction {
                 return ResponseEntity.status(400).body(new CreateServiceVoIPResponse(
                         "400",
                         ERROR_PREFIX + "Subscriber name too long",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         null,
                         null
                 ));
@@ -149,7 +150,7 @@ public class CreateServiceVoIP implements HttpAction {
                 return ResponseEntity.status(400).body(new CreateServiceVoIPResponse(
                         "400",
                         ERROR_PREFIX + "Subscription name too long",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         null,
                         null
                 ));
@@ -241,7 +242,7 @@ public class CreateServiceVoIP implements HttpAction {
                 return ResponseEntity.status(400).body(new CreateServiceVoIPResponse(
                         "400",
                         ERROR_PREFIX + "Product name too long",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         null,
                         null
                 ));
@@ -278,7 +279,7 @@ public class CreateServiceVoIP implements HttpAction {
             }
             if (isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()) {
                 log.error("createServiceVOIP service already exist");
-                return ResponseEntity.status(409).body( new CreateServiceVoIPResponse("409", "Service already exist/Duplicate entry", Instant.now().toString(), subscriptionName, "ONT" + req.getOntSN()));
+                return ResponseEntity.status(409).body( new CreateServiceVoIPResponse("409", "Service already exist/Duplicate entry", DateTimeUtil.now(), subscriptionName, "ONT" + req.getOntSN()));
             }
             if (isSubscriptionExist.get()) {
                 subscription = subscriptionRepo.findByDiscoveredName(subscription.getDiscoveredName()).get();
@@ -450,7 +451,7 @@ public class CreateServiceVoIP implements HttpAction {
             return ResponseEntity.status(201).body(new CreateServiceVoIPResponse(
                     "201",
                     "UIV action CreateServiceVoIP executed successfully.",
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     subscriptionName,
                     ontName
             ));
@@ -460,7 +461,7 @@ public class CreateServiceVoIP implements HttpAction {
             return ResponseEntity.status(500).body(new CreateServiceVoIPResponse(
                     "500",
                     ERROR_PREFIX + "Error occurred while creating service VOIP - " + ex.getMessage(),
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     null,
                     null
             ));

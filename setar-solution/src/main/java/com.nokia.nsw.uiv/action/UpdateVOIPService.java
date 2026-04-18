@@ -9,6 +9,7 @@ import com.nokia.nsw.uiv.repository.SubscriptionCustomRepository;
 import com.nokia.nsw.uiv.request.UpdateVOIPServiceRequest;
 import com.nokia.nsw.uiv.response.UpdateVOIPServiceResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 
 import com.nokia.nsw.uiv.model.common.party.Customer;
@@ -60,7 +61,7 @@ public class UpdateVOIPService implements HttpAction {
                 return ResponseEntity.status(400).body(new UpdateVOIPServiceResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         null,
                         null
                 ));
@@ -80,7 +81,7 @@ public class UpdateVOIPService implements HttpAction {
                 return ResponseEntity.status(404).body(new UpdateVOIPServiceResponse(
                         "404",
                         ERROR_PREFIX + "No entry found for update",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         null,
                         null
                 ));
@@ -99,7 +100,7 @@ public class UpdateVOIPService implements HttpAction {
                     return ResponseEntity.status(500).body(new UpdateVOIPServiceResponse(
                             "500",
                             ERROR_PREFIX + "Persistence error while saving subscriber",
-                            Instant.now().toString(),
+                            DateTimeUtil.now(),
                             null,
                             null
                     ));
@@ -133,7 +134,7 @@ public class UpdateVOIPService implements HttpAction {
                     return ResponseEntity.status(500).body( new UpdateVOIPServiceResponse(
                             "500",
                             ERROR_PREFIX + "Persistence error while saving subscription",
-                            Instant.now().toString(),
+                            DateTimeUtil.now(),
                             null,
                             null
                     ));
@@ -146,7 +147,7 @@ public class UpdateVOIPService implements HttpAction {
                 return ResponseEntity.status(200).body(new UpdateVOIPServiceResponse(
                         "200",
                         "UIV action UpdateVOIPService executed successfully.",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         req.getSubscriberName(),
                         req.getServiceId()
                 ));
@@ -154,7 +155,7 @@ public class UpdateVOIPService implements HttpAction {
                 return ResponseEntity.status(404).body(new UpdateVOIPServiceResponse(
                         "404",
                         ERROR_PREFIX + "No subscription or subscriber found to update",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         null,
                         null
                 ));
@@ -165,7 +166,7 @@ public class UpdateVOIPService implements HttpAction {
             return ResponseEntity.status(500).body(new UpdateVOIPServiceResponse(
                     "500",
                     ERROR_PREFIX + "Error occurred during update - " + ex.getMessage(),
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     null,
                     null
             ));

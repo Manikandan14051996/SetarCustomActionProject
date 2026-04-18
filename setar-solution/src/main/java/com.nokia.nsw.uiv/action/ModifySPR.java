@@ -23,6 +23,7 @@ import com.nokia.nsw.uiv.response.CreateServiceIPTVResponse;
 import com.nokia.nsw.uiv.response.ModifyCBMResponse;
 import com.nokia.nsw.uiv.response.ModifySPRResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.jcodings.util.Hash;
@@ -98,7 +99,7 @@ public class ModifySPR implements HttpAction {
                 Validations.validateLength(subscriptionName, "Subscription");
             } catch (BadRequestException bre) {
                 return ResponseEntity.status(400).body(new ModifySPRResponse("400", ERROR_PREFIX + bre.getMessage(),
-                        Instant.now().toString(), "", ""));
+                        DateTimeUtil.now(), "", ""));
             }
 
 
@@ -132,7 +133,7 @@ public class ModifySPR implements HttpAction {
             } catch (BadRequestException bre) {
                 log.error("Validation or not found error: {}", bre.getMessage(), bre);
                 String msg = ERROR_PREFIX + bre.getMessage();
-                return  ResponseEntity.status(400).body(new ModifySPRResponse("400", msg, getCurrentTimestamp(), "", ""));
+                return  ResponseEntity.status(400).body(new ModifySPRResponse("400", msg, DateTimeUtil.now(), "", ""));
             }
             Subscription updatedSubscription = subscriptionRepository.findById(subscription.getUuid())
                     .orElse(subscription); // fallback to original if somehow missing
@@ -145,25 +146,25 @@ public class ModifySPR implements HttpAction {
             // 5. Response
             if (success) {
                 log.error(Constants.ACTION_COMPLETED);
-                return new ModifySPRResponse("200", "UIV action ModifySPR executed successfully.", getCurrentTimestamp(),
+                return new ModifySPRResponse("200", "UIV action ModifySPR executed successfully.", DateTimeUtil.now(),
                         updatedOntName, updatedSubscriptionName);
             } else {
-                return new ModifySPRResponse("200", "Error,Modification not done", getCurrentTimestamp(),
+                return new ModifySPRResponse("200", "Error,Modification not done", DateTimeUtil.now(),
                         updatedOntName, updatedSubscriptionName);
             }
 
         } catch (BadRequestException bre) {
             log.error("Validation or not found error: {}", bre.getMessage(), bre);
             String msg = ERROR_PREFIX + bre.getMessage();
-            return ResponseEntity.status(400).body(new ModifySPRResponse("400", msg, getCurrentTimestamp(), "", ""));
+            return ResponseEntity.status(400).body(new ModifySPRResponse("400", msg, DateTimeUtil.now(), "", ""));
         } catch (ModificationNotAllowedException ex) {
             log.error("Persistence error: {}", ex.getMessage(), ex);
             String msg = ERROR_PREFIX + ex.getMessage();
-            return ResponseEntity.status(500).body(new ModifySPRResponse("500", msg, getCurrentTimestamp(), "", ""));
+            return ResponseEntity.status(500).body(new ModifySPRResponse("500", msg, DateTimeUtil.now(), "", ""));
         } catch (Exception ex) {
             log.error("Unhandled exception during ModifySPR", ex);
             String msg = ERROR_PREFIX + "Internal server error occurred";
-            return ResponseEntity.status(500).body(new ModifySPRResponse("500", msg, getCurrentTimestamp(), "", ""));
+            return ResponseEntity.status(500).body(new ModifySPRResponse("500", msg, DateTimeUtil.now(), "", ""));
         }
     }
 

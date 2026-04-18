@@ -12,6 +12,7 @@ import com.nokia.nsw.uiv.repository.*;
 import com.nokia.nsw.uiv.request.QueryAddrByServiceIDRequest;
 import com.nokia.nsw.uiv.response.QueryAddrByServiceIDResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -188,7 +189,7 @@ public class QueryAddrByServiceID implements HttpAction {
             QueryAddrByServiceIDResponse resp = new QueryAddrByServiceIDResponse();
             resp.setStatus("200");
             resp.setMessage("Service Details Found.");
-            resp.setTimestamp(Instant.now().toString());
+            resp.setTimestamp(DateTimeUtil.now());
             resp.setProductName(productName == null ? "" : productName);
             resp.setAddress(address == null ? "" : address);
             resp.setServiceLink(serviceLink == null ? "" : serviceLink);
@@ -204,7 +205,7 @@ public class QueryAddrByServiceID implements HttpAction {
         QueryAddrByServiceIDResponse resp = new QueryAddrByServiceIDResponse();
         resp.setStatus(status);
         resp.setMessage(message);
-        resp.setTimestamp(Instant.now().toString());
+        resp.setTimestamp(DateTimeUtil.now());
         resp.setProductName("");
         resp.setAddress("");
         resp.setServiceLink("");

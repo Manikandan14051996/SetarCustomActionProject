@@ -11,6 +11,7 @@ import com.nokia.nsw.uiv.repository.ServiceCustomRepository;
 import com.nokia.nsw.uiv.request.AssociateResourcesRequest;
 import com.nokia.nsw.uiv.response.AssociateResourcesResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import com.nokia.nsw.uiv.model.resource.logical.LogicalDevice;
 import com.nokia.nsw.uiv.model.resource.logical.LogicalDeviceRepository;
@@ -78,7 +79,7 @@ public class AssociateResources implements HttpAction {
                 return ResponseEntity.status(400).body(new AssociateResourcesResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         ""
                 ));
             }
@@ -101,7 +102,7 @@ public class AssociateResources implements HttpAction {
                 return  ResponseEntity.status(400).body(new AssociateResourcesResponse(
                         "400",
                         ERROR_PREFIX + "Invalid combination of identifiers",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         ""
                 ));
             }
@@ -113,7 +114,7 @@ public class AssociateResources implements HttpAction {
                 return  ResponseEntity.status(404).body(new AssociateResourcesResponse(
                         "404",
                         ERROR_PREFIX + "Required entity not found: " + rfsName,
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         ""
                 ));
             }
@@ -171,7 +172,7 @@ public class AssociateResources implements HttpAction {
                             return  ResponseEntity.status(404).body(new AssociateResourcesResponse(
                                     "404",
                                     ERROR_PREFIX + "Device not found: " + devName,
-                                    Instant.now().toString(),
+                                    DateTimeUtil.now(),
                                     ""
                             ));
                         }
@@ -231,7 +232,7 @@ public class AssociateResources implements HttpAction {
                         return ResponseEntity.status(404).body(new AssociateResourcesResponse(
                                 "404",
                                 ERROR_PREFIX + "Device not found: " + devName,
-                                Instant.now().toString(),
+                                DateTimeUtil.now(),
                                 ""
                         ));
                     }
@@ -256,14 +257,14 @@ public class AssociateResources implements HttpAction {
                 return new AssociateResourcesResponse(
                         "200",
                         "UIV action AssociateResources executed successfully.",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         subscriptionName
                 );
             } else {
                 return  ResponseEntity.status(409).body(new AssociateResourcesResponse(
                         "409",
                         ERROR_PREFIX + "Resource not attached",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         ""
                 ));
             }
@@ -273,7 +274,7 @@ public class AssociateResources implements HttpAction {
             return ResponseEntity.status(500).body(new AssociateResourcesResponse(
                     "500",
                     ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     ""
             ));
         }

@@ -36,6 +36,7 @@ import com.nokia.nsw.uiv.request.DeleteSPRRequest;
 import com.nokia.nsw.uiv.response.DeleteSPRResponse;
 
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.net.bsd.RLoginClient;
@@ -89,7 +90,7 @@ public class DeleteSPR implements HttpAction {
             return ResponseEntity.status(400).body(new DeleteSPRResponse(
                     "400",
                     ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                    now(),
+                    DateTimeUtil.now(),
                     "", ""
             ));
         }
@@ -109,7 +110,7 @@ public class DeleteSPR implements HttpAction {
             return ResponseEntity.status(400).body(new DeleteSPRResponse(
                     "400",
                     ERROR_PREFIX + "ONT name too long",
-                    now(),
+                    DateTimeUtil.now(),
                     ontName,
                     subscriptionName
             ));
@@ -336,7 +337,7 @@ public class DeleteSPR implements HttpAction {
             return new DeleteSPRResponse(
                     "200",
                     "UIV action DeleteSPR executed successfully.",
-                    now(),
+                    DateTimeUtil.now(),
                     ontName,
                     subscriptionName
             );
@@ -347,7 +348,7 @@ public class DeleteSPR implements HttpAction {
             return  ResponseEntity.status(500).body(new DeleteSPRResponse(
                     "500",
                     ERROR_PREFIX + "Internal server error occurred",
-                    now(),
+                    DateTimeUtil.now(),
                     ontName,
                     subscriptionName
             ));

@@ -22,6 +22,7 @@ import com.nokia.nsw.uiv.request.ChangeStateRequest;
 import com.nokia.nsw.uiv.response.ChangeStateResponse;
 
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +76,7 @@ public class ChangeState implements HttpAction {
             log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
         } catch (BadRequestException bre) {
             return ResponseEntity.status(400).body(new ChangeStateResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                    java.time.Instant.now().toString(), "","",""));
+                    DateTimeUtil.now(), "","",""));
         }
 
         // 2. Prepare names based on product type and service link
@@ -119,7 +120,7 @@ public class ChangeState implements HttpAction {
             ontName ="ONT" + req.getOntSN();
             if (ontName.length() > 100) {
                 return ResponseEntity.status(400).body(new ChangeStateResponse("400", ERROR_PREFIX + "ONT name too long",
-                        java.time.Instant.now().toString(), "", ontName, ""));
+                        DateTimeUtil.now(), "", ontName, ""));
             }
         }
 
@@ -150,7 +151,7 @@ public class ChangeState implements HttpAction {
             }
             if (!optSubscription.isPresent() || !optRfs.isPresent()) {
                 return ResponseEntity.status(500).body(new ChangeStateResponse("500", ERROR_PREFIX + "No entry found for Suspend/Resume",
-                        java.time.Instant.now().toString(), (cbmName == null ? "" : cbmName),
+                        DateTimeUtil.now(), (cbmName == null ? "" : cbmName),
                         (ontName == null ? "" : ontName), subscriptionName));
             }
 
@@ -166,7 +167,7 @@ public class ChangeState implements HttpAction {
                 newStatus = "Active";
             } else {
                 return ResponseEntity.status(400).body(new ChangeStateResponse("400", ERROR_PREFIX + "Unsupported actionType: " + actionType,
-                        java.time.Instant.now().toString(), (cbmName == null ? "" : cbmName),
+                        DateTimeUtil.now(), (cbmName == null ? "" : cbmName),
                         (ontName == null ? "" : ontName), subscriptionName));
             }
 
@@ -199,7 +200,7 @@ public class ChangeState implements HttpAction {
             // 7. Final response
             return new ChangeStateResponse("200",
                     "UIV action ChangeState executed successfully.",
-                    java.time.Instant.now().toString(),
+                    DateTimeUtil.now(),
                     (cbmName == null ? "" : cbmName),
                     (ontName == null ? "" : ontName),
                     subscriptionName
@@ -208,7 +209,7 @@ public class ChangeState implements HttpAction {
         } catch (Exception ex) {
             log.error("ChangeState failed", ex);
             return ResponseEntity.status(500).body(new ChangeStateResponse("500", ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
-                    java.time.Instant.now().toString(),
+                    DateTimeUtil.now(),
                     (cbmName == null ? "" : cbmName),
                     (ontName == null ? "" : ontName),
                     subscriptionName));

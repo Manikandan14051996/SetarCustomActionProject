@@ -11,6 +11,7 @@ import com.nokia.nsw.uiv.repository.*;
 import com.nokia.nsw.uiv.request.QueryServiceRequest;
 import com.nokia.nsw.uiv.response.QueryServiceResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import com.nokia.nsw.uiv.model.common.party.Customer;
 import com.nokia.nsw.uiv.model.service.Subscription;
@@ -61,7 +62,7 @@ public class QueryService implements HttpAction {
                 Validations.validateMandatory(request.getServiceId(), "serviceId");
             } catch (BadRequestException bre) {
                 return ResponseEntity.status(400).body(new QueryServiceResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                        Instant.now().toString(), false, "Missing parameter"));
+                        DateTimeUtil.now(), false, "Missing parameter"));
             }
 
             String serviceId = request.getServiceId().trim();
@@ -94,7 +95,7 @@ public class QueryService implements HttpAction {
             if (cfsNameSet.isEmpty()) {
                 log.error("No matching CFS found for serviceId {}", serviceId);
                 return ResponseEntity.status(404).body(new QueryServiceResponse("404", "No IPTV Service Details Found.",
-                        Instant.now().toString(), false, "No CFS match found"));
+                        DateTimeUtil.now(), false, "No CFS match found"));
             }
 
             // Step 3: For each CFS, fetch linked data
@@ -124,7 +125,7 @@ public class QueryService implements HttpAction {
                         optCust = Optional.ofNullable(prod.getCustomer());
                 }else {
                     return ResponseEntity.status(404).body(new QueryServiceResponse("404", "No entry found to update.",
-                            Instant.now().toString(), true, iptvinfo));
+                            DateTimeUtil.now(), true, iptvinfo));
                 }
 
                 // Step 4: Populate Subscription details
@@ -290,12 +291,12 @@ public class QueryService implements HttpAction {
 
             // Step 7: Build final success response
             return ResponseEntity.status(200).body(new QueryServiceResponse("200", "IPTV Service Details Found.",
-                    Instant.now().toString(), true, iptvinfo));
+                    DateTimeUtil.now(), true, iptvinfo));
 
         } catch (Exception ex) {
             log.error("Error executing QueryService", ex);
             return ResponseEntity.status(500).body(new QueryServiceResponse("500", ERROR_PREFIX + "Internal server error - " + ex.getMessage(),
-                    Instant.now().toString(), false, null));
+                    DateTimeUtil.now(), false, null));
         }
     }
 }

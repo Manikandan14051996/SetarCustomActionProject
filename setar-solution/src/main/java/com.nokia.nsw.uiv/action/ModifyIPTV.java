@@ -17,6 +17,7 @@ import com.nokia.nsw.uiv.model.resource.logical.LogicalInterface;
 import com.nokia.nsw.uiv.model.resource.logical.LogicalInterfaceRepository;
 import com.nokia.nsw.uiv.request.ModifyIPTVRequest;
 import com.nokia.nsw.uiv.response.ModifyIPTVResponse;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import com.nokia.nsw.uiv.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
@@ -81,7 +82,7 @@ public class ModifyIPTV implements HttpAction {
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             }catch (BadRequestException bre) {
                 return ResponseEntity.status(400).body(new ModifyIPTVResponse("400", ERROR_PREFIX + bre.getMessage(),
-                        java.time.Instant.now().toString(), "",""));
+                        DateTimeUtil.now(), "",""));
             }
             String subscriberName = request.getSubscriberName();
             String subscriptionName = subscriberName + Constants.UNDER_SCORE  + request.getServiceId();
@@ -95,7 +96,7 @@ public class ModifyIPTV implements HttpAction {
                 return ResponseEntity.status(400).body(new ModifyIPTVResponse(
                         "400",
                         ERROR_PREFIX + "Subscription name too long",
-                        String.valueOf(System.currentTimeMillis()),
+                        DateTimeUtil.now(),
                         "",
                         ""
                 ));
@@ -106,7 +107,7 @@ public class ModifyIPTV implements HttpAction {
                 return ResponseEntity.status(400).body(new ModifyIPTVResponse(
                         "400",
                         ERROR_PREFIX + "Product name too long",
-                        String.valueOf(System.currentTimeMillis()),
+                        DateTimeUtil.now(),
                         "",
                         ""
                 ));
@@ -117,7 +118,7 @@ public class ModifyIPTV implements HttpAction {
                 return ResponseEntity.status(400).body(new ModifyIPTVResponse(
                         "400",
                         ERROR_PREFIX + "CBM device name too long",
-                        String.valueOf(System.currentTimeMillis()),
+                        DateTimeUtil.now(),
                         "",
                         ""
                 ));
@@ -133,7 +134,7 @@ public class ModifyIPTV implements HttpAction {
                 return ResponseEntity.status(404).body(new ModifyIPTVResponse(
                         "404",
                         ERROR_PREFIX + "One or more required objects (Subscriber, Subscription, Product, CFS, RFS) not found",
-                        String.valueOf(System.currentTimeMillis()),
+                        DateTimeUtil.now(),
                         "",
                         ""
                 ));
@@ -259,7 +260,7 @@ public class ModifyIPTV implements HttpAction {
             return new ModifyIPTVResponse(
                     "200",
                     "UIV action ModifyIPTV executed successfully.",
-                    java.time.Instant.now().toString(),
+                    DateTimeUtil.now(),
                     subscriber.getDiscoveredName(),
                     subscription.getDiscoveredName()
             );
@@ -269,7 +270,7 @@ public class ModifyIPTV implements HttpAction {
             return ResponseEntity.status(400).body(new ModifyIPTVResponse(
                     "400",
                     ERROR_PREFIX + "Missing mandatory parameter: " + ex.getMessage(),
-                    String.valueOf(System.currentTimeMillis()),
+                    DateTimeUtil.now(),
                     "",
                     ""
             ));
@@ -278,7 +279,7 @@ public class ModifyIPTV implements HttpAction {
             return ResponseEntity.status(500).body(new ModifyIPTVResponse(
                     "500",
                     ERROR_PREFIX + "IPTV request " + request.getModifyType() + " not executed",
-                    String.valueOf(System.currentTimeMillis()),
+                    DateTimeUtil.now(),
                     "",
                     ""
             ));

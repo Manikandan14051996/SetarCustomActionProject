@@ -11,6 +11,7 @@ import com.nokia.nsw.uiv.repository.LogicalInterfaceCustomRepository;
 import com.nokia.nsw.uiv.request.QueryTemplateNameVLANRequest;
 import com.nokia.nsw.uiv.response.QueryTemplateNameVLANResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -177,7 +178,7 @@ public class    QueryTemplateNameVLAN implements HttpAction {
             QueryTemplateNameVLANResponse resp = new QueryTemplateNameVLANResponse();
             resp.setStatus("200");
             resp.setMessage("Next Free VLAN ID is " + freeVLAN + " and Template name is " + templateName + " and Template VPLS is " + templateVpls);
-            resp.setTimestamp(Instant.now().toString());
+            resp.setTimestamp(DateTimeUtil.now());
             resp.setVlanId(freeVLAN);
             resp.setVlanTemplateName(templateName);
             resp.setVlanTemplateCreateName(templateCreate);
@@ -195,7 +196,7 @@ public class    QueryTemplateNameVLAN implements HttpAction {
         QueryTemplateNameVLANResponse resp = new QueryTemplateNameVLANResponse();
         resp.setStatus(status);
         resp.setMessage(message);
-        resp.setTimestamp(Instant.now().toString());
+        resp.setTimestamp(DateTimeUtil.now());
         resp.setVlanId("");
         resp.setVlanTemplateName("");
         resp.setVlanTemplateCreateName("");

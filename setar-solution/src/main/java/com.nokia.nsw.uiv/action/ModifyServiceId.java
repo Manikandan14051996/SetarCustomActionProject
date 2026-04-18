@@ -10,6 +10,7 @@ import com.nokia.nsw.uiv.repository.*;
 import com.nokia.nsw.uiv.request.ModifyServiceIdRequest;
 import com.nokia.nsw.uiv.response.ModifyServiceIdResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import com.nokia.nsw.uiv.model.service.Subscription;
 import com.nokia.nsw.uiv.model.service.SubscriptionRepository;
@@ -71,7 +72,7 @@ public class ModifyServiceId implements HttpAction {
                 return ResponseEntity.status(400).body(new ModifyServiceIdResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
-                        Instant.now().toString()
+                        DateTimeUtil.now()
                 ));
             }
             try {
@@ -81,7 +82,7 @@ public class ModifyServiceId implements HttpAction {
                 return ResponseEntity.status(400).body( new ModifyServiceIdResponse(
                         "400",
                         ERROR_PREFIX  + bre.getMessage(),
-                        Instant.now().toString()
+                        DateTimeUtil.now()
                 ));
             }
             String oldServiceId = req.getServiceId();
@@ -246,18 +247,18 @@ public class ModifyServiceId implements HttpAction {
                 log.error(Constants.ACTION_COMPLETED);
                 return new ModifyServiceIdResponse("200",
                         "ServiceID successfully updated",
-                        Instant.now().toString());
+                        DateTimeUtil.now());
             } else {
                 return ResponseEntity.status(404).body(new ModifyServiceIdResponse("404",
                         ERROR_PREFIX + "Error, No Service found.",
-                        Instant.now().toString()));
+                        DateTimeUtil.now()));
             }
 
         } catch (Exception ex) {
             log.error("Unhandled exception in ModifyServiceId", ex);
             return ResponseEntity.status(500).body(new ModifyServiceIdResponse("500",
                     ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
-                    Instant.now().toString()));
+                    DateTimeUtil.now()));
         }
     }
 }

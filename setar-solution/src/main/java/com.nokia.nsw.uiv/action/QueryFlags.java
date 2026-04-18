@@ -15,6 +15,7 @@ import com.nokia.nsw.uiv.repository.*;
 import com.nokia.nsw.uiv.request.QueryFlagsRequest;
 import com.nokia.nsw.uiv.response.QueryFlagsResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -491,7 +492,7 @@ public class QueryFlags implements HttpAction {
         if (serviceLink != null && equalsAnyIgnoreCase(serviceLink, "ONT", "SRX")) {
             String ontGdn = "ONT" + ontSN;
             if (ontGdn.length() > 100) {
-                return new QueryFlagsResponse("400", ERROR_PREFIX + "ONT name too long", getCurrentTimestamp(), flags);
+                return new QueryFlagsResponse("400", ERROR_PREFIX + "ONT name too long", DateTimeUtil.now(), flags);
             }
 
             Optional<LogicalDevice> ontOpt = deviceRepository.findByDiscoveredName(ontGdn);
@@ -1709,7 +1710,7 @@ public class QueryFlags implements HttpAction {
         }
 
         log.info("QueryFlags completed - returning {} flags", flags.size());
-        return new QueryFlagsResponse("200", "UIV action QueryFlags executed successfully.", getCurrentTimestamp(), flags);
+        return new QueryFlagsResponse("200", "UIV action QueryFlags executed successfully.", DateTimeUtil.now(), flags);
     }
 
     // ───────────────────────────────────────────────

@@ -14,6 +14,7 @@ import com.nokia.nsw.uiv.model.service.Subscription;
 import com.nokia.nsw.uiv.model.service.SubscriptionRepository;
 import com.nokia.nsw.uiv.model.resource.logical.LogicalDevice;
 import com.nokia.nsw.uiv.model.resource.logical.LogicalDeviceRepository;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +68,7 @@ public class QueryIPTVByServiceID implements HttpAction {
                 QueryIPTVByServiceIDResponse resp = new QueryIPTVByServiceIDResponse();
                 resp.setStatus("400");
                 resp.setMessage("Missing mandatory parameter(s)");
-                resp.setTimestamp(Instant.now().toString());
+                resp.setTimestamp(DateTimeUtil.now());
                 return resp;
             }
 
@@ -108,7 +109,7 @@ public class QueryIPTVByServiceID implements HttpAction {
                 QueryIPTVByServiceIDResponse resp = new QueryIPTVByServiceIDResponse();
                 resp.setStatus("400");
                 resp.setMessage("No entry found for delete");
-                resp.setTimestamp(Instant.now().toString());
+                resp.setTimestamp(DateTimeUtil.now());
                 return resp;
             }
 
@@ -408,7 +409,7 @@ public class QueryIPTVByServiceID implements HttpAction {
                 QueryIPTVByServiceIDResponse resp = new QueryIPTVByServiceIDResponse();
                 resp.setStatus("200");
                 resp.setMessage("IPTV Service Details Found");
-                resp.setTimestamp(Instant.now().toString());
+                resp.setTimestamp(DateTimeUtil.now());
                 resp.setIptvInfo(iptvInfo);
                 return resp;
 
@@ -416,7 +417,7 @@ public class QueryIPTVByServiceID implements HttpAction {
                 QueryIPTVByServiceIDResponse resp = new QueryIPTVByServiceIDResponse();
                 resp.setStatus("200");
                 resp.setMessage("No IPTV Service Details Found");
-                resp.setTimestamp(Instant.now().toString());
+                resp.setTimestamp(DateTimeUtil.now());
                 return resp;
             }
 
@@ -424,7 +425,7 @@ public class QueryIPTVByServiceID implements HttpAction {
             QueryIPTVByServiceIDResponse resp = new QueryIPTVByServiceIDResponse();
             resp.setStatus("1");
             resp.setMessage("Exception in QueryIPTVByServiceID");
-            resp.setTimestamp(Instant.now().toString());
+            resp.setTimestamp(DateTimeUtil.now());
             return resp;
         }
     }

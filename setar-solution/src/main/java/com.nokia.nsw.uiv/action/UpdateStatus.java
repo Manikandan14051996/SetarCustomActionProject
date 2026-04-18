@@ -10,6 +10,7 @@ import com.nokia.nsw.uiv.request.UpdateStatusRequest;
 import com.nokia.nsw.uiv.response.CreateProductSubscriptionResponse;
 import com.nokia.nsw.uiv.response.UpdateStatusResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +100,7 @@ public class UpdateStatus implements HttpAction {
             return ResponseEntity.status(201).body(new UpdateStatusResponse(
                     "201",
                     "Port Status Updated Successfully",
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     portName,
                     portStatus
             ));
@@ -110,7 +111,7 @@ public class UpdateStatus implements HttpAction {
             return ResponseEntity.status(400).body(new UpdateStatusResponse(
                     "400",
                     msg,
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     portName,
                     portStatus
             ));
@@ -118,7 +119,7 @@ public class UpdateStatus implements HttpAction {
         }catch (Exception ex) {
             String msg = "UIV action UpdateStatus execution failed - Internal server error occurred";
             return ResponseEntity.status(500).body(new UpdateStatusResponse("500", msg + " - " + ex.getMessage(),
-                    Instant.now().toString(), "", ""));
+                    DateTimeUtil.now(), "", ""));
         }
     }
 }

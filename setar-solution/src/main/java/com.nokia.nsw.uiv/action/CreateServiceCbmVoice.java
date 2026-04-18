@@ -14,6 +14,7 @@ import com.nokia.nsw.uiv.repository.*;
 import com.nokia.nsw.uiv.request.CreateServiceCbmVoiceRequest;
 import com.nokia.nsw.uiv.response.CreateServiceCbmVoiceResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -182,7 +183,7 @@ public class CreateServiceCbmVoice implements HttpAction {
                         subProps.put("actionName", ACTION_LABEL);
                         s.setProperties(subProps);
                         // save with depth 2 as in your codebase
-                        subscriberRepository.save(s, 2);
+                        subscriberRepository.save(s);
                         return s;
                     });
 
@@ -264,7 +265,7 @@ public class CreateServiceCbmVoice implements HttpAction {
                         }
                         sub.setProperties(props);
                         sub.setCustomer(subscriber);
-                        subscriptionRepository.save(sub, 2);
+                        subscriptionRepository.save(sub);
                         return sub;
                     });
 
@@ -275,7 +276,7 @@ public class CreateServiceCbmVoice implements HttpAction {
 //                    subsProps.put("voipPackage1", request.getServicePackage());
                 // subsProps.put("voipServiceCodePrimary", request.getVoipServiceCode());
                 subscription.setProperties(subsProps);
-                subscriptionRepository.save(subscription, 2);
+                subscriptionRepository.save(subscription);
             } catch (Exception e) {
                 log.error("Persistence error updating subscription", e);
                 return ResponseEntity.status(500).body(createErrorResponse(CODE_PERSISTENCE_ERROR, "Persistence error while updating subscription: " + e.getMessage()));
@@ -309,11 +310,11 @@ public class CreateServiceCbmVoice implements HttpAction {
                         prodProps.put("actionName", ACTION_LABEL);
                         p.setProperties(prodProps);
                         p.setCustomer(subscriber);
-                        productRepository.save(p, 2);
+                        productRepository.save(p);
                         return p;
                     });
             subscription.setService(new HashSet<>(List.of(product)));
-            subscriptionRepository.save(subscription, 2);
+            subscriptionRepository.save(subscription);
             if(isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()){
                 log.error("createServiceCbmVoice service already exist");
                 return ResponseEntity.status(409).body(new CreateServiceCbmVoiceResponse("409","Service already exist/Duplicate entry",Instant.now().toString(),subscriptionName,cbmName));
@@ -353,7 +354,7 @@ public class CreateServiceCbmVoice implements HttpAction {
                         if (request.getFxOrderID() != null) cfsProps.put("transactionId", request.getFxOrderID());
                         c.setProperties(cfsProps);
                         c.setUsingService(new HashSet<>(List.of(product)));
-                        serviceCustomRepository.save(c, 2);
+                        serviceCustomRepository.save(c);
                         return c;
                     });
 
@@ -380,7 +381,7 @@ public class CreateServiceCbmVoice implements HttpAction {
                         rfsProps.put("actionName", ACTION_LABEL);
                         r.setProperties(rfsProps);
                         r.setUsedService(new HashSet<>(List.of(cfs)));
-                        serviceCustomRepository.save(r, 2);
+                        serviceCustomRepository.save(r);
                         return r;
                     });
 
@@ -412,7 +413,7 @@ public class CreateServiceCbmVoice implements HttpAction {
                         deviceProps.put("OperationalState", "Active");
                         d.setProperties(deviceProps);
                         d.setUsingService(new HashSet<>(List.of(rfs)));
-                        cbmDeviceRepository.save(d, 2);
+                        cbmDeviceRepository.save(d);
                         return d;
                     });
 
@@ -445,7 +446,7 @@ public class CreateServiceCbmVoice implements HttpAction {
                     }
 
                     cpe.setProperties(props);
-                    cpeDeviceRepository.save(cpe, 2);
+                    cpeDeviceRepository.save(cpe);
                 } catch (Exception e) {
                     log.error("Persistence error updating CPE device", e);
                     return ResponseEntity.status(500).body(createErrorResponse(CODE_PERSISTENCE_ERROR, "Persistence error while updating CPE device: "+cpeDeviceName + e.getMessage()));
@@ -456,7 +457,7 @@ public class CreateServiceCbmVoice implements HttpAction {
             CreateServiceCbmVoiceResponse response = new CreateServiceCbmVoiceResponse();
             response.setStatus(CODE_SUCCESS);
             response.setMessage("UIV action CreateServiceCbmVoice executed successfully");
-            response.setTimestamp(new Date().toString());
+            response.setTimestamp(DateTimeUtil.now());
             response.setSubscriptionName(subscriptionName);
             response.setCbmName(cbmName);
             return ResponseEntity.status(201).body(response);
@@ -480,7 +481,7 @@ public class CreateServiceCbmVoice implements HttpAction {
         CreateServiceCbmVoiceResponse resp = new CreateServiceCbmVoiceResponse();
         resp.setStatus(code);
         resp.setMessage("UIV action CreateServiceCbmVoice execution failed - " + message);
-        resp.setTimestamp(new Date().toString());
+        resp.setTimestamp(DateTimeUtil.now());
         return resp;
     }
 }

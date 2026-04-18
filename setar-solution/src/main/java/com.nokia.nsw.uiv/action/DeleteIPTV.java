@@ -16,6 +16,7 @@ import com.nokia.nsw.uiv.repository.*;
 import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.request.DeleteIPTVRequest;
 import com.nokia.nsw.uiv.response.DeleteIPTVResponse;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +70,7 @@ public class DeleteIPTV implements HttpAction {
 
             }catch (BadRequestException bre) {
                 return ResponseEntity.status(400).body(new DeleteIPTVResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                        Instant.now().toString(), "",""));
+                        DateTimeUtil.now(), "",""));
             }
             // Step 2: Prepare entity names
             String subscriptionName = subscriberName + Constants.UNDER_SCORE  + serviceId;
@@ -199,10 +200,10 @@ public class DeleteIPTV implements HttpAction {
     }
 
     private DeleteIPTVResponse errorResponse(String code, String message) {
-        return new DeleteIPTVResponse(code, message, Instant.now().toString());
+        return new DeleteIPTVResponse(code, message, DateTimeUtil.now());
     }
 
     private DeleteIPTVResponse successResponse(String subscriptionId, String ontName, String message) {
-        return ResponseEntity.status(200).body(new DeleteIPTVResponse("200", message, Instant.now().toString(), subscriptionId,ontName)).getBody();
+        return ResponseEntity.status(200).body(new DeleteIPTVResponse("200", message, DateTimeUtil.now(), subscriptionId,ontName)).getBody();
     }
 }

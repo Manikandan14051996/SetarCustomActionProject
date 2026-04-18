@@ -16,6 +16,7 @@ import com.nokia.nsw.uiv.request.AssociateResourcesRequest;
 import com.nokia.nsw.uiv.request.ChangeTechnologyRequest;
 import com.nokia.nsw.uiv.response.ChangeTechnologyResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 
 import com.nokia.nsw.uiv.model.common.party.Customer;
@@ -129,7 +130,7 @@ public class ChangeTechnology implements HttpAction {
                 return ResponseEntity.status(400).body(new ChangeTechnologyResponse(
                         "400",
                         ERROR_PREFIX + bre.getMessage(),
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         "",
                         ""
                 ));
@@ -153,7 +154,7 @@ public class ChangeTechnology implements HttpAction {
             // 4. Update existing subscriber (only when productSubtype == Fibernet)
             if ("Fibernet".equalsIgnoreCase(productSubtype)) {
                 if (subscriberNameFibernet.length() > 100) {
-                    return  ResponseEntity.status(400).body(new ChangeTechnologyResponse("400", ERROR_PREFIX + "Subscriber name too long", Instant.now().toString(), subscriptionName, ontName));
+                    return  ResponseEntity.status(400).body(new ChangeTechnologyResponse("400", ERROR_PREFIX + "Subscriber name too long", DateTimeUtil.now(), subscriptionName, ontName));
                 }
                 // Try find CBM-keyed subscriber
                 Optional<Customer> maybeCbmSubscriber = customerRepo.findByDiscoveredName(subscriberNameCbmKey);
@@ -179,7 +180,7 @@ public class ChangeTechnology implements HttpAction {
                 }
             }
             if (subscriptionName.length() > 100) {
-                return ResponseEntity.status(400).body(new ChangeTechnologyResponse("400", ERROR_PREFIX + "Subscription name too long", Instant.now().toString(), subscriptionName, ""));
+                return ResponseEntity.status(400).body(new ChangeTechnologyResponse("400", ERROR_PREFIX + "Subscription name too long", DateTimeUtil.now(), subscriptionName, ""));
             }
             // 5. Update existing subscription (if exists)
             Optional<Subscription> maybeSubscription = subscriptionRepo.findByDiscoveredName(subscriptionName);
@@ -266,7 +267,7 @@ public class ChangeTechnology implements HttpAction {
 
             // validate ont name length
             if (ontName.length() > 100) {
-                return ResponseEntity.status(400).body(new ChangeTechnologyResponse("400", ERROR_PREFIX + "ONT name too long", Instant.now().toString(), "", ""));
+                return ResponseEntity.status(400).body(new ChangeTechnologyResponse("400", ERROR_PREFIX + "ONT name too long", DateTimeUtil.now(), "", ""));
             }
 
             // 9. Prepare ONT device (create if missing)
@@ -303,7 +304,7 @@ public class ChangeTechnology implements HttpAction {
                     });
 
             if (mgmtVlanName.length() > 100) {
-                return ResponseEntity.status(400).body(new ChangeTechnologyResponse("400", ERROR_PREFIX + "Vlan name too long", Instant.now().toString(), "", ""));
+                return ResponseEntity.status(400).body(new ChangeTechnologyResponse("400", ERROR_PREFIX + "Vlan name too long", DateTimeUtil.now(), "", ""));
             }
             // 10. Create or retrieve management VLAN interface
             vlanRepo.findByDiscoveredName(mgmtVlanName).orElseGet(() -> {
@@ -369,7 +370,7 @@ public class ChangeTechnology implements HttpAction {
                 return ResponseEntity.status(500).body(new ChangeTechnologyResponse(
                         "500",
                         ERROR_PREFIX + "ONT name \"" + ontName + "\" is not found in CPEDevice",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         "",
                         ""
                 ));
@@ -380,7 +381,7 @@ public class ChangeTechnology implements HttpAction {
                 return ResponseEntity.status(500).body(new ChangeTechnologyResponse(
                         "500",
                         ERROR_PREFIX + "CBM device \"" + cpeDeviceOldName + "\" is not found in CPEDevice",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         "",
                         ""
                 ));
@@ -437,11 +438,11 @@ public class ChangeTechnology implements HttpAction {
             out.put("subscriptionName", subscriptionName);
             out.put("ontName", ontName);
             log.error(Constants.ACTION_COMPLETED);
-            return new ChangeTechnologyResponse("200", "ChangeTechnology executed successfully.", Instant.now().toString(), subscriptionName,ontName);
+            return new ChangeTechnologyResponse("200", "ChangeTechnology executed successfully.", DateTimeUtil.now(), subscriptionName,ontName);
 
         } catch (Exception ex) {
             log.error("Exception in ChangeTechnology", ex);
-            return ResponseEntity.status(500).body(new ChangeTechnologyResponse("500", ERROR_PREFIX + ex.getMessage(), Instant.now().toString(),"",""));
+            return ResponseEntity.status(500).body(new ChangeTechnologyResponse("500", ERROR_PREFIX + ex.getMessage(), DateTimeUtil.now(),"",""));
         }
     }
 }

@@ -13,6 +13,7 @@ import com.nokia.nsw.uiv.request.QueryCPEDeviceRequest;
 import com.nokia.nsw.uiv.response.ChangeStateResponse;
 import com.nokia.nsw.uiv.response.QueryCPEDeviceResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -54,7 +55,7 @@ public class QueryCPEDevice implements HttpAction {
             log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
         } catch (BadRequestException bre) {
             return ResponseEntity.status(400).body(new QueryCPEDeviceResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                    java.time.Instant.now().toString()));
+                    DateTimeUtil.now()));
         }
 
         String resourceType = request.getResourceType();
@@ -65,14 +66,14 @@ public class QueryCPEDevice implements HttpAction {
         String devName = resourceType + Constants.UNDER_SCORE + request.getResourceSN();
         Optional<LogicalDevice> deviceOpt = cpeDeviceRepository.findByDiscoveredName(devName);
         if (!deviceOpt.isPresent()) {
-            return ResponseEntity.status(404).body(new QueryCPEDeviceResponse("404", "CPE Details Not Found", String.valueOf(System.currentTimeMillis())));
+            return ResponseEntity.status(404).body(new QueryCPEDeviceResponse("404", "CPE Details Not Found", DateTimeUtil.now()));
         }
 
         LogicalDevice device = deviceOpt.get();
         QueryCPEDeviceResponse response = new QueryCPEDeviceResponse();
         response.setStatus("200");
         response.setMessage("CPE Details Found.");
-        response.setTimestamp(String.valueOf(System.currentTimeMillis()));
+        response.setTimestamp(DateTimeUtil.now());
 
         response.setResourceModel((String) device.getProperties().get("deviceModel"));
         response.setResourceModelMTA((String) device.getProperties().get("deviceModelMta"));

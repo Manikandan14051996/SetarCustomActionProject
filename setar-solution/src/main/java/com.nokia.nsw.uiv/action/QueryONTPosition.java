@@ -9,6 +9,7 @@ import com.nokia.nsw.uiv.repository.LogicalDeviceCustomRepository;
 import com.nokia.nsw.uiv.request.QueryONTPositionRequest;
 import com.nokia.nsw.uiv.response.QueryONTPositionResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 
 
@@ -56,7 +57,7 @@ public class QueryONTPosition implements HttpAction {
                 return ResponseEntity.status(400).body(new QueryONTPositionResponse(
                         "400",
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         ""
                 ));
             }
@@ -73,7 +74,7 @@ public class QueryONTPosition implements HttpAction {
                 return ResponseEntity.status(400).body(new QueryONTPositionResponse(
                         "400",
                         ERROR_PREFIX + "ONT name too long.",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         ""
                 ));
             }
@@ -85,7 +86,7 @@ public class QueryONTPosition implements HttpAction {
                 return ResponseEntity.status(404).body(new QueryONTPositionResponse(
                         "404",
                         ERROR_PREFIX + "No ONT found.",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         ""
                 ));
             }
@@ -101,7 +102,7 @@ public class QueryONTPosition implements HttpAction {
                 return ResponseEntity.status(404).body(new QueryONTPositionResponse(
                         "404",
                         ERROR_PREFIX + "No ONT Object ID found.",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         ""
                 ));
             }
@@ -110,7 +111,7 @@ public class QueryONTPosition implements HttpAction {
                 return ResponseEntity.status(404).body(new QueryONTPositionResponse(
                         "404",
                         ERROR_PREFIX + "No ONT Object ID found.",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         ""
                 ));
             }
@@ -126,7 +127,7 @@ public class QueryONTPosition implements HttpAction {
                 return ResponseEntity.status(404).body(new QueryONTPositionResponse(
                         "404",
                         ERROR_PREFIX + "No ONT Object ID found.",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         ""
                 ));
             }
@@ -138,7 +139,7 @@ public class QueryONTPosition implements HttpAction {
             return ResponseEntity.status(200).body(new QueryONTPositionResponse(
                     "200",
                     "UIV action QueryONTPosition executed successfully.",
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     objectId
             ));
 
@@ -147,7 +148,7 @@ public class QueryONTPosition implements HttpAction {
             return ResponseEntity.status(500).body(new QueryONTPositionResponse(
                     "500",
                     ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage(),
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     ""
             ));
         }

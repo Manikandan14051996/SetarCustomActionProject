@@ -14,6 +14,7 @@ import com.nokia.nsw.uiv.repository.*;
 import com.nokia.nsw.uiv.request.QueryAllServicesByCPERequest;
 import com.nokia.nsw.uiv.response.QueryAllServicesByCPEResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +71,7 @@ public class QueryAllServicesByCPE implements HttpAction {
                 return new QueryAllServicesByCPEResponse(
                         "400",
                         ERROR_PREFIX + "ONT name too long",
-                        Instant.now().toString(),
+                        DateTimeUtil.now(),
                         null);
             }
 
@@ -206,7 +207,7 @@ public class QueryAllServicesByCPE implements HttpAction {
             return new QueryAllServicesByCPEResponse(
                     "200",
                     "UIV action QueryAllServicesByCPE executed successfully.",
-                    Instant.now().toString(),
+                    DateTimeUtil.now(),
                     output);
 
         } catch (Exception ex) {
@@ -481,7 +482,7 @@ public class QueryAllServicesByCPE implements HttpAction {
         return new QueryAllServicesByCPEResponse(
                 status,
                 ERROR_PREFIX + msg,
-                Instant.now().toString(),
+                DateTimeUtil.now(),
                 null);
     }
 
