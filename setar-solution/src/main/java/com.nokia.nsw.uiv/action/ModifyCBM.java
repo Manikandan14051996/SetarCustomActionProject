@@ -132,7 +132,7 @@ public class ModifyCBM implements HttpAction {
                     // Check "Status" property
                     Object statusValue = customer.getProperties().get("subscriberStatus");
                     if (statusValue != null && "Active".equalsIgnoreCase(statusValue.toString())) {
-                        customerCustomRepository.save(customer);
+                        customerCustomRepository.save(customer,0);
                         subscriber = Optional.of(customer);
                     } else {
                         return ResponseEntity.status(409).body(new ModifyCBMResponse("409", ERROR_PREFIX + "Customer not active", DateTimeUtil.now(), "", ""));
@@ -173,7 +173,7 @@ public class ModifyCBM implements HttpAction {
                 rfsProps.put("transactionType", input.getModifyType());
                 rfsProps.put("endDate", getCurrentTimestamp());
                 rfs.setProperties(rfsProps);
-                serviceCustomRepository.save(rfs);
+                serviceCustomRepository.save(rfs,0);
             }
             if (!"IPTV".equalsIgnoreCase(input.getProductType())) {
                 // Update Service MAC / Gateway MAC flows (ModifyCableModem / Cable_Modem)
@@ -216,7 +216,7 @@ public class ModifyCBM implements HttpAction {
                                     cbmDevice.getProperties().put("gatewayMAC", modifyParam2);
                                 }
                                 subscription.setProperties(subProps);
-                                subscriptionRepository.save(subscription);
+                                subscriptionRepository.save(subscription,0);
                             } else {
                                 // serviceMAC mismatch: try to find CBM by serviceID (from subscription) and update that device
                                 String serviceID = (String) subscription.getProperties().getOrDefault("serviceID", "");
@@ -241,10 +241,10 @@ public class ModifyCBM implements HttpAction {
                                         sProps.put("serviceSN", modifyParam1);
                                     }
                                     subscription.setProperties(sProps);
-                                    subscriptionRepository.save(subscription);
+                                    subscriptionRepository.save(subscription,0);
                                     newCBM = logicalDeviceRepository.findByDiscoveredName(cbmDeviceName).get();
                                     newCBM.setProperties(dProps);
-                                    logicalDeviceRepository.save(newCBM);
+                                    logicalDeviceRepository.save(newCBM,0);
 
                                     // update subscriber name replace resourceSN with modifyParam1
                                     if (modifyParam1 != null && !modifyParam1.isEmpty() && subscriber.isPresent()) {
@@ -255,7 +255,7 @@ public class ModifyCBM implements HttpAction {
                                         Map<String, Object> custProps = Optional.ofNullable(subscriberObj.getProperties()).map(HashMap::new).orElse(new HashMap<>());
                                         custProps.put("name", newSubscriberName);
                                         subscriberObj.setProperties(custProps);
-                                        customerCustomRepository.save(subscriberObj);
+                                        customerCustomRepository.save(subscriberObj,0);
                                     }
                                 } else {
                                     // no matching CBM found by serviceID - nothing to change
@@ -299,7 +299,7 @@ public class ModifyCBM implements HttpAction {
                             newProps.put("voipPorts", voip1 + "," + voip2);
 
                             newCbm.setProperties(newProps);
-                            logicalDeviceRepository.save(newCbm);
+                            logicalDeviceRepository.save(newCbm,0);
 
                             // Reset old CBM
                             oldProps.put("AdministrativeState", "Available");
@@ -307,7 +307,7 @@ public class ModifyCBM implements HttpAction {
                             oldProps.put("modelSubtype", "");
                             oldProps.put("voipPorts", "Available");
                             oldCbm.setProperties(oldProps);
-                            logicalDeviceRepository.save(oldCbm);
+                            logicalDeviceRepository.save(oldCbm,0);
                         }
                     } catch (Exception ex) {
                         log.error("Error migrating broadband ports", ex);
@@ -327,7 +327,7 @@ public class ModifyCBM implements HttpAction {
                             sProps.put("voipPackage1", modifyParam1);
                         }
                         subscription.setProperties(sProps);
-                        subscriptionRepository.save(subscription);
+                        subscriptionRepository.save(subscription,0);
                     } catch (Exception ex) {
                         log.error("Error updating package/components", ex);
                         String msg = ERROR_PREFIX + "Error updating package/components";
@@ -348,7 +348,7 @@ public class ModifyCBM implements HttpAction {
                             Map<String, Object> custProps = Optional.ofNullable(customer.getProperties()).map(HashMap::new).orElse(new HashMap<>());
                             custProps.put("email_pwd", modifyParam1 != null ? modifyParam1 : "");
                             customer.setProperties(custProps);
-                            customerCustomRepository.save(customer);
+                            customerCustomRepository.save(customer,0);
                         } else {
                             String msg = ERROR_PREFIX + "Subscriber not found for password update";
                             return ResponseEntity.status(409).body(new ModifyCBMResponse("409", msg, DateTimeUtil.now(), "", ""));
@@ -382,7 +382,7 @@ public class ModifyCBM implements HttpAction {
 
                                 // rename subscription
                                 subscription.setDiscoveredName(subscriptionNameNew);
-                                subscriptionRepository.save(subscription);
+                                subscriptionRepository.save(subscription,0);
 
                                 // rename product if exists
                                 Optional<Product> optProduct = productRepository.findByDiscoveredName(productName);
@@ -392,7 +392,7 @@ public class ModifyCBM implements HttpAction {
                                     Map<String, Object> pProps = Optional.ofNullable(prod.getProperties()).map(HashMap::new).orElse(new HashMap<>());
                                     pProps.put("name", productNameNew);
                                     prod.setProperties(pProps);
-                                    productRepository.save(prod);
+                                    productRepository.save(prod,0);
                                 }
 
                                 // rename CFS
@@ -403,7 +403,7 @@ public class ModifyCBM implements HttpAction {
                                     cfsProps.put("name", cfsNameNew);
                                     cfsProps.put("endDate", Instant.now().toString());
                                     cfs.setProperties(cfsProps);
-                                    serviceCustomRepository.save(cfs);
+                                    serviceCustomRepository.save(cfs,0);
                                 }
 
                                 // rename RFS
@@ -414,7 +414,7 @@ public class ModifyCBM implements HttpAction {
                                     rfsProps.put("name", rfsNameNew);
                                     if (fxOrderId != null) rfsProps.put("transactionId", fxOrderId);
                                     rfs.setProperties(rfsProps);
-                                    serviceCustomRepository.save(rfs);
+                                    serviceCustomRepository.save(rfs,0);
                                 }
 
                                 // rename CBM device if found by old name
@@ -425,7 +425,7 @@ public class ModifyCBM implements HttpAction {
                                     Map<String, Object> cbmProps = Optional.ofNullable(oldCbmDevice.getProperties()).map(HashMap::new).orElse(new HashMap<>());
                                     cbmProps.put("name", cbmDeviceNameNew);
                                     oldCbmDevice.setProperties(cbmProps);
-                                    logicalDeviceRepository.save(oldCbmDevice);
+                                    logicalDeviceRepository.save(oldCbmDevice,0);
 
                                     // Update VOIP_PORT1 if it contains old service id
                                     if (cbmProps.containsKey("voipPort1")) {
@@ -433,7 +433,7 @@ public class ModifyCBM implements HttpAction {
                                         if (port != null && port.contains(input.getServiceId())) {
                                             cbmProps.put("voipPort1", newServiceId);
                                             oldCbmDevice.setProperties(cbmProps);
-                                            logicalDeviceRepository.save(oldCbmDevice);
+                                            logicalDeviceRepository.save(oldCbmDevice,0);
                                         }
                                     }
                                     // Add missing VOIP_PORT2 update
@@ -442,13 +442,13 @@ public class ModifyCBM implements HttpAction {
                                         if (port2 != null && port2.contains(input.getServiceId())) {
                                             cbmProps.put("voipPort2", newServiceId);
                                             oldCbmDevice.setProperties(cbmProps);
-                                            logicalDeviceRepository.save(oldCbmDevice);
+                                            logicalDeviceRepository.save(oldCbmDevice,0);
                                         }
                                     }
 
                                 }
                             } else {
-                                subscriptionRepository.save(subscription);
+                                subscriptionRepository.save(subscription,0);
                             }
                         }
                     } catch (Exception ex) {
