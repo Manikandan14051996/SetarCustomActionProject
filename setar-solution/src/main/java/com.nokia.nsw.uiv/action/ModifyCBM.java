@@ -432,25 +432,33 @@ public class ModifyCBM implements HttpAction {
                                     oldCbmDevice.setProperties(cbmProps);
                                     logicalDeviceRepository.save(oldCbmDevice,0);
 
-                                    // Update VOIP_PORT1 if it contains old service id
-                                    if (cbmProps.containsKey("voipPort1")) {
-                                        String port = String.valueOf(cbmProps.get("voipPort1"));
-                                        if (port != null && port.contains(input.getServiceId())) {
-                                            cbmProps.put("voipPort1", newServiceId);
-                                            oldCbmDevice.setProperties(cbmProps);
-                                            logicalDeviceRepository.save(oldCbmDevice,0);
+                                }
+                                if(input.getResourceSN()!=null && !input.getResourceSN().isEmpty()) {
+                                    Optional<LogicalDevice> cpeDevice = logicalDeviceRepository.findByDiscoveredName("CBM_" + input.getResourceSN());
+                                    if (cpeDevice.isPresent())
+                                    {
+                                        LogicalDevice oldcpeDevice = cpeDevice.get();
+                                        Map<String, Object> cpeProps = Optional.ofNullable(oldcpeDevice.getProperties()).map(HashMap::new).orElse(new HashMap<>());
+                                        // Update VOIP_PORT1 if it contains old service id
+                                        if (cpeProps.containsKey("voipPort1")) {
+                                            String port = String.valueOf(cpeProps.get("voipPort1"));
+                                            if (port != null && port.equalsIgnoreCase(input.getServiceId())) {
+                                                cpeProps.put("voipPort1", newServiceId);
+                                                oldcpeDevice.setProperties(cpeProps);
+                                                logicalDeviceRepository.save(oldcpeDevice,0);
+                                            }
                                         }
-                                    }
-                                    // Add missing VOIP_PORT2 update
-                                    if (cbmProps.containsKey("voipPort2")) {
-                                        String port2 = String.valueOf(cbmProps.get("voipPort2"));
-                                        if (port2 != null && port2.contains(input.getServiceId())) {
-                                            cbmProps.put("voipPort2", newServiceId);
-                                            oldCbmDevice.setProperties(cbmProps);
-                                            logicalDeviceRepository.save(oldCbmDevice,0);
+                                        // Add missing VOIP_PORT2 update
+                                        if (cpeProps.containsKey("voipPort2")) {
+                                            String port2 = String.valueOf(cpeProps.get("voipPort2"));
+                                            if (port2 != null && port2.contains(input.getServiceId())) {
+                                                cpeProps.put("voipPort2", newServiceId);
+                                                oldcpeDevice.setProperties(cpeProps);
+                                                logicalDeviceRepository.save(oldcpeDevice,0);
+                                            }
                                         }
-                                    }
 
+                                    }
                                 }
                             } else {
                                 subscriptionRepository.save(subscription,0);
