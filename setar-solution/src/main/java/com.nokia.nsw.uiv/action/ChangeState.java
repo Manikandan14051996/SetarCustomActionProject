@@ -30,6 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Optional;
 
@@ -80,8 +81,8 @@ public class ChangeState implements HttpAction {
         }
 
         // 2. Prepare names based on product type and service link
-        String subscriptionName;
-        String rfsName;
+        String subscriptionName = "";
+        String rfsName = "";
         String ontName = null;
         String cbmName = null;
         String productType = nullSafe(req.getProductType());
@@ -106,14 +107,15 @@ public class ChangeState implements HttpAction {
             }
         }
         // fallback when ontSN present
-        else if (!isEmpty(req.getOntSN())) {
+        else if (req.getOntSN()!=null && !productType.toUpperCase().contains("IPTV")) {
             subscriptionName = req.getSubscriberName()+ Constants.UNDER_SCORE  + req.getServiceId()+ Constants.UNDER_SCORE  + req.getOntSN();
             rfsName = "RFS" + Constants.UNDER_SCORE + req.getSubscriberName()+ Constants.UNDER_SCORE  + req.getServiceId()+ Constants.UNDER_SCORE  + req.getOntSN();
-        } else {
-            // default fallback: subscriber + serviceId
-            subscriptionName = req.getSubscriberName()+ Constants.UNDER_SCORE  + req.getServiceId();
-            rfsName = "RFS" + Constants.UNDER_SCORE + subscriptionName;
         }
+//        else {
+//            // default fallback: subscriber + serviceId
+//            subscriptionName = req.getSubscriberName()+ Constants.UNDER_SCORE  + req.getServiceId();
+//            rfsName = "RFS" + Constants.UNDER_SCORE + subscriptionName;
+//        }
 
         // 3. Check ONT name length if present
         if (!isEmpty(req.getOntSN())) {
@@ -173,7 +175,7 @@ public class ChangeState implements HttpAction {
 
             // Update subscription property - store as subscriptionStatus
             subscription = subscriptionRepository.findByDiscoveredName(subscription.getDiscoveredName()).get();
-            if (subscription.getProperties() == null) subscription.setProperties(new java.util.HashMap<>());
+            if (subscription.getProperties() == null) subscription.setProperties(new HashMap<>());
             subscription.getProperties().put("subscriptionStatus", newStatus);
             // Persist changes
             subscriptionRepository.save(subscription, 2);
@@ -181,7 +183,7 @@ public class ChangeState implements HttpAction {
             // 6. Update RFS transaction info if fxOrderId present
             rfs = serviceCustomRepository.findByDiscoveredName(rfs.getDiscoveredName()).get();
             if (!isEmpty(req.getFxOrderId())) {
-                if (rfs.getProperties() == null) rfs.setProperties(new java.util.HashMap<>());
+                if (rfs.getProperties() == null) rfs.setProperties(new HashMap<>());
                 rfs.getProperties().put("transactionId", req.getFxOrderId());
                 rfs.getProperties().put("transactionType", actionType);
             }
