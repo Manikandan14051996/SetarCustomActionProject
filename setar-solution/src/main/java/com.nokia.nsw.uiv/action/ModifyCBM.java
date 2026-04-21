@@ -162,7 +162,7 @@ public class ModifyCBM implements HttpAction {
 
             Optional<LogicalDevice> optCbm = logicalDeviceRepository.findByDiscoveredName(cbmDeviceName);
             if (optCbm.isEmpty()) {
-                return new ModifyCBMResponse("409", ERROR_PREFIX + "No entry found to modify CBM device: " + cbmDeviceName, DateTimeUtil.now(), "", "");
+                return ResponseEntity.status(409).body(new ModifyCBMResponse("409", ERROR_PREFIX + "No entry found to modify CBM device: " + cbmDeviceName, DateTimeUtil.now(), "", ""));
             }
             LogicalDevice cbmDevice = optCbm.get();
 
