@@ -369,7 +369,12 @@ public class ModifyCBM implements HttpAction {
                             // Update subscription fields: serviceID, voipNumber1
                             Map<String, Object> sProps = Optional.ofNullable(subscription.getProperties()).map(HashMap::new).orElse(new HashMap<>());
                             sProps.put("serviceID", newServiceId);
-                            sProps.put("voipNumber1", newServiceId);
+                            if(sProps.get("voipNumber1")!=null) {
+                                sProps.put("voipNumber1", newServiceId);
+                            }
+                            else if(sProps.get("voipNumber2")!=null) {
+                                sProps.put("voipNumber2", newServiceId);
+                            }
                             subscription.setProperties(sProps);
 
                             // If service ID changed, reconstruct names
