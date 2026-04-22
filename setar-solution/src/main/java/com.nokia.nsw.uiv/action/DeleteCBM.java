@@ -235,8 +235,8 @@ public class DeleteCBM implements HttpAction {
                         } else {
 
                             String serviceMac = subProps.get("serviceMAC").toString();
-                            String cleanMac = serviceMac.replace(":", "");
-                            String cpeDeviceName = "CBM_" + cleanMac;
+
+                            String cpeDeviceName = "CBM_" + serviceMac;
 
                             log.error("Derived CPE device name from subscription = {}", cpeDeviceName);
 
@@ -418,6 +418,11 @@ public class DeleteCBM implements HttpAction {
                 log.error("Subscription has no voipNumber1");
                 return;
             }
+            Object voipNumber2 = subProps.get("voipNumber2");
+            if (voipNumber2 == null) {
+                log.error("Subscription has no voipNumber2");
+                return;
+            }
 
             Map<String, Object> devProps = cpeDevice.getProperties();
             if (devProps == null) {
@@ -437,7 +442,7 @@ public class DeleteCBM implements HttpAction {
                 log.error("Reset voipPort1 to Available on CPE {}", cpeDevice.getDiscoveredName());
             }
 
-            if (voipNumber.equals(port2)) {
+            if (voipNumber2.equals(port2)) {
                 devProps.put("voipPort2", "Available");
                 updated = true;
                 log.error("Reset voipPort2 to Available on CPE {}", cpeDevice.getDiscoveredName());
