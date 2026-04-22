@@ -3,6 +3,7 @@ package com.nokia.nsw.uiv.action;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import com.nokia.nsw.uiv.exception.BadRequestException;
@@ -413,15 +414,13 @@ public class DeleteCBM implements HttpAction {
                 return;
             }
 
-            Object voipNumber = subProps.get("voipNumber1");
-            if (voipNumber == null) {
+            String voipNumber = subProps.getOrDefault("voipNumber1", "").toString();
+            if (voipNumber.isEmpty()) {
                 log.error("Subscription has no voipNumber1");
-                return;
             }
-            Object voipNumber2 = subProps.get("voipNumber2");
-            if (voipNumber2 == null) {
+            String voipNumber2 = subProps.getOrDefault("voipNumber2", "").toString();
+            if (voipNumber2.isEmpty()) {
                 log.error("Subscription has no voipNumber2");
-                return;
             }
 
             Map<String, Object> devProps = cpeDevice.getProperties();
