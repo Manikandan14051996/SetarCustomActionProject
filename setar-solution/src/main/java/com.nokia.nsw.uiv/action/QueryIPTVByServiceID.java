@@ -18,6 +18,7 @@ import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -67,9 +68,9 @@ public class QueryIPTVByServiceID implements HttpAction {
             } catch (Exception ex) {
                 QueryIPTVByServiceIDResponse resp = new QueryIPTVByServiceIDResponse();
                 resp.setStatus("400");
-                resp.setMessage("Missing mandatory parameter(s)");
+                resp.setMessage("UIV action QueryIPTVByServiceID execution failed-Missing mandatory parameter(s)");
                 resp.setTimestamp(DateTimeUtil.now());
-                return resp;
+                return ResponseEntity.status(400).body(resp);
             }
 
             String serviceId = req.getServiceID();
@@ -110,7 +111,8 @@ public class QueryIPTVByServiceID implements HttpAction {
                 resp.setStatus("400");
                 resp.setMessage("No entry found for delete");
                 resp.setTimestamp(DateTimeUtil.now());
-                return resp;
+                return ResponseEntity.status(400).body(resp);
+
             }
 
             // 3. Prepare to collect IPTV details
@@ -411,14 +413,14 @@ public class QueryIPTVByServiceID implements HttpAction {
                 resp.setMessage("IPTV Service Details Found");
                 resp.setTimestamp(DateTimeUtil.now());
                 resp.setIptvInfo(iptvInfo);
-                return resp;
+                return ResponseEntity.status(200).body(resp);
 
             } else {
                 QueryIPTVByServiceIDResponse resp = new QueryIPTVByServiceIDResponse();
                 resp.setStatus("200");
                 resp.setMessage("No IPTV Service Details Found");
                 resp.setTimestamp(DateTimeUtil.now());
-                return resp;
+                return ResponseEntity.status(200).body(resp);
             }
 
         } catch (Exception ex) {

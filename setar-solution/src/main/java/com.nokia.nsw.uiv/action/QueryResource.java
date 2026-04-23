@@ -14,6 +14,7 @@ import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -62,7 +63,7 @@ public class QueryResource implements HttpAction {
             // Step 3: Search Device
             Optional<LogicalDevice> optDev = deviceRepository.findByDiscoveredName(devName);
             if (optDev.isEmpty()) {
-                return errorResponse("404", ERROR_PREFIX + "Resource not found, SN is: " + resourceSN);
+                return ResponseEntity.status(404).body(errorResponse("404", ERROR_PREFIX + "Resource not found, SN is: " + resourceSN));
             }
 
             LogicalDevice device = optDev.get();
@@ -89,7 +90,7 @@ public class QueryResource implements HttpAction {
             }
             log.error(Constants.ACTION_COMPLETED);
             // Step 4: Final Success Response
-            return new QueryResourceResponse(
+            return ResponseEntity.status(200).body(new QueryResourceResponse(
                     "200",
                     "UIV action QueryResource executed successfully.",
                     DateTimeUtil.now(),
@@ -104,12 +105,12 @@ public class QueryResource implements HttpAction {
                     devGroupID,
                     devDesc,
                     gatewayMac
-            );
+            ));
 
         } catch (BadRequestException bre) {
-            return errorResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage());
+            return ResponseEntity.status(400).body(errorResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage()));
         } catch (Exception ex) {
-            return errorResponse("500", ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage());
+            return ResponseEntity.status(500).body(errorResponse("500", ERROR_PREFIX + "Internal server error occurred - " + ex.getMessage()));
         }
     }
 

@@ -21,6 +21,7 @@ import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -73,8 +74,8 @@ public class QueryEquipment implements HttpAction {
             Validations.validateMandatoryParams(request.getProductSubtype(), "productSubtype");
             log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
         } catch (BadRequestException bre) {
-            return createErrorResponse(CODE_MISSING_PARAMS,
-                    "Missing mandatory parameter(s): " + bre.getMessage());
+            return ResponseEntity.status(400).body(createErrorResponse(CODE_MISSING_PARAMS,
+                    "Missing mandatory parameter(s): " + bre.getMessage()));
         }
 
         // 2. Construct names
@@ -83,13 +84,13 @@ public class QueryEquipment implements HttpAction {
         String rfsName = "RFS" + Constants.UNDER_SCORE + subscriptionName;
         String productName = request.getSubscriberName() + Constants.UNDER_SCORE + request.getProductSubtype() + Constants.UNDER_SCORE + request.getServiceId();
         if (subscriptionName.length()>100) {
-            return createErrorResponse("400",
-                    "Subscription Name too long " + subscriptionName);
+            return ResponseEntity.status(400).body(createErrorResponse("400",
+                    "Subscription Name too long " + subscriptionName));
         }
 
         if (productName.length()>100) {
-            return createErrorResponse("400",
-                    "Product Name too long " + productName);
+            return ResponseEntity.status(400).body(createErrorResponse("400",
+                    "Product Name too long " + productName));
         }
         boolean successFlag = false;
         int apCounter = 1;
@@ -102,15 +103,15 @@ public class QueryEquipment implements HttpAction {
                     subscriberRepository.findByDiscoveredName(request.getSubscriberName());
 
             if (subscriberOpt.isEmpty()) {
-                return createErrorResponse(CODE_NO_ENTRY,
-                        "No entry found for delete " + request.getSubscriberName());
+                return ResponseEntity.status(404).body(createErrorResponse(CODE_NO_ENTRY,
+                        "No entry found for delete " + request.getSubscriberName()));
             }
             Customer subscriber = subscriberOpt.get();
 
             // 3️⃣ Locate entities
             Optional<Subscription> subscriptionOpt = subscriptionRepository.findByDiscoveredName(subscriptionName);
             if (subscriptionOpt.isEmpty()) {
-                return createErrorResponse(CODE_NO_ENTRY, "No entry found for delete");
+                return ResponseEntity.status(404).body(createErrorResponse(CODE_NO_ENTRY, "No entry found for delete"));
             }
 
             Optional<Service> cfsOpt = serviceCustomRepository.findByDiscoveredName(cfsName);
@@ -121,7 +122,7 @@ public class QueryEquipment implements HttpAction {
             String rfsGdn = Validations.getGlobalName(rfsName);
             Service rfs = serviceCustomRepository.findByDiscoveredName(rfsName).orElse(null);
             if (rfs == null) {
-                return createErrorResponse(CODE_NO_ENTRY, "No entry found for delete");
+                return ResponseEntity.status(404).body(createErrorResponse(CODE_NO_ENTRY, "No entry found for delete"));
             }
 
             Optional<Product> productOpt = productRepository.findByDiscoveredName(productName);

@@ -16,6 +16,7 @@ import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -63,7 +64,7 @@ public class QueryAddrByServiceID implements HttpAction {
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             } catch (BadRequestException bre) {
                 // Code5 -> Missing mandatory parameter
-                return createErrorResponse("400", ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage());
+                return ResponseEntity.status(400).body(createErrorResponse("400", ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage()));
             }
 
             String serviceId = request.getServiceId().trim();
@@ -78,7 +79,7 @@ public class QueryAddrByServiceID implements HttpAction {
                 }});
             if (rfsList == null || rfsList.isEmpty()) {
                 log.error("No RFS entries found containing '{}'", serviceId);
-                return createErrorResponse("404", ERROR_PREFIX + "No Service Details Found");
+                return ResponseEntity.status(404).body(createErrorResponse("404", ERROR_PREFIX + "No Service Details Found"));
             }
 
             Service matchedRfs = null;
@@ -94,7 +95,7 @@ public class QueryAddrByServiceID implements HttpAction {
 
             if (matchedRfs == null) {
                 log.error("No RFS found whose 3rd token equals '{}'", serviceId);
-                return createErrorResponse("404", ERROR_PREFIX + "No Service Details Found");
+                return ResponseEntity.status(404).body(createErrorResponse("404", ERROR_PREFIX + "No Service Details Found"));
             }
 
             // 3) Resolve related data: product <- cfs <- rfs ; subscription <- product ; subscriber <- subscription
@@ -104,7 +105,7 @@ public class QueryAddrByServiceID implements HttpAction {
             }
             if (cfs == null) {
                 log.error("Matched RFS does not reference a CustomerFacingService");
-                return createErrorResponse("404", ERROR_PREFIX + "No Service Details Found");
+                return ResponseEntity.status(404).body(createErrorResponse("404", ERROR_PREFIX + "No Service Details Found"));
             }
 
             // From CFS to Product
@@ -112,7 +113,7 @@ public class QueryAddrByServiceID implements HttpAction {
             Product product = productRepository.findByDiscoveredName(productDiscoveredName).get();
             if (product == null) {
                 log.error("CustomerFacingService does not reference Product");
-                return createErrorResponse("404", ERROR_PREFIX + "No Service Details Found");
+                return ResponseEntity.status(404).body(createErrorResponse("404", ERROR_PREFIX + "No Service Details Found"));
             }
             // Product name: Try typed access then fallback to properties map
             String productName = null;
@@ -139,7 +140,7 @@ public class QueryAddrByServiceID implements HttpAction {
             if (subscription == null) {
                 // fallback: maybe product.properties contains subscription id or link - but per spec this is required
                 log.error("Product does not have Subscription reference");
-                return createErrorResponse("404", ERROR_PREFIX + "No Service Details Found");
+                return ResponseEntity.status(404).body(createErrorResponse("404", ERROR_PREFIX + "No Service Details Found"));
             }
 
             // Service link: prefer subscription.getServiceLink(); fallback to properties
@@ -182,7 +183,7 @@ public class QueryAddrByServiceID implements HttpAction {
             if (missing) {
                 log.error("One or more resolved values are missing: productName='{}', address='{}', serviceLink='{}'",
                         productName, address, serviceLink);
-                return createErrorResponse("404", ERROR_PREFIX + "No Service Details Found");
+                return ResponseEntity.status(404).body(createErrorResponse("404", ERROR_PREFIX + "No Service Details Found"));
             }
             log.error(Constants.ACTION_COMPLETED);
             // 4) Build success response
@@ -197,7 +198,7 @@ public class QueryAddrByServiceID implements HttpAction {
 
         } catch (Exception ex) {
             log.error("Unhandled error in {}", ACTION_LABEL, ex);
-            return createErrorResponse("500", ERROR_PREFIX + ex.getMessage());
+            return ResponseEntity.status(500).body(createErrorResponse("500", ERROR_PREFIX + ex.getMessage()));
         }
     }
 

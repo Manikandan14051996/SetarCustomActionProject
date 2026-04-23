@@ -18,6 +18,7 @@ import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -61,24 +62,24 @@ public class QueryAllServicesByCPE implements HttpAction {
         try {
             Validations.validateMandatory(req.getOntSn(), "ONT_SN");
         } catch (BadRequestException bre) {
-            return errorResponse("400", "Missing mandatory parameter: " + bre.getMessage());
+            return ResponseEntity.status(400).body(errorResponse("400", "Missing mandatory parameter: " + bre.getMessage()));
         }
 
         try {
             String ontName = "ONT" + req.getOntSn();
 
             if (ontName.length() > 100) {
-                return new QueryAllServicesByCPEResponse(
+                return ResponseEntity.status(400).body(new QueryAllServicesByCPEResponse(
                         "400",
                         ERROR_PREFIX + "ONT name too long",
                         DateTimeUtil.now(),
-                        null);
+                        null));
             }
 
             // Step 2: Identify the ONT
             Optional<LogicalDevice> ontOpt = logicalDeviceRepo.findByDiscoveredName(ontName);
             if (!ontOpt.isPresent()) {
-                return errorResponse("404", "CPE/ONT not found");
+                return ResponseEntity.status(404).body(errorResponse("404", "CPE/ONT not found"));
             }
             LogicalDevice ont = ontOpt.get();
             log.info("ONT located: {}", ontName);
@@ -102,7 +103,7 @@ public class QueryAllServicesByCPE implements HttpAction {
             }
 
             if (linkedRfsList.isEmpty()) {
-                return errorResponse("404", "No services linked to CPE");
+                return ResponseEntity.status(404).body(errorResponse("404", "No services linked to CPE"));
             }
 
             // Step 3: Initialize counters and output map
@@ -204,15 +205,15 @@ public class QueryAllServicesByCPE implements HttpAction {
 
             // Step 6: Success response
             log.info("QueryAllServicesByCPE completed successfully.");
-            return new QueryAllServicesByCPEResponse(
+            return ResponseEntity.status(200).body(new QueryAllServicesByCPEResponse(
                     "200",
                     "UIV action QueryAllServicesByCPE executed successfully.",
                     DateTimeUtil.now(),
-                    output);
+                    output));
 
         } catch (Exception ex) {
             log.error("Exception in QueryAllServicesByCPE", ex);
-            return errorResponse("500", "Internal server error occurred");
+            return ResponseEntity.status(500).body(errorResponse("500", "Internal server error occurred"));
         }
     }
 
