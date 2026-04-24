@@ -894,10 +894,14 @@ public class QueryFlags implements HttpAction {
                 String evpnPort4Tpl = getOltProperty(oltGdn, "evpnEthPort4Template");
                 String evpnPort5Tpl = getOltProperty(oltGdn, "evpnEthPort5Template");
 
-                flags.put("SERVICE_PORT2_EXIST", exists(evpnPort2Tpl));
-                flags.put("SERVICE_PORT3_EXIST", exists(evpnPort3Tpl));
-                flags.put("SERVICE_PORT4_EXIST", exists(evpnPort4Tpl));
-                flags.put("SERVICE_PORT5_EXIST", exists(evpnPort5Tpl));
+                templateNamePort2=exists(evpnPort2Tpl);
+                templateNamePort3=exists(evpnPort3Tpl);
+                templateNamePort4=exists(evpnPort4Tpl);
+                templateNamePort5=exists(evpnPort5Tpl);
+                flags.put("SERVICE_PORT2_EXIST", templateNamePort2);
+                flags.put("SERVICE_PORT3_EXIST", templateNamePort3);
+                flags.put("SERVICE_PORT4_EXIST", templateNamePort4);
+                flags.put("SERVICE_PORT5_EXIST", templateNamePort5);
 
                 templateNamePort = "New";
 
