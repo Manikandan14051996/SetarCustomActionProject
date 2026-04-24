@@ -105,6 +105,9 @@ public class ChangeState implements HttpAction {
                 subscriptionName = req.getSubscriberName() +Constants.UNDER_SCORE  + req.getServiceId();
                 rfsName = "RFS" + Constants.UNDER_SCORE + req.getSubscriberName() + Constants.UNDER_SCORE  + req.getServiceId();
             }
+        }else if (productType.equalsIgnoreCase("Broadband")&& serviceLink.contains("Cable_Modem")&&productSubtype.equalsIgnoreCase("Cloudstarter")) {
+            subscriptionName = req.getSubscriberName()+ Constants.UNDER_SCORE  + req.getServiceId();
+            rfsName = "RFS" + Constants.UNDER_SCORE + req.getSubscriberName()+ Constants.UNDER_SCORE  + req.getServiceId();
         }
         // fallback when ontSN present
         else if (req.getOntSN()!=null && !productType.toUpperCase().contains("IPTV")) {
