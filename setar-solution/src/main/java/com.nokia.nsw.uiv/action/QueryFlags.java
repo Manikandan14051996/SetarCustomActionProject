@@ -73,7 +73,6 @@ public class QueryFlags implements HttpAction {
         String ontPort = request.getOntPort();
 
         Validations.validateMandatory(subscriber, "subscriberName");
-        Validations.validateMandatory(ontSN, "ontSN");
         Validations.validateMandatory(productName, "productType");
         Validations.validateMandatory(productSubType, "productSubtype");
 
