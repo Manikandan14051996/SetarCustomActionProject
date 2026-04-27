@@ -428,7 +428,7 @@ public class QueryIPTVByServiceID implements HttpAction {
             resp.setStatus("1");
             resp.setMessage("Exception in QueryIPTVByServiceID");
             resp.setTimestamp(DateTimeUtil.now());
-            return resp;
+            return ResponseEntity.status(500).body(resp);
         }
     }
 

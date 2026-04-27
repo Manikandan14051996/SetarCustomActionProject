@@ -35,7 +35,7 @@ public class QueryEquipment implements HttpAction {
     private static final String CODE_SUCCESS = "200";
     private static final String CODE_MISSING_PARAMS = "400";
     private static final String CODE_NO_ENTRY = "404";
-    private static final String CODE_EQUIP_NOT_FOUND = "500";
+    private static final String CODE_EQUIP_NOT_FOUND = "404";
     private static final String CODE_EXCEPTION = "500";
 
     @Autowired
@@ -224,11 +224,11 @@ public class QueryEquipment implements HttpAction {
                 response.setMessage(reason.toString());
             }
             log.error(Constants.ACTION_COMPLETED);
-            return response;
+            return ResponseEntity.status(404).body(response);
 
         } catch (Exception e) {
             log.error("Exception querying equipment", e);
-            return createErrorResponse(CODE_EXCEPTION, "Exception: " + e.getMessage());
+            return ResponseEntity.status(500).body(createErrorResponse(CODE_EXCEPTION, "Exception: " + e.getMessage()));
         }
     }
 
