@@ -1677,10 +1677,14 @@ public class QueryFlags implements HttpAction {
         flags.putIfAbsent("CBM_MAC", cbmmac);
         flags.putIfAbsent("ONT_MODEL", ontModel);
         flags.putIfAbsent("OLT_POSITION", oltPosition);
-        putIfNotBlank(flags, "SERVICE_PORT2_EXIST", templateNamePort2);
-        putIfNotBlank(flags, "SERVICE_PORT3_EXIST", templateNamePort3);
-        putIfNotBlank(flags, "SERVICE_PORT4_EXIST", templateNamePort4);
-        putIfNotBlank(flags, "SERVICE_PORT5_EXIST", templateNamePort5);
+        flags.putIfAbsent("SERVICE_PORT2_EXIST", templateNamePort2);
+        flags.putIfAbsent("SERVICE_PORT3_EXIST", templateNamePort3);
+        flags.putIfAbsent("SERVICE_PORT4_EXIST", templateNamePort4);
+        flags.putIfAbsent("SERVICE_PORT5_EXIST", templateNamePort5);
+//        putIfNotBlank(flags, "SERVICE_PORT2_EXIST", templateNamePort2);
+//        putIfNotBlank(flags, "SERVICE_PORT3_EXIST", templateNamePort3);
+//        putIfNotBlank(flags, "SERVICE_PORT4_EXIST", templateNamePort4);
+//        putIfNotBlank(flags, "SERVICE_PORT5_EXIST", templateNamePort5);
         putIfNotBlank(flags, "SERVICE_TEMPLATE_CREATE",tempTemplateCreate);
         putIfNotBlank(flags, "SERVICE_TEMPLATE_MGMT",tempTemplateMGMT);
         flags.put("ONT_TEMPLATE", ontTemplate);
