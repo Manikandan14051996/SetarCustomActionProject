@@ -1797,11 +1797,16 @@ public class QueryFlags implements HttpAction {
         } else {
             List<Customer>customers= (List<Customer>) customerRepository.findAll();
             boolean exists=false;
-            for(Customer cust:customers)
-            {
-                if(cust.getDiscoveredName().contains(subscriber))
-                {
-                    exists=true;
+            for(Customer cust:customers) {
+                if (cust.getDiscoveredName().contains("_")) {
+                    String[] discoverdName = cust.getDiscoveredName().split("_");
+                    if (subscriber.equalsIgnoreCase(discoverdName[0])) {
+                        exists = true;
+                    }
+                }else {
+                    if (subscriber.equalsIgnoreCase(cust.getDiscoveredName())) {
+                        exists = true;
+                    }
                 }
             }
             if(exists){
