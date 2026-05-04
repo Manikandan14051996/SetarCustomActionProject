@@ -20,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.time.Instant;
 import java.util.*;
@@ -60,13 +62,15 @@ public class CreateServiceFibernet implements HttpAction {
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Object doPost(ActionContext actionContext) throws Exception {
         log.error(Constants.EXECUTING_ACTION, ACTION_LABEL);
         CreateServiceFibernetRequest request = (CreateServiceFibernetRequest) actionContext.getObject();
 
+        String subscriptionName = "";
+        String ontName="";
         try {
             // 1. Validate mandatory params
-            try{
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_STARTED);
                 Validations.validateMandatory(request.getSubscriberName(), "subscriberName");
                 Validations.validateMandatory(request.getProductType(), "productType");
@@ -80,35 +84,36 @@ public class CreateServiceFibernet implements HttpAction {
                 Validations.validateMandatory(request.getServiceID(), "serviceID");
                 Validations.validateMandatory(request.getOntModel(), "ontModel");
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
-            }catch (BadRequestException bre) {
-                return ResponseEntity.status(400).body(new CreateServiceFibernetResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                        DateTimeUtil.now(), "",""));
-            }
+
             // optional: template names etc.
 
             // Build canonical names
-            String subscriberName = request.getSubscriberName() + Constants.UNDER_SCORE  + request.getOntSN();
-            String subscriptionName = request.getSubscriberName() + Constants.UNDER_SCORE  + request.getServiceID() + Constants.UNDER_SCORE  + request.getOntSN();
-            String productName = request.getSubscriberName() + Constants.UNDER_SCORE  + request.getProductSubtype() + Constants.UNDER_SCORE  + request.getServiceID();
+            String subscriberName = request.getSubscriberName() + Constants.UNDER_SCORE + request.getOntSN();
+            subscriptionName = request.getSubscriberName() + Constants.UNDER_SCORE + request.getServiceID() + Constants.UNDER_SCORE + request.getOntSN();
+            String productName = request.getSubscriberName() + Constants.UNDER_SCORE + request.getProductSubtype() + Constants.UNDER_SCORE + request.getServiceID();
             String cfsName = "CFS" + Constants.UNDER_SCORE + subscriptionName;
             String rfsName = "RFS" + Constants.UNDER_SCORE + subscriptionName;
-            String ontName ="ONT" + request.getOntSN();
+            ontName = "ONT" + request.getOntSN();
 
             AtomicBoolean isSubscriberExist = new AtomicBoolean(true);
             AtomicBoolean isSubscriptionExist = new AtomicBoolean(true);
             AtomicBoolean isProductExist = new AtomicBoolean(true);
             // Length checks
             if (ontName.length() > 100) {
-                return ResponseEntity.status(400).body(createErrorResponse("ONT name too long", "400", "", ""));
+                throw new BadRequestException("ONT name too long");
+//                return ResponseEntity.status(400).body(createErrorResponse("ONT name too long", "400", "", ""));
             }
             if (subscriberName.length() > 100) {
-                return ResponseEntity.status(400).body(createErrorResponse("Subscriber name too long", "400", "", ""));
+                throw new BadRequestException("Subscriber name too long");
+//                return ResponseEntity.status(400).body(createErrorResponse("Subscriber name too long", "400", "", ""));
             }
             if (subscriptionName.length() > 100) {
-                return ResponseEntity.status(400).body(createErrorResponse("Subscription name too long", "400", "", ""));
+                throw new BadRequestException("Subscription name too long");
+//                return ResponseEntity.status(400).body(createErrorResponse("Subscription name too long", "400", "", ""));
             }
             if (productName.length() > 100) {
-                return ResponseEntity.status(400).body(createErrorResponse("Product name too long", "400", "", ""));
+                throw new BadRequestException("Product name too long");
+//                return ResponseEntity.status(400).body(createErrorResponse("Product name too long", "400", "", ""));
             }
 
             // 2. Subscriber: create or fetch
@@ -213,16 +218,17 @@ public class CreateServiceFibernet implements HttpAction {
                 productRepository.save(product, 2);
                 log.error("Created product: {}", productName);
             }
-            if(isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()){
+            if (isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()) {
                 log.error("createServiceFibernate service already exist");
-                return ResponseEntity.status(409).body(new CreateServiceFibernetResponse("409","Service already exist/Duplicate entry",DateTimeUtil.now(),subscriptionName,ontName));
+                throw new RuntimeException("Service already exist/Duplicate entry");
+//                return ResponseEntity.status(409).body(new CreateServiceFibernetResponse("409","Service already exist/Duplicate entry",DateTimeUtil.now(),subscriptionName,ontName));
             }
-            if(isSubscriptionExist.get()){
+            if (isSubscriptionExist.get()) {
                 subscription = subscriptionRepository.findByDiscoveredName(subscription.getDiscoveredName()).get();
                 Set<Service> existingServices = subscription.getService();
                 existingServices.add(product);
                 subscription.setService(existingServices);
-            }else{
+            } else {
                 subscription.setService(new HashSet<>(List.of(product)));
             }
             subscriptionRepository.save(subscription, 2);
@@ -298,8 +304,10 @@ public class CreateServiceFibernet implements HttpAction {
                     oltDevice.setContext(Constants.SETAR);
                     Map<String, Object> props = new HashMap<>();
                     props.put("localName", oltName);
-                    if (request.getTemplateNameVEIP() != null) props.put("veipServiceTemplate", request.getTemplateNameVEIP());
-                    if (request.getTemplateNameHSI() != null) props.put("veipHsiTemplate", request.getTemplateNameHSI());
+                    if (request.getTemplateNameVEIP() != null)
+                        props.put("veipServiceTemplate", request.getTemplateNameVEIP());
+                    if (request.getTemplateNameHSI() != null)
+                        props.put("veipHsiTemplate", request.getTemplateNameHSI());
                     props.put("oltPosition", request.getOltName());
                     props.put("OperationalState", "Active");
                     props.put("createdBy",
@@ -313,7 +321,6 @@ public class CreateServiceFibernet implements HttpAction {
                     log.error("Created OLT device: {}", oltName);
                 }
             }
-
 
             // 8. ONT device: find or create as LogicalDevice with kind=ONT
             String ontContext = Constants.SETAR;
@@ -364,8 +371,8 @@ public class CreateServiceFibernet implements HttpAction {
 
             // 9. VLAN interface (LogicalInterface) creation if needed
             if (request.getMenm() != null && request.getVlanID() != null) {
-                String vlanName = request.getMenm() + Constants.UNDER_SCORE  + request.getVlanID();
-                String vlanContext=Constants.SETAR;
+                String vlanName = request.getMenm() + Constants.UNDER_SCORE + request.getVlanID();
+                String vlanContext = Constants.SETAR;
                 Optional<LogicalInterface> optVlan = logicalInterfaceRepository.findByDiscoveredName(vlanName);
                 if (!optVlan.isPresent()) {
                     LogicalInterface vlan = new LogicalInterface();
@@ -397,7 +404,7 @@ public class CreateServiceFibernet implements HttpAction {
             }
 
 
-            if(ontDevice!=null && oltDevice!=null) {
+            if (ontDevice != null && oltDevice != null) {
                 oltDevice = logicalDeviceRepository
                         .findByDiscoveredName(oltDevice.getDiscoveredName())
                         .get();
@@ -410,16 +417,17 @@ public class CreateServiceFibernet implements HttpAction {
                 if (request.getTemplateNameHSI() != null) {
                     oltDevice.getProperties().put("veipHsiTemplate", request.getTemplateNameHSI());
                 }
-                if (request.getMenm() != "" && request.getMenm() !=null){
+                if (request.getMenm() != "" && request.getMenm() != null) {
                     ontDevice.getProperties().put("description", request.getMenm());
                 }
                 ontDevice.getProperties().put("oltPosition", request.getOltName());
-                if (request.getTemplateNameONT() != null) ontDevice.getProperties().put("ontTemplate", request.getTemplateNameONT());
+                if (request.getTemplateNameONT() != null)
+                    ontDevice.getProperties().put("ontTemplate", request.getTemplateNameONT());
                 ontDevice.setUsingService(new HashSet<>(List.of(rfs)));
                 ontDevice.setUsedResource(new HashSet<>(List.of(oltDevice)));
                 oltDevice.setUsingService(new HashSet<>(List.of(rfs)));
-                logicalDeviceRepository.save(ontDevice,3);
-                logicalDeviceRepository.save(oltDevice,3);
+                logicalDeviceRepository.save(ontDevice, 3);
+                logicalDeviceRepository.save(oltDevice, 3);
             }
 
             log.error(Constants.ACTION_COMPLETED);
@@ -435,11 +443,31 @@ public class CreateServiceFibernet implements HttpAction {
 
         } catch (BadRequestException bre) {
             log.error("Validation error creating Fibernet", bre);
-            return ResponseEntity.status(400).body(createErrorResponse(bre.getMessage(), "400", "", ""));
+            log.error("Transaction active: {}",
+                    TransactionAspectSupport.currentTransactionStatus().isRollbackOnly());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+
+            return ResponseEntity.status(400)
+                    .body(createErrorResponse(
+                            bre.getMessage(),
+                            "400",
+                            subscriptionName,
+                            ontName
+                    ));
         } catch (Exception ex) {
             log.error("Unhandled error in CreateServiceFibernet", ex);
-            return ResponseEntity.status(500).body(createErrorResponse("Internal server error occurred - " + ex.getMessage(), "500", "", ""));
+            log.error("Transaction active: {}",
+                    TransactionAspectSupport.currentTransactionStatus().isRollbackOnly());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return ResponseEntity.status(500)
+                    .body(createErrorResponse(
+                            "Internal server error occurred - " + ex.getMessage(),
+                            "500",
+                            subscriptionName,
+                            ontName
+                    ));
         }
+
     }
 
     private CreateServiceFibernetResponse createErrorResponse(String message, String status, String subscriptionName, String ontName) {
