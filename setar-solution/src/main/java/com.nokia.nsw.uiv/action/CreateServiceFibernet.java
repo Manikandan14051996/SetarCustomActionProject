@@ -15,6 +15,7 @@ import com.nokia.nsw.uiv.request.CreateServiceFibernetRequest;
 import com.nokia.nsw.uiv.response.CreateServiceFibernetResponse;
 import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.utils.DateTimeUtil;
+import com.nokia.nsw.uiv.utils.DuplicateServiceException;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -220,7 +221,7 @@ public class CreateServiceFibernet implements HttpAction {
             }
             if (isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()) {
                 log.error("createServiceFibernate service already exist");
-                throw new RuntimeException("Service already exist/Duplicate entry");
+                throw new DuplicateServiceException("Service already exist/Duplicate entry");
 //                return ResponseEntity.status(409).body(new CreateServiceFibernetResponse("409","Service already exist/Duplicate entry",DateTimeUtil.now(),subscriptionName,ontName));
             }
             if (isSubscriptionExist.get()) {
@@ -454,6 +455,18 @@ public class CreateServiceFibernet implements HttpAction {
                             subscriptionName,
                             ontName
                     ));
+        }catch (DuplicateServiceException dive) {
+            log.error("Duplicate entry error", dive);
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+
+            return ResponseEntity.status(409)
+                    .body(createErrorResponse(
+                            "Service already exists / Duplicate entry",
+                            "409",
+                            subscriptionName,
+                            ontName
+                    ));
+
         } catch (Exception ex) {
             log.error("Unhandled error in CreateServiceFibernet", ex);
             log.error("Transaction active: {}",
