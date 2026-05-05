@@ -34,6 +34,8 @@ public class CreateServiceFibernetRequest {
     private String menm;
     @NotNull
     private String hhid;
+    private String subscriptionStatus;
+    private String subscriberStatus;
     private String subsAddress;
     private String companyName;
     private String contactPhone;
