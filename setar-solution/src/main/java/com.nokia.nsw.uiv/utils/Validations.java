@@ -28,7 +28,7 @@ public class Validations {
 
     public static void validateMandatory(String val, String name) throws BadRequestException {
         if (val == null || val.trim().isEmpty())
-            throw new BadRequestException(name);
+            throw new BadRequestException("Missing Mandatory Parameter : "+name);
     }
 
     public static boolean equalsAny(String data, String... args) {
