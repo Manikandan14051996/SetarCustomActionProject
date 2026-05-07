@@ -16,10 +16,13 @@ import com.nokia.nsw.uiv.request.ImportCPEDeviceBulkRequest;
 import com.nokia.nsw.uiv.request.ImportCPEDeviceRequest;
 import com.nokia.nsw.uiv.response.ImportCPEDeviceResponse;
 import com.nokia.nsw.uiv.utils.Constants;
+import com.nokia.nsw.uiv.utils.DateTimeUtil;
+import com.nokia.nsw.uiv.utils.DuplicateServiceException;
 import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
@@ -43,6 +46,11 @@ public class ImportCPEDevice_Migration implements HttpAction {
     @Autowired
     private LogicalInterfaceCustomRepository logicalInterfaceRepository;
 
+    @Autowired
+    private ImportCPEDevice_Migration self;
+
+
+
     @Override
     public Class getActionClass() {
         return ImportCPEDeviceBulkRequest.class;
@@ -53,11 +61,6 @@ public class ImportCPEDevice_Migration implements HttpAction {
 
         log.error(Constants.EXECUTING_ACTION, ACTION_LABEL);
 
-        List<ImportCPEDeviceResponse> responses = new ArrayList<>();
-
-        List<LogicalDevice> deviceBatch = new ArrayList<>();
-        List<LogicalComponent> componentBatch = new ArrayList<>();
-        List<LogicalInterface> vlanBatch = new ArrayList<>();
 
         try {
 
@@ -65,139 +68,39 @@ public class ImportCPEDevice_Migration implements HttpAction {
                     (ImportCPEDeviceBulkRequest) actionContext.getObject();
 
             List<ImportCPEDeviceRequest> requests = bulkRequest.getDevices();
+            List<ImportCPEDeviceResponse> responses = new ArrayList<>();
 
             for (ImportCPEDeviceRequest request : requests) {
 
                 try {
-
-                    log.error("Processing SerialNo: {}", request.getCpeSerialNo());
-
-                    // -------- VALIDATION ----------
-                    try {
-                        Validations.validateMandatoryParams(request.getCpeSerialNo(), "cpeSerialNo");
-                        Validations.validateMandatoryParams(request.getCpeModel(), "cpeModel");
-                        Validations.validateMandatoryParams(request.getCpeType(), "cpeType");
-                        Validations.validateMandatoryParams(request.getCpeMacAddress(), "cpeMacAddress");
-                        Validations.validateMandatoryParams(request.getCpeGwMacAddress(), "cpeGwMacAddress");
-                    } catch (BadRequestException bre) {
-                        responses.add(new ImportCPEDeviceResponse(
-                                "400",
-                                ERROR_PREFIX + bre.getMessage(),
-                                Instant.now().toString()
-                        ));
-                        continue;
-                    }
-
-                    String devName = request.getCpeType() + Constants.UNDER_SCORE + request.getCpeSerialNo();
-
-                    try {
-                        Validations.validateLength(devName, "CPEDevice");
-                    } catch (BadRequestException bre) {
-                        responses.add(new ImportCPEDeviceResponse(
-                                "400",
-                                ERROR_PREFIX + bre.getMessage(),
-                                Instant.now().toString()
-                        ));
-                        continue;
-                    }
-
-                    Optional<LogicalDevice> optDevice =
-                            cpeDeviceRepository.findByDiscoveredName(devName);
-
-                    if (optDevice.isPresent()) {
-                        log.error("Duplicate device: {}", devName);
-
-                        responses.add(new ImportCPEDeviceResponse(
-                                "409",
-                                "Duplicate entry for " + devName,
-                                Instant.now().toString()
-                        ));
-                        continue;
-                    }
-
-                    // -------- CREATE DEVICE ----------
-                    LogicalDevice device = new LogicalDevice();
-                    device.setLocalName(Validations.encryptName(devName));
-                    device.setDiscoveredName(devName);
-                    device.setKind(Constants.SETAR_KIND_CPE_DEVICE);
-                    device.setContext(Constants.SETAR);
-
-                    Map<String, Object> properties = new HashMap<>();
-                    properties.put("name", devName);
-                    properties.put("serialNo", request.getCpeSerialNo());
-                    properties.put("deviceModel", request.getCpeModel());
-                    properties.put("deviceModelMta", request.getCpeModelMta());
-                    properties.put("deviceType", request.getCpeType());
-                    properties.put("gatewayMacAddress", request.getCpeGwMacAddress());
-                    properties.put("inventoryType", request.getCpeType());
-                    properties.put("macAddress", request.getCpeMacAddress());
-                    properties.put("macAddressMta", request.getCpeMacAddressMta());
-                    properties.put("manufacturer", request.getCpeManufacturer());
-                    properties.put("modelSubType", request.getCpeModelSubType());
-                    properties.put("createdBy", getCreatedBy(request));
-                    properties.put("actionName", ACTION_LABEL);
-                    properties.put("OperationalState", "Active");
-                    properties.put("AdministrativeState", "Available");
-
-                    device.setProperties(properties);
-
-                    deviceBatch.add(device);
-
-                    // -------- POTS PORTS ----------
-                    componentBatch.add(createPotsPort(request, "POTS_1"));
-                    componentBatch.add(createPotsPort(request, "POTS_2"));
-
-                    // -------- ETHERNET PORTS ----------
-                    int noOfPorts = determineNumberOfEthernetPorts(
-                            request.getCpeType(),
-                            request.getCpeModel()
-                    );
-
-                    for (int i = 1; i <= noOfPorts; i++) {
-
-                        String portType = "ETH_" + i;
-
-                        LogicalComponent ethPort = createEthernetPort(request, portType);
-                        componentBatch.add(ethPort);
-
-                        if (!portType.equalsIgnoreCase("ETH_1") &&
-                                !portType.equalsIgnoreCase("ETH_2")) {
-
-                            for (int vlanIndex = 1; vlanIndex <= 7; vlanIndex++) {
-                                vlanBatch.add(createVlan(request, portType, vlanIndex));
-                            }
-                        }
-                    }
+                    responses.add(self.singleReqprocess(request));
+                }catch (BadRequestException dive) {
+                    log.error("Duplicate entry error", dive);
 
                     responses.add(new ImportCPEDeviceResponse(
-                            "201",
-                            "CPE Device created: " + devName,
-                            Instant.now().toString()
+                            "409",
+                            dive.getMessage(),
+                            DateTimeUtil.now()
                     ));
+                    continue;
+                } catch (DuplicateServiceException dive) {
+                    log.error("Duplicate entry error", dive);
 
+                    responses.add(new ImportCPEDeviceResponse(
+                            "409",
+                            "Service already exists / Duplicate entry",
+                            DateTimeUtil.now()
+                    ));
+                    continue;
                 } catch (Exception ex) {
-
-                    log.error("Error processing {}", request.getCpeSerialNo(), ex);
-
+                    log.error("Unhandled error in CreateServiceFibernet", ex);
                     responses.add(new ImportCPEDeviceResponse(
                             "500",
-                            "Failed for " + request.getCpeSerialNo() + " : " + ex.getMessage(),
-                            Instant.now().toString()
+                            "Internal server error occurred - " + ex.getMessage(),
+                            DateTimeUtil.now()
                     ));
+                    continue;
                 }
-            }
-
-            // 🔥 BATCH SAVE
-            if (!deviceBatch.isEmpty()) {
-                cpeDeviceRepository.saveAll(deviceBatch);
-            }
-
-            if (!componentBatch.isEmpty()) {
-                componentRepository.saveAll(componentBatch);
-            }
-
-            if (!vlanBatch.isEmpty()) {
-                logicalInterfaceRepository.saveAll(vlanBatch);
             }
 
             log.error(Constants.ACTION_COMPLETED);
@@ -214,6 +117,107 @@ public class ImportCPEDevice_Migration implements HttpAction {
                     )
             );
         }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ImportCPEDeviceResponse singleReqprocess(ImportCPEDeviceRequest request) throws BadRequestException, ModificationNotAllowedException, AccessForbiddenException {
+        ImportCPEDeviceResponse response = null;
+        try {
+
+            log.error("Processing SerialNo: {}", request.getCpeSerialNo());
+
+            // -------- VALIDATION ----------
+                Validations.validateMandatoryParams(request.getCpeSerialNo(), "cpeSerialNo");
+                Validations.validateMandatoryParams(request.getCpeModel(), "cpeModel");
+                Validations.validateMandatoryParams(request.getCpeType(), "cpeType");
+                Validations.validateMandatoryParams(request.getCpeMacAddress(), "cpeMacAddress");
+                Validations.validateMandatoryParams(request.getCpeGwMacAddress(), "cpeGwMacAddress");
+
+
+            String devName = request.getCpeType() + Constants.UNDER_SCORE + request.getCpeSerialNo();
+
+            try {
+                Validations.validateLength(devName, "CPEDevice");
+            } catch (BadRequestException bre) {
+                throw new BadRequestException("Name Length is too Long");
+            }
+
+            Optional<LogicalDevice> optDevice =
+                    cpeDeviceRepository.findByDiscoveredName(devName);
+
+            if (optDevice.isPresent()) {
+                log.error("Duplicate device: {}", devName);
+                throw new DuplicateServiceException("Duplicate entry for \" " + devName);
+            }
+
+            // -------- CREATE DEVICE ----------
+            LogicalDevice device = new LogicalDevice();
+            device.setLocalName(Validations.encryptName(devName));
+            device.setDiscoveredName(devName);
+            device.setKind(Constants.SETAR_KIND_CPE_DEVICE);
+            device.setContext(Constants.SETAR);
+
+            Map<String, Object> properties = new HashMap<>();
+            properties.put("name", devName);
+            properties.put("serialNo", request.getCpeSerialNo());
+            properties.put("deviceModel", request.getCpeModel());
+            properties.put("deviceModelMta", request.getCpeModelMta());
+            properties.put("deviceType", request.getCpeType());
+            properties.put("gatewayMacAddress", request.getCpeGwMacAddress());
+            properties.put("inventoryType", request.getCpeType());
+            properties.put("macAddress", request.getCpeMacAddress());
+            properties.put("macAddressMta", request.getCpeMacAddressMta());
+            properties.put("manufacturer", request.getCpeManufacturer());
+            properties.put("modelSubType", request.getCpeModelSubType());
+            properties.put("createdBy", getCreatedBy(request));
+            properties.put("actionName", ACTION_LABEL);
+            properties.put("OperationalState", "Active");
+            properties.put("AdministrativeState", "Available");
+
+            device.setProperties(properties);
+
+            cpeDeviceRepository.save(device);
+
+            // -------- POTS PORTS ----------
+            createPotsPort(request, "POTS_1");
+            createPotsPort(request, "POTS_2");
+            if(request.getCpeSerialNo().equalsIgnoreCase("ALCLF919CAB5"))
+            {
+                if(true)
+                {
+                    throw new RuntimeException("checking purpose");
+                }
+            }
+            // -------- ETHERNET PORTS ----------
+            int noOfPorts = determineNumberOfEthernetPorts(
+                    request.getCpeType(),
+                    request.getCpeModel()
+            );
+            for (int i = 1; i <= noOfPorts; i++) {
+
+                String portType = "ETH_" + i;
+
+                LogicalComponent ethPort = createEthernetPort(request, portType);
+
+                if (!portType.equalsIgnoreCase("ETH_1") &&
+                        !portType.equalsIgnoreCase("ETH_2")) {
+
+                    for (int vlanIndex = 1; vlanIndex <= 7; vlanIndex++) {
+                        createVlan(request, portType, vlanIndex);
+                    }
+                }
+            }
+
+            response = new ImportCPEDeviceResponse(
+                    "201",
+                    "CPE Device created: " + devName,
+                    Instant.now().toString()
+            );
+
+        } catch (Exception ex) {
+            throw  ex;
+        }
+        return response;
     }
 
     // ---------------- HELPER METHODS ----------------
@@ -239,7 +243,7 @@ public class ImportCPEDevice_Migration implements HttpAction {
         properties.put("actionName", ACTION_LABEL);
 
         potsPort.setProperties(properties);
-
+        componentRepository.save(potsPort);
         return potsPort;
     }
 
@@ -264,9 +268,10 @@ public class ImportCPEDevice_Migration implements HttpAction {
         properties.put("actionName", ACTION_LABEL);
 
         ethPort.setProperties(properties);
-
+        componentRepository.save(ethPort);
         return ethPort;
     }
+
 
     private LogicalInterface createVlan(ImportCPEDeviceRequest request, String portType, int vlanIndex) throws BadRequestException, AccessForbiddenException, ModificationNotAllowedException {
 
@@ -290,7 +295,7 @@ public class ImportCPEDevice_Migration implements HttpAction {
         vlanProps.put("description", "VLAN Interface for " + portType);
 
         vlan.setProperties(vlanProps);
-
+        logicalInterfaceRepository.save(vlan);
         return vlan;
     }
 

@@ -18,6 +18,9 @@ public class CreateProductSubscriptionRequest {
     private String componentName;
     @NotNull
     private String productVariant;
+
+    private String subscriptionStatus;
+    private String subscriberStatus;
     @NotNull
     private String product;
     @NotNull

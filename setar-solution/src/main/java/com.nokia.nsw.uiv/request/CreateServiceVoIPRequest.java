@@ -20,6 +20,9 @@ public class CreateServiceVoIPRequest {
     @NotNull
     private String productSubtype;
 
+    private String subscriptionStatus;
+    private String subscriberStatus;
+
     @NotNull
     private String ontSN;
 

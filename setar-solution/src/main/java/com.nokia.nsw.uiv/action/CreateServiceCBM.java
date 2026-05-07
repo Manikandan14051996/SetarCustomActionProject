@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.*;
@@ -56,6 +57,7 @@ public class CreateServiceCBM implements HttpAction {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Object doPost(ActionContext actionContext) throws Exception {
         log.error(Constants.EXECUTING_ACTION, ACTION_LABEL);
         CreateServiceCBMRequest request = (CreateServiceCBMRequest) actionContext.getObject();

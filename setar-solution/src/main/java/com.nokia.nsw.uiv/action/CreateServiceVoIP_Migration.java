@@ -154,7 +154,11 @@ public class CreateServiceVoIP_Migration implements HttpAction {
                         throw new RuntimeException(e);
                     }
                     Map<String, Object> subProps = new HashMap<>();
-                    subProps.put("subscriberStatus", "Active");
+                    if(req.getSubscriberStatus()!=null){
+                        subProps.put("subscriberStatus", req.getSubscriberStatus());
+                    }else{
+                        subProps.put("subscriberStatus", "Active");
+                    }
                     subProps.put("subscriberType", "Regular");
                     subProps.put("accountNumber", req.getSubscriberName());
                     subProps.put("houseHoldId", req.getHhid());
@@ -198,7 +202,12 @@ public class CreateServiceVoIP_Migration implements HttpAction {
                         throw new RuntimeException(e);
                     }
                     Map<String, Object> subProps = new HashMap<>();
-                    subProps.put("subscriptionStatus", "Active");
+                    if(req.getSubscriberStatus()!=null)
+                    {
+                        subProps.put("subscriptionStatus", req.getSubscriptionStatus());
+                    }else{
+                        subProps.put("subscriptionStatus", "Active");
+                    }
                     subProps.put("serviceSubType", req.getProductSubtype());
                     subProps.put("serviceID", req.getServiceId());
                     subProps.put("oltPosition", req.getOltName());

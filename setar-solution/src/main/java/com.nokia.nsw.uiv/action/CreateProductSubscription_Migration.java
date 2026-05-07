@@ -110,7 +110,11 @@ public class CreateProductSubscription_Migration implements HttpAction {
 
                     Map<String, Object> props = new HashMap<>();
                     props.put("name", subscriberName);
-                    props.put("subscriberStatus", "Active");
+                    if(request.getSubscriberStatus()!=null){
+                        props.put("subscriberStatus", request.getSubscriberStatus());
+                    }else{
+                        props.put("subscriberStatus", "Active");
+                    }
                     props.put("subscriberType", "Regular");
                     props.put("createdBy",
                             request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
@@ -149,7 +153,12 @@ public class CreateProductSubscription_Migration implements HttpAction {
 
                     Map<String, Object> props = new HashMap<>();
                     props.put("name", subscriptionName);
-                    props.put("subscriptionStatus", "Active");
+                    if(request.getSubscriberStatus()!=null)
+                    {
+                        props.put("subscriptionStatus", request.getSubscriptionStatus());
+                    }else{
+                        props.put("subscriptionStatus", "Active");
+                    }
                     props.put("serviceID", request.getServiceID());
                     props.put("createdBy",
                             request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()

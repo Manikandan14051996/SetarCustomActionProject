@@ -16,7 +16,10 @@ public class CreateServiceCbmVoiceRequest {
     @NotNull
     private String cbmSN;              // M
     @NotNull
-    private String cbmMac;             // M
+    private String cbmMac;
+
+    private String subscriptionStatus;
+    private String subscriberStatus;
     private String cbmGatewayMac;      // O
     @NotNull
     private String cbmManufacturer;    // M

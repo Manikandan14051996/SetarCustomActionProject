@@ -152,6 +152,7 @@ public class QueryFlags implements HttpAction {
 
         if (ontSN != null) {
             if (ontSN.startsWith("ALC")) serviceLink = "ONT";
+
             else if (ontSN.startsWith("CW")) serviceLink = "SRX";
         }
 
@@ -1671,7 +1672,7 @@ public class QueryFlags implements HttpAction {
             flags.put("QOS_PROFILE", qosProfile);
         }
 
-        flags.putIfAbsent("SERVICE_LINK", serviceLink);
+        flags.put("SERVICE_LINK", serviceLink);
         flags.putIfAbsent("SERVICE_SN", serviceSN);
         flags.putIfAbsent("SERVICE_MAC", serviceMAC);
         flags.putIfAbsent("CBM_MAC", cbmmac);

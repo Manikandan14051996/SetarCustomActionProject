@@ -27,6 +27,9 @@ public class CreateServiceEVPNRequest {
     @NotNull
     private String oltName;
 
+    private String subscriptionStatus;
+    private String subscriberStatus;
+
     @NotNull
     private String mgmntVlanId;
 

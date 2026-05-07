@@ -19,6 +19,9 @@ public class CreateServiceCBMRequest {
     private String cbmSN;
     @NotNull
     private String cbmMac;
+
+    private String subscriptionStatus;
+    private String subscriberStatus;
     private String cbmGatewayMac;
     @NotNull
     private String cbmManufacturer;

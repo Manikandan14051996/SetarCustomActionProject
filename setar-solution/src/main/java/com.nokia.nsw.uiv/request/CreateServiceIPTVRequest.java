@@ -31,6 +31,8 @@ public class CreateServiceIPTVRequest {
     private String ontModel;
     private String firstName;
     private String lastName;
+    private String subscriptionStatus;
+    private String subscriberStatus;
     @NotNull
     private String menm;
     @NotNull

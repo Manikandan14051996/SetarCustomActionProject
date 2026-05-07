@@ -190,7 +190,11 @@ public class CreateServiceEVPN_Migration implements HttpAction {
                                 throw new RuntimeException(e);
                             }
                             Map<String, Object> subProps = new HashMap<>();
-                            subProps.put("subscriberStatus", "Active");
+                            if(req.getSubscriberStatus()!=null){
+                                subProps.put("subscriberStatus", req.getSubscriberStatus());
+                            }else{
+                                subProps.put("subscriberStatus", "Active");
+                            }
                             subProps.put("subscriberType", "Regular");
                             subProps.put("accountNumber", req.getSubscriberName());
                             subProps.put("houseHoldId", req.getHhid());
@@ -227,7 +231,12 @@ public class CreateServiceEVPN_Migration implements HttpAction {
                         throw new RuntimeException(e);
                     }
                     Map<String, Object> subsProps = new HashMap<>();
-                    subsProps.put("subscriptionStatus", "Active");
+                    if(req.getSubscriberStatus()!=null)
+                    {
+                        subsProps.put("subscriptionStatus", req.getSubscriptionStatus());
+                    }else{
+                        subsProps.put("subscriptionStatus", "Active");
+                    }
                     subsProps.put("serviceSubType", req.getProductSubtype());
                     if (req.getQosProfile() != null) subsProps.put("evpnQosSessionProfile", req.getQosProfile());
                     if (req.getOntPort() != null) subsProps.put("evpnPort", req.getOntPort());
@@ -276,7 +285,7 @@ public class CreateServiceEVPN_Migration implements HttpAction {
                     subscription = subscriptionRepo.findByDiscoveredName(subscription.getDiscoveredName()).get();
                     subscription.getProperties().put("linkedSubscriber", subscriber.getDiscoveredName());
                 }
-                subscriptionRepo.save(subscription, 2);
+                subscriptionRepo.save(subscription, 0);
 
                 // 5) Product: find or create (properties map)
                 Optional<Product> productOpt = productRepo.findByDiscoveredName(productNameStr);
@@ -309,7 +318,7 @@ public class CreateServiceEVPN_Migration implements HttpAction {
                     prod.setProperties(prodProps);
                     prod.setCustomer(subscriber);
                     product = prod;
-                    productRepo.save(prod, 2);
+                    productRepo.save(prod, 0);
                 }
                 if (isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()) {
                     log.error("createServiceEVPN service already exist");
@@ -326,7 +335,7 @@ public class CreateServiceEVPN_Migration implements HttpAction {
                     subscription = subscriptionRepo.findByDiscoveredName(subscription.getDiscoveredName()).get();
                     subscription.setService(new HashSet<>(List.of(product)));
                 }
-                subscriptionRepo.save(subscription);
+                subscriptionRepo.save(subscription,0);
 
                 // 6) CFS: find or create (properties map)
                 Optional<Service> cfsOpt = serviceCustomRepository.findByDiscoveredName(cfsName);
@@ -359,7 +368,7 @@ public class CreateServiceEVPN_Migration implements HttpAction {
                     newCfs.setProperties(cfsProps);
                     newCfs.addUsingService(product);
                     cfs = newCfs;
-                    serviceCustomRepository.save(newCfs, 2);
+                    serviceCustomRepository.save(newCfs, 0);
                 }
 
                 // 7) RFS: find or create (properties map)
@@ -391,7 +400,7 @@ public class CreateServiceEVPN_Migration implements HttpAction {
                     newRfs.addUsedService(cfs);
                     rfs = newRfs;
                     newRfs.setProperties(rfsProps);
-                    serviceCustomRepository.save(newRfs);
+                    serviceCustomRepository.save(newRfs,0);
                 }
 
                 // 8) OLT: find or create
@@ -424,7 +433,7 @@ public class CreateServiceEVPN_Migration implements HttpAction {
                     // link RFS reference if exists
                     dev.getProperties().put("linkedRFS", rfs.getDiscoveredName());
                     olt = dev;
-                    logicalDeviceRepo.save(dev, 2);
+                    logicalDeviceRepo.save(dev, 0);
                 }
 
                 // 9) ONT: find or create, manage EVPN counters
@@ -469,7 +478,7 @@ public class CreateServiceEVPN_Migration implements HttpAction {
                     ontProps.put("linkedRFS", rfs.getDiscoveredName());
                     dev.setProperties(ontProps);
                     dev.getProperties().put("containingDevice", olt.getDiscoveredName());
-                    logicalDeviceRepo.save(dev);
+                    logicalDeviceRepo.save(dev,0);
                     ont = dev;
                 }
 
@@ -518,7 +527,7 @@ public class CreateServiceEVPN_Migration implements HttpAction {
                             );
                             vProps.put("actionName", ACTION_LABEL);
                             v.setProperties(vProps);
-                            vlanRepo.save(v);
+                            vlanRepo.save(v,0);
                         }
                         // no direct association required here beyond existence
                     }
@@ -585,11 +594,11 @@ public class CreateServiceEVPN_Migration implements HttpAction {
                                 }
                             }
                             v.setProperties(vProps);
-                            vlanRepo.save(v, 2);
+                            vlanRepo.save(v, 0);
                             if (usedStandardEvpn) {
                                 ont = logicalDeviceRepo.findByDiscoveredName(ont.getDiscoveredName()).get();
                                 ont.setContained(new HashSet<>(List.of(v)));
-                                logicalDeviceRepo.save(ont);
+                                logicalDeviceRepo.save(ont,0);
                             }
                             serviceVlan = v;
                         }
@@ -685,10 +694,10 @@ public class CreateServiceEVPN_Migration implements HttpAction {
 
                 // persist updates to ONT and OLT
                 ont.setProperties(ontProps);
-                logicalDeviceRepo.save(ont);
+                logicalDeviceRepo.save(ont,0);
                 olt = logicalDeviceRepo.findByDiscoveredName(olt.getDiscoveredName()).get();
                 olt.setProperties(oltProps);
-                logicalDeviceRepo.save(olt);
+                logicalDeviceRepo.save(olt,0);
 
                 // 15) Single-tagged VLAN interface creation logic (spec) - simplified: create one matching
                 if (((req.getProductType() != null && req.getProductType().contains("EVPN")) || req.getProductType().contains("ENTERPRISE"))
@@ -723,10 +732,10 @@ public class CreateServiceEVPN_Migration implements HttpAction {
                                     svProps.put("actionName", ACTION_LABEL);
                                     svProps.put("linkedOnt", ont.getDiscoveredName());
                                     singleVlan.setProperties(svProps);
-                                    vlanRepo.save(singleVlan);
+                                    vlanRepo.save(singleVlan,0);
                                     ont = logicalDeviceRepo.findByDiscoveredName(ont.getDiscoveredName()).get();
                                     ont.setContained(new HashSet<>(List.of(singleVlan)));
-                                    logicalDeviceRepo.save(ont);
+                                    logicalDeviceRepo.save(ont,0);
                                     break;
                                 }
                             }
@@ -746,11 +755,11 @@ public class CreateServiceEVPN_Migration implements HttpAction {
                 services.add(rfs);
                 ont.addUsedResource(olt);
                 ont.setUsingService(services);
-                logicalDeviceRepo.save(ont);
+                logicalDeviceRepo.save(ont,0);
                 olt = logicalDeviceRepo.findByDiscoveredName(olt.getDiscoveredName()).get();
                 olt.getProperties().put("linkedRFS", rfs.getDiscoveredName());
                 olt.setUsingService(services);
-                logicalDeviceRepo.save(olt);
+                logicalDeviceRepo.save(olt,0);
 
                 // final response
                 log.error(Constants.ACTION_COMPLETED);

@@ -186,7 +186,11 @@ public class CreateServiceCbmVoice_Migration implements HttpAction {
                                 throw new RuntimeException(e);
                             }
                             Map<String, Object> subProps = new HashMap<>();
-                            subProps.put("subscriberStatus", "Active");
+                            if(request.getSubscriberStatus()!=null){
+                                subProps.put("subscriberStatus", request.getSubscriberStatus());
+                            }else{
+                                subProps.put("subscriberStatus", "Active");
+                            }
                             subProps.put("subscriberType", "Regular");
                             subProps.put("accountNumber", request.getSubscriberName());
                             subProps.put("houseHoldId", request.getHhid());
@@ -242,7 +246,12 @@ public class CreateServiceCbmVoice_Migration implements HttpAction {
                             }
 
                             Map<String, Object> props = new HashMap<>();
-                            props.put("subscriptionStatus", "Active");
+                            if(request.getSubscriberStatus()!=null)
+                            {
+                                props.put("subscriptionStatus", request.getSubscriptionStatus());
+                            }else{
+                                props.put("subscriptionStatus", "Active");
+                            }
                             props.put("serviceSubType", request.getProductSubtype());
                             props.put("serviceLink", "Cable_Modem");
                             props.put("serviceSN", request.getCbmSN());
