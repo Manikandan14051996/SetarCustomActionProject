@@ -132,7 +132,6 @@ continue;
         String ontName="";
         CreateServiceFibernetResponse response;
         try{
-        try {
             log.error(Constants.MANDATORY_PARAMS_VALIDATION_STARTED);
             Validations.validateMandatory(request.getSubscriberName(), "subscriberName");
             Validations.validateMandatory(request.getProductType(), "productType");
@@ -146,9 +145,6 @@ continue;
             Validations.validateMandatory(request.getServiceID(), "serviceID");
             Validations.validateMandatory(request.getOntModel(), "ontModel");
             log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
-        } catch (BadRequestException bre) {
-            throw new BadRequestException("Missing mandatory parameter");
-        }
         // optional: template names etc.
 
         // Build canonical names
