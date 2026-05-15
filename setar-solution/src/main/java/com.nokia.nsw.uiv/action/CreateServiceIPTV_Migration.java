@@ -355,13 +355,6 @@ public class CreateServiceIPTV_Migration implements HttpAction {
             }
 
 
-        if(request.getServiceID().equalsIgnoreCase("15796271"))
-        {
-            if(true)
-            {
-                throw  new RuntimeException("Checking Purpose im throwing this exception");
-            }
-        }
         String oltName = request.getOltName() == null ? "" : request.getOltName();
         LogicalDevice oltDevice;
             // ------------------- Logical Devices -------------------

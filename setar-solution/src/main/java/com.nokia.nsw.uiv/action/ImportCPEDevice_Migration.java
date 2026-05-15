@@ -181,13 +181,7 @@ public class ImportCPEDevice_Migration implements HttpAction {
             // -------- POTS PORTS ----------
             createPotsPort(request, "POTS_1");
             createPotsPort(request, "POTS_2");
-            if(request.getCpeSerialNo().equalsIgnoreCase("ALCLF919CAB5"))
-            {
-                if(true)
-                {
-                    throw new RuntimeException("checking purpose");
-                }
-            }
+
             // -------- ETHERNET PORTS ----------
             int noOfPorts = determineNumberOfEthernetPorts(
                     request.getCpeType(),

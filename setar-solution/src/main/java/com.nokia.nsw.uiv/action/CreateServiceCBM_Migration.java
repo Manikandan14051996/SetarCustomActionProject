@@ -375,13 +375,7 @@ public class CreateServiceCBM_Migration implements HttpAction {
                     return r;
                 });
 
-        if(request.getServiceId().equalsIgnoreCase("thomas.decuba"))
-        {
-            if(true)
-            {
-                throw  new RuntimeException("Checking Purpose im throwing this exception");
-            }
-        }
+
         LogicalDevice cbmDevice = cbmDeviceRepository.findByDiscoveredName(cbmName)
                 .orElseGet(() -> {
                     LogicalDevice d = new LogicalDevice();

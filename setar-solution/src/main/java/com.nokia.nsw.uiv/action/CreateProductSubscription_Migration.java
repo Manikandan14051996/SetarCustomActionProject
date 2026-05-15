@@ -208,13 +208,6 @@ public class CreateProductSubscription_Migration implements HttpAction {
             throw new BadRequestException("Product name too long");
         }
 
-        if(request.getServiceID().equalsIgnoreCase("15763239"))
-        {
-            if(true)
-            {
-                throw  new RuntimeException("Checking Purpose im throwing this exception");
-            }
-        }
 
         Optional<Product> optProduct =
                 productRepository.findByDiscoveredName(productName);

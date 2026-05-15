@@ -82,7 +82,7 @@ public class CreateServiceVoIP_Migration implements HttpAction {
                 log.error("Validation error: {}", bre.getMessage(), bre);
                 responses.add(new CreateServiceVoIPResponse(
                         "400",
-                        ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
+                        ERROR_PREFIX  + bre.getMessage(),
                         DateTimeUtil.now(),
                         "",
                         ""
@@ -418,13 +418,7 @@ public class CreateServiceVoIP_Migration implements HttpAction {
             olt.setProperties(oltProps);
             logicalDeviceRepo.save(olt);
         }
-        if(req.getServiceId().equalsIgnoreCase("5866309"))
-        {
-            if(true)
-            {
-                throw  new RuntimeException("Checking Purpose im throwing this exception");
-            }
-        }
+
         LogicalDevice ont = null;
         Optional<LogicalDevice> ontOpt = logicalDeviceRepo.findByDiscoveredName(ontName);
         if (ontOpt.isPresent()) {

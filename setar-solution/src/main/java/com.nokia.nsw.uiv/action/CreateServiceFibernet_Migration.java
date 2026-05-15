@@ -392,13 +392,7 @@ continue;
                 log.error("Created OLT device: {}", oltName);
             }
         }
-            if(request.getServiceID().equalsIgnoreCase("hkuiperdal"))
-            {
-                if(true)
-                {
-                    throw  new RuntimeException("Checking Purpose im throwing this exception");
-                }
-            }
+
 
         // 8. ONT device: find or create as LogicalDevice with kind=ONT
         String ontContext = Constants.SETAR;

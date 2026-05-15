@@ -100,7 +100,7 @@ public class CreateServiceEVPN_Migration implements HttpAction {
                 log.error("Validation error: {}", bre.getMessage(), bre);
                 responses.add(new CreateServiceEVPNResponse(
                         "400",
-                        ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
+                        ERROR_PREFIX + bre.getMessage(),
                         DateTimeUtil.now(),
                         "",
                         ""
@@ -118,7 +118,7 @@ public class CreateServiceEVPN_Migration implements HttpAction {
                 log.error("Exception in CreateServiceVoIP", ex);
                 responses.add(new CreateServiceEVPNResponse(
                         "500",
-                        ERROR_PREFIX + "Error occurred while creating service VOIP - " + ex.getMessage(),
+                        ERROR_PREFIX + ex.getMessage(),
                         Instant.now().toString(),
                         null,
                         null
@@ -131,7 +131,7 @@ public class CreateServiceEVPN_Migration implements HttpAction {
     @Transactional(rollbackFor = Exception.class)
     public CreateServiceEVPNResponse singleReqprocess(CreateServiceEVPNRequest req) throws BadRequestException, AccessForbiddenException, ModificationNotAllowedException {
         CreateServiceEVPNResponse response=null;
-        try {
+
             log.error(Constants.MANDATORY_PARAMS_VALIDATION_STARTED);
             Validations.validateMandatoryParams(req.getSubscriberName(), "subscriberName");
             Validations.validateMandatoryParams(req.getProductType(), "productType");
@@ -146,10 +146,7 @@ public class CreateServiceEVPN_Migration implements HttpAction {
             Validations.validateMandatoryParams(req.getHhid(), "hhid");
             Validations.validateMandatoryParams(req.getOntModel(), "ontModel");
             log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
-        } catch (Exception bre) {
-            log.error("------------Trace # 2--------------- Missing mandatory param: " + bre.getMessage());
-            throw new BadRequestException("Missing Mandadtory Parameter");
-        }
+
         AtomicBoolean isSubscriberExist = new AtomicBoolean(true);
         AtomicBoolean isSubscriptionExist = new AtomicBoolean(true);
         AtomicBoolean isProductExist = new AtomicBoolean(true);
@@ -485,13 +482,7 @@ public class CreateServiceEVPN_Migration implements HttpAction {
             logicalDeviceRepo.save(dev,0);
             ont = dev;
         }
-        if(req.getServiceId().equalsIgnoreCase("dli260320262"))
-        {
-            if(true)
-            {
-                throw  new RuntimeException("Checking Purpose im throwing this exception");
-            }
-        }
+
         // If ONT existed, ensure it is linked and counters initialized properly
         if (!ont.getProperties().containsKey("evpnEthPort3Template")) {
             ont.getProperties().put("evpnEthPort3Template", "0");

@@ -95,7 +95,7 @@ public class AssociateResources_Migration implements HttpAction {
                 log.error("Exception in CreateServiceVoIP", ex);
                 responses.add(new AssociateResourcesResponse(
                         "500",
-                        ERROR_PREFIX + "Error occurred while creating service VOIP - " + ex.getMessage(),
+                        ERROR_PREFIX  + ex.getMessage(),
                         Instant.now().toString(),
                         null
                 ));
@@ -263,13 +263,6 @@ public class AssociateResources_Migration implements HttpAction {
             }
         }
 
-        if(request.getServiceId().equalsIgnoreCase("15776501"))
-        {
-            if(true)
-            {
-                throw  new RuntimeException("Checking Purpose im throwing this exception");
-            }
-        }
 
         // Step 7: Persist RFS changes
         if (deviceUpdated) {

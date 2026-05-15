@@ -428,13 +428,7 @@ public class CreateServiceCbmVoice_Migration implements HttpAction {
                         serviceCustomRepository.save(r, 2);
                         return r;
                     });
-            if(request.getServiceId().equalsIgnoreCase("585012500"))
-            {
-                if(true)
-                {
-                    throw  new RuntimeException("Checking Purpose im throwing this exception");
-                }
-            }
+
             // 8. CBM device logic
             LogicalDevice cbmDevice = cbmDeviceRepository.findByDiscoveredName(cbmName)
                     .orElseGet(() -> {
