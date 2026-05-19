@@ -172,9 +172,11 @@ public class DetachResources implements HttpAction {
 
         newDevice.setProperties(props);
 
-        deviceRepository.save(newDevice, 1);
-
         deviceRepository.delete(oldDevice);
+
+        deviceRepository.save(newDevice);
+
+
 
         return true;
     }

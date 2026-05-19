@@ -181,9 +181,8 @@ public class DeleteIPTV implements HttpAction {
             // Step 8: Conditional deletion of Subscriber & Subscription
             if (optCust.isPresent() && optSub.isPresent()) {
                 Customer cust = optCust.get();
-                List<Subscription> subs = new ArrayList<>();
-                subscriptionRepository.findAll().forEach(subs::add);
-                if (subs.size() <= 1) {
+                Set<Subscription> subscriptions= cust.getSubscription();
+                if (subscriptions.size() <= 1) {
                     subscriptionRepository.delete(optSub.get());
                     customerRepository.delete(cust);
                 } else {
