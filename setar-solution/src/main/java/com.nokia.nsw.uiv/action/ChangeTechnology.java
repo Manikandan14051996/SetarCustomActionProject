@@ -297,10 +297,10 @@ public class ChangeTechnology implements HttpAction {
                         if (templateNameOnt != null) p.put("ontTemplate", templateNameOnt);
                         d.setProperties(p);
                         // link containing logical device (OLT)
-                        d.addManagingDevices(olt);
+                        d.setUsedResource(new HashSet<>(List.of(olt)));
                         // link rfs if present
                         maybeRfs.ifPresent(rfs -> d.setUsingService(new HashSet<>(List.of(rfs))));
-                        return logicalDeviceRepo.save(d);
+                        return logicalDeviceRepo.save(d,2);
                     });
 
             if (mgmtVlanName.length() > 100) {
