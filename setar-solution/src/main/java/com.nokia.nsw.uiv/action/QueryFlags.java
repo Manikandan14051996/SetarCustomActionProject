@@ -394,21 +394,14 @@ public class QueryFlags implements HttpAction {
                             flags.put("SERVICE_VOIP_EXIST", "New");
                             String cbmName = "CBM_" + cbmmac;
                             Optional<LogicalDevice> cbmOpt = deviceRepository.findByDiscoveredName(cbmName);
-                            if (cbmOpt.isEmpty() && serviceID != null) {
-                                // Original fallback
-                                cbmName = "CBM" + serviceID;
-                                cbmOpt = deviceRepository.findByDiscoveredName(cbmName);
-                            }
-                            if (cbmOpt.isPresent()) {
+                            if(cbmOpt.isPresent())
+                            {
                                 LogicalDevice cbm = cbmOpt.get();
                                 Map<String, Object> cp = safeProps(cbm.getProperties());
                                 number1 = safeString(cp.get("voipPort1"));
                                 number2 = safeString(cp.get("voipPort2"));
-                                ontModel = safeString(cp.get("deviceModel"));
                                 flags.put("SERVICE_VOIP_NUMBER1", number1);
                                 flags.put("SERVICE_VOIP_NUMBER2", number2);
-                                flags.put("ONT_MODEL", ontModel);
-
                                 if (!"Available".equalsIgnoreCase(number1)) templateNameVoip = "Exist";
                                 if (!"Available".equalsIgnoreCase(number2)) templateNameVoip = "Exist";
                                 flags.put("SERVICE_VOIP_EXIST", templateNameVoip);
@@ -423,6 +416,17 @@ public class QueryFlags implements HttpAction {
                                         flags.put("VOICE_POTS_PORT", "2");
                                     }
                                 }
+                            }
+                            else if (cbmOpt.isEmpty() && serviceID != null) {
+                                // Original fallback
+                                cbmName = "CBM" + serviceID;
+                                cbmOpt = deviceRepository.findByDiscoveredName(cbmName);
+                            }
+                            if (cbmOpt.isPresent()) {
+                                LogicalDevice cbm = cbmOpt.get();
+                                Map<String, Object> cp = safeProps(cbm.getProperties());
+                                ontModel = safeString(cp.get("deviceModel"));
+                                flags.put("ONT_MODEL", ontModel);
                             }
 
                         }
