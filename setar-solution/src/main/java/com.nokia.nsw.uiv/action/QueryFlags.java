@@ -400,6 +400,8 @@ public class QueryFlags implements HttpAction {
                                 Map<String, Object> cp = safeProps(cbm.getProperties());
                                 number1 = safeString(cp.get("voipPort1"));
                                 number2 = safeString(cp.get("voipPort2"));
+                                ontModel = safeString(cp.get("deviceModel"));
+                                flags.put("ONT_MODEL", ontModel);
                                 flags.put("SERVICE_VOIP_NUMBER1", number1);
                                 flags.put("SERVICE_VOIP_NUMBER2", number2);
                                 if (!"Available".equalsIgnoreCase(number1)) templateNameVoip = "Exist";
