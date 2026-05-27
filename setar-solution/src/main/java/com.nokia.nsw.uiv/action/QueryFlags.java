@@ -391,7 +391,7 @@ public class QueryFlags implements HttpAction {
                         }
 
                         if ("Cable_Modem".equalsIgnoreCase(serviceLink)) {
-                            flags.put("SERVICE_VOIP_EXIST", "New");
+                            templateNameVoip="New";
                             String cbmName = "CBM_" + cbmmac;
                             Optional<LogicalDevice> cbmOpt = deviceRepository.findByDiscoveredName(cbmName);
                             if(cbmOpt.isPresent())
@@ -402,10 +402,16 @@ public class QueryFlags implements HttpAction {
                                 number2 = safeString(cp.get("voipPort2"));
                                 ontModel = safeString(cp.get("deviceModel"));
                                 flags.put("ONT_MODEL", ontModel);
-                                flags.put("SERVICE_VOIP_NUMBER1", number1);
-                                flags.put("SERVICE_VOIP_NUMBER2", number2);
-                                if (!"Available".equalsIgnoreCase(number1)) templateNameVoip = "Exist";
-                                if (!"Available".equalsIgnoreCase(number2)) templateNameVoip = "Exist";
+                                if(!number1.isEmpty()) {
+                                    flags.put("SERVICE_VOIP_NUMBER1", number1);
+                                    if (!"Available".equalsIgnoreCase(number1)) templateNameVoip = "Exist";
+                                }
+
+                                if(!number2.isEmpty()) {
+                                    flags.put("SERVICE_VOIP_NUMBER2", number2);
+                                    if (!"Available".equalsIgnoreCase(number2)) templateNameVoip = "Exist";
+                                }
+
                                 flags.put("SERVICE_VOIP_EXIST", templateNameVoip);
 
                                 if (serviceID != null) {
