@@ -398,8 +398,16 @@ public class QueryFlags implements HttpAction {
                             {
                                 LogicalDevice cbm = cbmOpt.get();
                                 Map<String, Object> cp = safeProps(cbm.getProperties());
-                                number1 = safeString(cp.get("voipPort1"));
-                                number2 = safeString(cp.get("voipPort2"));
+                                String voipPort1=safeString(cp.get("voipPort1"));
+                                if(!voipPort1.isEmpty())
+                                {
+                                    number1 = safeString(cp.get("voipPort1"));
+                                }
+                                String voipPort2 = safeString(cp.get("voipPort2"));
+                                if(!voipPort2.isEmpty())
+                                {
+                                    number2 = safeString(cp.get("voipPort2"));
+                                }
                                 ontModel = safeString(cp.get("deviceModel"));
                                 flags.put("ONT_MODEL", ontModel);
                                 if(!number1.isEmpty()) {
@@ -856,10 +864,7 @@ public class QueryFlags implements HttpAction {
                             continue;
                         }
 
-                        String macAddr = safeString(props.get("macAddress"));
-                        if (!macLocal.equals(macAddr)) {
-                            continue;
-                        }
+
 
                         if (iptvIds.size() < 15) {
                             String sid = safeString(props.get("serviceID"));
@@ -1947,7 +1952,12 @@ public class QueryFlags implements HttpAction {
                 "RESOURCE_MAC_MTA_OLD",
                 "RESOURCE_MODEL_MTA_OLD",
                 "BRIDGE_SERVICE_ID",
-                "QOS_PROFILE_BRIDGE"
+                "QOS_PROFILE_BRIDGE",
+                "Service_IPTV_Service_ID_1",
+                "Service_IPTV_Service_ID_2",
+                "Service_IPTV_Service_ID_3",
+                "Service_IPTV_Service_ID_4",
+                "Service_IPTV_Service_ID_5"
         };
         for (String k : keys) flags.put(k, "");
     }
