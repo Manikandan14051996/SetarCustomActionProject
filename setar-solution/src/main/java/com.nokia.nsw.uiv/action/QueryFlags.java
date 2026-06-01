@@ -859,6 +859,11 @@ public class QueryFlags implements HttpAction {
 
                         Map<String, Object> props = safeProps(s.getProperties());
 
+                        if (s.getDiscoveredName() == null ||
+                                !s.getDiscoveredName().contains(subscriber)) {
+                            continue;
+                        }
+
                         String serviceSubType = safeString(props.get("serviceSubType"));
                         if (!"IPTV".equalsIgnoreCase(serviceSubType)) {
                             continue;

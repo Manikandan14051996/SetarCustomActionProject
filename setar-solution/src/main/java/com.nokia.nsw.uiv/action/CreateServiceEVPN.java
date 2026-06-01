@@ -1,5 +1,6 @@
 package com.nokia.nsw.uiv.action;
 
+import com.nokia.nsw.uiv.exception.BadRequestException;
 import com.nokia.nsw.uiv.exception.ModificationNotAllowedException;
 import com.nokia.nsw.uiv.framework.action.Action;
 import com.nokia.nsw.uiv.framework.action.ActionContext;
@@ -15,6 +16,7 @@ import com.nokia.nsw.uiv.response.CreateServiceCbmVoiceResponse;
 import com.nokia.nsw.uiv.response.CreateServiceEVPNResponse;
 import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.utils.DateTimeUtil;
+import com.nokia.nsw.uiv.utils.DuplicateServiceException;
 import com.nokia.nsw.uiv.utils.Validations;
 
 import com.nokia.nsw.uiv.model.common.party.Customer;
@@ -28,6 +30,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
@@ -69,44 +73,37 @@ public class CreateServiceEVPN implements HttpAction {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Object doPost(ActionContext actionContext) {
         log.error(Constants.EXECUTING_ACTION, ACTION_LABEL);
         log.error("------------Trace # 1--------------- CreateServiceEVPN started");
         CreateServiceEVPNRequest req = (CreateServiceEVPNRequest) actionContext.getObject();
 
+        String ontName = null;
+        String subscriptionName = null;
         try {
             // 1) Validate mandatory parameters (runtime)
-            try {
-                log.error(Constants.MANDATORY_PARAMS_VALIDATION_STARTED);
-                Validations.validateMandatoryParams(req.getSubscriberName(), "subscriberName");
-                Validations.validateMandatoryParams(req.getProductType(), "productType");
-                Validations.validateMandatoryParams(req.getProductSubtype(), "productSubtype");
-                Validations.validateMandatoryParams(req.getOntSN(), "ontSN");
-                Validations.validateMandatoryParams(req.getOltName(), "oltName");
-                if (req.getProductSubtype() != null && !req.getProductSubtype().equalsIgnoreCase("SRX")) {
-                    Validations.validateMandatoryParams(req.getMgmntVlanId(), "mgmntVlanId");
-                    Validations.validateMandatoryParams(req.getMenm(), "menm");
-                }
-                Validations.validateMandatoryParams(req.getServiceId(), "serviceId");
-                Validations.validateMandatoryParams(req.getHhid(), "hhid");
-                Validations.validateMandatoryParams(req.getOntModel(), "ontModel");
-                log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
-            } catch (Exception bre) {
-                log.error("------------Trace # 2--------------- Missing mandatory param: " + bre.getMessage());
-                return ResponseEntity.status(400).body(new CreateServiceEVPNResponse(
-                        "400",
-                        ERROR_PREFIX + bre.getMessage(),
-                        DateTimeUtil.now(),
-                        null,
-                        null
-                ));
+            log.error(Constants.MANDATORY_PARAMS_VALIDATION_STARTED);
+            Validations.validateMandatoryParams(req.getSubscriberName(), "subscriberName");
+            Validations.validateMandatoryParams(req.getProductType(), "productType");
+            Validations.validateMandatoryParams(req.getProductSubtype(), "productSubtype");
+            Validations.validateMandatoryParams(req.getOntSN(), "ontSN");
+            Validations.validateMandatoryParams(req.getOltName(), "oltName");
+            if (req.getProductSubtype() != null && !req.getProductSubtype().equalsIgnoreCase("SRX")) {
+                Validations.validateMandatoryParams(req.getMgmntVlanId(), "mgmntVlanId");
+                Validations.validateMandatoryParams(req.getMenm(), "menm");
             }
+            Validations.validateMandatoryParams(req.getServiceId(), "serviceId");
+            Validations.validateMandatoryParams(req.getHhid(), "hhid");
+            Validations.validateMandatoryParams(req.getOntModel(), "ontModel");
+            log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
+
             AtomicBoolean isSubscriberExist = new AtomicBoolean(true);
             AtomicBoolean isSubscriptionExist = new AtomicBoolean(true);
             AtomicBoolean isProductExist = new AtomicBoolean(true);
             // 2) Prepare names
 
-            String ontName = "ONT" + req.getOntSN();
+            ontName = "ONT" + req.getOntSN();
             if (ontName.length() > 100) {
                 log.error("------------Trace # 6--------------- ONT name too long");
                 return ResponseEntity.status(400).body(new CreateServiceEVPNResponse(
@@ -129,28 +126,30 @@ public class CreateServiceEVPN implements HttpAction {
                 ));
             }
 
-            String subscriptionName = req.getSubscriberName() + Constants.UNDER_SCORE + req.getServiceId() + Constants.UNDER_SCORE + req.getOntSN();
+            subscriptionName = req.getSubscriberName() + Constants.UNDER_SCORE + req.getServiceId() + Constants.UNDER_SCORE + req.getOntSN();
             if (subscriptionName.length() > 100) {
                 log.error("------------Trace # 4-------V-------- Subscription name too long");
-                return ResponseEntity.status(400).body(new CreateServiceEVPNResponse(
-                        "400",
-                        ERROR_PREFIX + "Subscription name too long",
-                        DateTimeUtil.now(),
-                        null,
-                        null
-                ));
+//                return ResponseEntity.status(400).body(new CreateServiceEVPNResponse(
+//                        "400",
+//                        ERROR_PREFIX + "Subscription name too long",
+//                        DateTimeUtil.now(),
+//                        null,
+//                        null
+//                ));
+                throw new BadRequestException(ERROR_PREFIX +"Subscription name too long");
             }
 
             String productNameStr = req.getSubscriberName() + Constants.UNDER_SCORE + req.getProductSubtype() + Constants.UNDER_SCORE + req.getServiceId();
             if (productNameStr.length() > 100) {
                 log.error("------------Trace # 5--------------- Product name too long");
-                return ResponseEntity.status(400).body( new CreateServiceEVPNResponse(
-                        "400",
-                        ERROR_PREFIX + "Product name too long",
-                        DateTimeUtil.now(),
-                        null,
-                        null
-                ));
+//                return ResponseEntity.status(400).body(new CreateServiceEVPNResponse(
+//                        "400",
+//                        ERROR_PREFIX + "Product name too long",
+//                        DateTimeUtil.now(),
+//                        null,
+//                        null
+//                ));
+                throw new BadRequestException(ERROR_PREFIX +"Product name too long");
             }
 
             String cfsName = "CFS" + Constants.UNDER_SCORE + subscriptionName;
@@ -294,7 +293,8 @@ public class CreateServiceEVPN implements HttpAction {
             }
             if (isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()) {
                 log.error("createServiceEVPN service already exist");
-                return ResponseEntity.status(409).body(new CreateServiceEVPNResponse("409", "Service already exist/Duplicate entry", DateTimeUtil.now(), subscriberNameStr, ontName));
+//                return ResponseEntity.status(409).body(new CreateServiceEVPNResponse("409", "Service already exist/Duplicate entry", DateTimeUtil.now(), subscriberNameStr, ontName));
+                throw new DuplicateServiceException("Service already exist/Duplicate entry");
             }
             if (isSubscriptionExist.get()) {
                 subscription = subscriptionRepo.findByDiscoveredName(subscription.getDiscoveredName()).get();
@@ -711,6 +711,11 @@ public class CreateServiceEVPN implements HttpAction {
                     }
                 }
             }
+
+            if(req.getServiceId().equalsIgnoreCase("checkrollback"))
+            {
+                throw new RuntimeException("checking Rollback");
+            }
             // 16) Ensure associations & final persist for RFS/ONT/OLT
             // - add linked RFS on ONT and OLT properties
             ont = logicalDeviceRepo.findByDiscoveredName(ont.getDiscoveredName()).get();
@@ -720,14 +725,15 @@ public class CreateServiceEVPN implements HttpAction {
             ont.getProperties().put("oltPosition", req.getOltName());
             ont.addUsedResource(olt);
             ont.setUsingService(new HashSet<>(List.of(rfs)));
-            logicalDeviceRepo.save(ont);
+            logicalDeviceRepo.save(ont, 0);
             olt = logicalDeviceRepo.findByDiscoveredName(olt.getDiscoveredName()).get();
             olt.getProperties().put("linkedRFS", rfs.getDiscoveredName());
             olt.setUsingService(new HashSet<>(List.of(rfs)));
-            logicalDeviceRepo.save(olt);
+            logicalDeviceRepo.save(olt, 0);
 
             // final response
             log.error(Constants.ACTION_COMPLETED);
+
             log.error("------------Trace # 19--------------- CreateServiceEVPN completed successfully");
             return ResponseEntity.status(201).body(new CreateServiceEVPNResponse(
                     "201",
@@ -737,14 +743,42 @@ public class CreateServiceEVPN implements HttpAction {
                     ont.getDiscoveredName()
             ));
 
+        } catch (BadRequestException bre) {
+            log.error("Validation error creating CreateServiceEVPN", bre);
+            log.error("Transaction active: {}",
+                    TransactionAspectSupport.currentTransactionStatus().isRollbackOnly());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+
+            return ResponseEntity.status(400)
+                    .body(new CreateServiceEVPNResponse(
+                            "400",
+                            bre.getMessage(),
+                            DateTimeUtil.now(),
+                            subscriptionName,
+                            ontName
+                    ));
+        }catch (DuplicateServiceException dive) {
+            log.error("Duplicate entry error", dive);
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+
+            return ResponseEntity.status(409)
+                    .body(new CreateServiceEVPNResponse(
+                            "409",
+                            "Service already exists / Duplicate entry",
+                            DateTimeUtil.now(),
+                            subscriptionName,
+                            ontName
+                    ));
+
         } catch (Exception ex) {
             log.error("Exception in CreateServiceEVPN", ex);
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ResponseEntity.status(500).body(new CreateServiceEVPNResponse(
                     "500",
                     ERROR_PREFIX + "Error occurred while creating service EVPN - " + ex.getMessage(),
                     DateTimeUtil.now(),
-                    null,
-                    null
+                    subscriptionName,
+                    ontName
             ));
         }
     }
