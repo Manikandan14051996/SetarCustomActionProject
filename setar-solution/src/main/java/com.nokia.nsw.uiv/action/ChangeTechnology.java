@@ -152,7 +152,7 @@ public class ChangeTechnology implements HttpAction {
             String subscriberNameCbmKey = subscriberName + Constants.UNDER_SCORE + cbmMac.replace(":", "");
 
             // 4. Update existing subscriber (only when productSubtype == Fibernet)
-            if ("Fibernet".equalsIgnoreCase(productSubtype)|| productSubType.equalsIgnoreCase("Broadband")) {
+            if ("Fibernet".equalsIgnoreCase(productSubtype)|| productSubtype.equalsIgnoreCase("Broadband")) {
                 if (subscriberNameFibernet.length() > 100) {
                     return  ResponseEntity.status(400).body(new ChangeTechnologyResponse("400", ERROR_PREFIX + "Subscriber name too long", DateTimeUtil.now(), subscriptionName, ontName));
                 }
@@ -192,7 +192,7 @@ public class ChangeTechnology implements HttpAction {
                 subProps.put("serviceMAC", ontMacAddr);
                 subProps.put("serviceSN", ontSN);
                 subProps.put("serviceSubType", "Broadband");
-                if ("Fibernet".equalsIgnoreCase(productSubtype)|| productSubType.equalsIgnoreCase("Broadband")) {
+                if ("Fibernet".equalsIgnoreCase(productSubtype)|| productSubtype.equalsIgnoreCase("Broadband")) {
                     if (qosProfile != null) subProps.put("veipQosSessionProfile", qosProfile);
                     subscription.setDiscoveredName(subscriptionName + Constants.UNDER_SCORE + ontSN);
 
@@ -216,7 +216,7 @@ public class ChangeTechnology implements HttpAction {
 
             // 6. Update existing CFS (if exists)
             Optional<Service> maybeCfs = serviceCustomRepository.findByDiscoveredName(cfsName);
-            if (maybeCfs.isPresent() && "Fibernet".equalsIgnoreCase(productSubtype)|| productSubType.equalsIgnoreCase("Broadband")) {
+            if (maybeCfs.isPresent() && "Fibernet".equalsIgnoreCase(productSubtype)|| productSubtype.equalsIgnoreCase("Broadband")) {
                 Service cfs = maybeCfs.get();
                 cfs.setDiscoveredName(cfs.getDiscoveredName() + Constants.UNDER_SCORE + ontSN);
                 if (fxOrderId != null) {
@@ -228,7 +228,7 @@ public class ChangeTechnology implements HttpAction {
 
             // 7. Update existing RFS (if exists)
             Optional<Service> maybeRfs = serviceCustomRepository.findByDiscoveredName(rfsName);
-            if (maybeRfs.isPresent() && "Fibernet".equalsIgnoreCase(productSubtype)|| productSubType.equalsIgnoreCase("Broadband")) {
+            if (maybeRfs.isPresent() && "Fibernet".equalsIgnoreCase(productSubtype)|| productSubtype.equalsIgnoreCase("Broadband")) {
                 Service rfs = maybeRfs.get();
                 // Append ONT_SN to existing RFS name as per specification
                 rfs.setDiscoveredName(rfs.getDiscoveredName() + Constants.UNDER_SCORE + ontSN);
@@ -276,13 +276,14 @@ public class ChangeTechnology implements HttpAction {
             if(ont.isPresent())
             {
                 ontDevice=ont.get();
+                LogicalDevice finalOntDevice = ontDevice;
                 maybeRfs.ifPresent(rfs -> {
-                    Set<Service> services = ontDevice.getUsingService();
+                    Set<Service> services = finalOntDevice.getUsingService();
                     if (services == null) {
                         services = new HashSet<>();
                     }
                     services.add(rfs);
-                    ontDevice.setUsingService(services);
+                    finalOntDevice.setUsingService(services);
                 });
                 ontDevice= logicalDeviceRepo.save(ontDevice,2);
             }else{
