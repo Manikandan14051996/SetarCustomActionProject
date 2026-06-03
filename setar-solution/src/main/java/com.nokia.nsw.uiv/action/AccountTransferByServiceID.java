@@ -144,7 +144,7 @@ public class AccountTransferByServiceID implements HttpAction {
                     if ("Broadband".equalsIgnoreCase(serviceSubType)) {
                         subsProps.put("kenanSubscriberId", req.getKenanUidNo());
                     } else if ("IPTV".equalsIgnoreCase(serviceSubType)) {
-                        subsProps.put("subscriberId_cableModem", subscriberName);
+                        subsProps.put("subscriberID_CableModem", subscriberName);
                     }
                     newSubscription.setProperties(subsProps);
                     subsRepo.save(newSubscription, 2);

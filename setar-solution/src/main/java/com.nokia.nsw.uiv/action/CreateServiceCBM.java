@@ -130,7 +130,7 @@ public class CreateServiceCBM implements HttpAction {
                     prop.put("accountNumber", request.getSubscriberName());
                     prop.put("subscriberStatus", "Active");
                     prop.put("subscriberUserName", request.getUserName());
-                    prop.put("address", request.getSubsAddress());
+                    prop.put("subscriberAddress", request.getSubsAddress());
                     prop.put("houseHoldId", request.getHhid());
                     prop.put("subscriberType", "Regular");
                     prop.put("createdBy",
@@ -274,7 +274,7 @@ public class CreateServiceCBM implements HttpAction {
                     prop.put("serviceType",request.getProductType());
                     if(request.getFxOrderID()!=null && !request.getFxOrderID().isBlank())
                     {
-                        prop.put("TransactionID",request.getProductType());
+                        prop.put("transactionId",request.getProductType());
                     }
                     prop.put("serviceStartDate",new Date());
                     prop.put("createdBy",

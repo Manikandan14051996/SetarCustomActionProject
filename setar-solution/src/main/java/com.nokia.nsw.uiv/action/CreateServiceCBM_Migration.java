@@ -327,7 +327,7 @@ public class CreateServiceCBM_Migration implements HttpAction {
                     prop.put("serviceStatus", "Active");
                     prop.put("serviceType", request.getProductType());
                     if (request.getFxOrderID() != null && !request.getFxOrderID().isBlank()) {
-                        prop.put("TransactionID", request.getProductType());
+                        prop.put("transactionId", request.getProductType());
                     }
                     prop.put("serviceStartDate", new Date());
                     prop.put("createdBy",

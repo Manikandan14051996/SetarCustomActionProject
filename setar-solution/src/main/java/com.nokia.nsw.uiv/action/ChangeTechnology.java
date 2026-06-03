@@ -152,7 +152,7 @@ public class ChangeTechnology implements HttpAction {
             String subscriberNameCbmKey = subscriberName + Constants.UNDER_SCORE + cbmMac.replace(":", "");
 
             // 4. Update existing subscriber (only when productSubtype == Fibernet)
-            if ("Fibernet".equalsIgnoreCase(productSubtype)) {
+            if ("Fibernet".equalsIgnoreCase(productSubtype)|| productSubType.equalsIgnoreCase("Broadband")) {
                 if (subscriberNameFibernet.length() > 100) {
                     return  ResponseEntity.status(400).body(new ChangeTechnologyResponse("400", ERROR_PREFIX + "Subscriber name too long", DateTimeUtil.now(), subscriptionName, ontName));
                 }
@@ -192,7 +192,7 @@ public class ChangeTechnology implements HttpAction {
                 subProps.put("serviceMAC", ontMacAddr);
                 subProps.put("serviceSN", ontSN);
                 subProps.put("serviceSubType", "Broadband");
-                if ("Fibernet".equalsIgnoreCase(productSubtype)) {
+                if ("Fibernet".equalsIgnoreCase(productSubtype)|| productSubType.equalsIgnoreCase("Broadband")) {
                     if (qosProfile != null) subProps.put("veipQosSessionProfile", qosProfile);
                     subscription.setDiscoveredName(subscriptionName + Constants.UNDER_SCORE + ontSN);
 
@@ -216,7 +216,7 @@ public class ChangeTechnology implements HttpAction {
 
             // 6. Update existing CFS (if exists)
             Optional<Service> maybeCfs = serviceCustomRepository.findByDiscoveredName(cfsName);
-            if (maybeCfs.isPresent() && "Fibernet".equalsIgnoreCase(productSubtype)) {
+            if (maybeCfs.isPresent() && "Fibernet".equalsIgnoreCase(productSubtype)|| productSubType.equalsIgnoreCase("Broadband")) {
                 Service cfs = maybeCfs.get();
                 cfs.setDiscoveredName(cfs.getDiscoveredName() + Constants.UNDER_SCORE + ontSN);
                 if (fxOrderId != null) {
@@ -228,7 +228,7 @@ public class ChangeTechnology implements HttpAction {
 
             // 7. Update existing RFS (if exists)
             Optional<Service> maybeRfs = serviceCustomRepository.findByDiscoveredName(rfsName);
-            if (maybeRfs.isPresent() && "Fibernet".equalsIgnoreCase(productSubtype)) {
+            if (maybeRfs.isPresent() && "Fibernet".equalsIgnoreCase(productSubtype)|| productSubType.equalsIgnoreCase("Broadband")) {
                 Service rfs = maybeRfs.get();
                 // Append ONT_SN to existing RFS name as per specification
                 rfs.setDiscoveredName(rfs.getDiscoveredName() + Constants.UNDER_SCORE + ontSN);
@@ -271,37 +271,51 @@ public class ChangeTechnology implements HttpAction {
             }
 
             // 9. Prepare ONT device (create if missing)
-            LogicalDevice ont = logicalDeviceRepo.findByDiscoveredName(ontName)
-                    .orElseGet(() -> {
-                        LogicalDevice d = new LogicalDevice();
-                        try {
-                            d.setLocalName(Validations.encryptName(ontName));
-                            d.setDiscoveredName(ontName);
-                            d.setContext("Setar");
-                            d.setKind("ONTDevice");
-                        } catch (AccessForbiddenException e) {
-                            throw new RuntimeException(e);
-                        } catch (BadRequestException e) {
-                            throw new RuntimeException(e);
-                        } catch (ModificationNotAllowedException e) {
-                            throw new RuntimeException(e);
-                        }
-                        Map<String, Object> p = new HashMap<>();
-                        p.put("OperationalState", "Active");
-                        p.put("serialNo", ontSN);
-                        p.put("deviceModel", ontModel);
-                        p.put("description", menm);
-                        p.put("veipVlan", vlanId);
-                        p.put("iptvVlan", vlanId);
-                        p.put("oltPosition", oltName);
-                        if (templateNameOnt != null) p.put("ontTemplate", templateNameOnt);
-                        d.setProperties(p);
-                        // link containing logical device (OLT)
-                        d.setUsedResource(new HashSet<>(List.of(olt)));
-                        // link rfs if present
-                        maybeRfs.ifPresent(rfs -> d.setUsingService(new HashSet<>(List.of(rfs))));
-                        return logicalDeviceRepo.save(d,2);
-                    });
+            Optional<LogicalDevice> ont = logicalDeviceRepo.findByDiscoveredName(ontName);
+            LogicalDevice ontDevice;
+            if(ont.isPresent())
+            {
+                ontDevice=ont.get();
+                maybeRfs.ifPresent(rfs -> {
+                    Set<Service> services = ontDevice.getUsingService();
+                    if (services == null) {
+                        services = new HashSet<>();
+                    }
+                    services.add(rfs);
+                    ontDevice.setUsingService(services);
+                });
+                ontDevice= logicalDeviceRepo.save(ontDevice,2);
+            }else{
+                LogicalDevice d = new LogicalDevice();
+                try {
+                    d.setLocalName(Validations.encryptName(ontName));
+                    d.setDiscoveredName(ontName);
+                    d.setContext("Setar");
+                    d.setKind("ONTDevice");
+                } catch (AccessForbiddenException e) {
+                    throw new RuntimeException(e);
+                } catch (BadRequestException e) {
+                    throw new RuntimeException(e);
+                } catch (ModificationNotAllowedException e) {
+                    throw new RuntimeException(e);
+                }
+                Map<String, Object> p = new HashMap<>();
+                p.put("OperationalState", "Active");
+                p.put("serialNo", ontSN);
+                p.put("deviceModel", ontModel);
+                p.put("description", menm);
+                p.put("veipVlan", vlanId);
+                p.put("iptvVlan", vlanId);
+                p.put("oltPosition", oltName);
+                if (templateNameOnt != null) p.put("ontTemplate", templateNameOnt);
+                d.setProperties(p);
+                // link containing logical device (OLT)
+                d.setUsedResource(new HashSet<>(List.of(olt)));
+                // link rfs if present
+                maybeRfs.ifPresent(rfs -> d.setUsingService(new HashSet<>(List.of(rfs))));
+                ontDevice= logicalDeviceRepo.save(d,2);
+            }
+
 
             if (mgmtVlanName.length() > 100) {
                 return ResponseEntity.status(400).body(new ChangeTechnologyResponse("400", ERROR_PREFIX + "Vlan name too long", DateTimeUtil.now(), "", ""));
@@ -354,7 +368,7 @@ public class ChangeTechnology implements HttpAction {
 
 // Expected names as per specification
             String cpeDeviceName = "ONT_" + ontSN;
-            String cpeDeviceOldName = "CBM_" + cbmMac.replace(":", "");
+            String cpeDeviceOldName = "CBM_" + cbmMac;
 
 // Fetch ONT CPE
             Optional<LogicalDevice> maybeCpeNew =
@@ -362,7 +376,7 @@ public class ChangeTechnology implements HttpAction {
 
 // Fetch CBM CPE
             Optional<LogicalDevice> maybeCpeOld =
-                    cpeRepo.findByDiscoveredName("CBM_" + cbmMac.replace(":", ""));
+                    cpeRepo.findByDiscoveredName("CBM_" + cbmMac);
 
 
 // Validate ONT CPE existence

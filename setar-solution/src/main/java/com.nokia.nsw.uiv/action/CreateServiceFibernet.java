@@ -395,11 +395,11 @@ public class CreateServiceFibernet implements HttpAction {
                     //uncommented for checking devicetointerface association
                     logicalInterfaceRepository.save(vlan, 2);
                     log.error("Created VLAN interface: {}", vlanName);
-                    if (oltDevice != null) {
-                        oltDevice = logicalDeviceRepository.findByDiscoveredName(oltDevice.getDiscoveredName()).get();
-                        oltDevice.setContained(new HashSet<>(List.of(vlan)));
-                        logicalDeviceRepository.save(oltDevice);
-                    }
+//                    if (oltDevice != null) {
+//                        oltDevice = logicalDeviceRepository.findByDiscoveredName(oltDevice.getDiscoveredName()).get();
+//                        oltDevice.setContained(new HashSet<>(List.of(vlan)));
+//                        logicalDeviceRepository.save(oltDevice);
+//                    }
 
                 }
             }

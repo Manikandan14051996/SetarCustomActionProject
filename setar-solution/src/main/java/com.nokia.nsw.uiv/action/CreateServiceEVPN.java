@@ -725,11 +725,11 @@ public class CreateServiceEVPN implements HttpAction {
             ont.getProperties().put("oltPosition", req.getOltName());
             ont.addUsedResource(olt);
             ont.setUsingService(new HashSet<>(List.of(rfs)));
-            logicalDeviceRepo.save(ont, 0);
+            logicalDeviceRepo.save(ont);
             olt = logicalDeviceRepo.findByDiscoveredName(olt.getDiscoveredName()).get();
             olt.getProperties().put("linkedRFS", rfs.getDiscoveredName());
             olt.setUsingService(new HashSet<>(List.of(rfs)));
-            logicalDeviceRepo.save(olt, 0);
+            logicalDeviceRepo.save(olt);
 
             // final response
             log.error(Constants.ACTION_COMPLETED);
