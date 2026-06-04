@@ -70,7 +70,6 @@ public class QueryServicesInfo implements HttpAction {
             try {
                 // 1) Input validations (both optional but at least one required)
                 Validations.validateMandatoryParams(request.getSubscriberName(), "subscriberName");
-                Validations.validateMandatoryParams(request.getOntSn(), "ontSn");
             } catch (BadRequestException bre) {
                 log.error("QueryServicesInfo start: subscriberName='{}', ontSN='{}'", request.getSubscriberName(), request.getOntSn());
                 return ResponseEntity.status(400).body(new CreateServiceIPTVResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
@@ -78,8 +77,12 @@ public class QueryServicesInfo implements HttpAction {
             }
             // 1) Input validations (both optional but at least one required)
             String accno = request.getSubscriberName();
-            String ontSN = request.getOntSn();
 
+            String ontSN=null;
+            if(request.getOntSn()!=null)
+            {
+                ontSN=request.getOntSn();
+            }
 
             log.error("QueryServicesInfo start: subscriberName='{}', ontSN='{}'", accno, ontSN);
 
