@@ -1,9 +1,7 @@
 package com.nokia.nsw.uiv.action;
 
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import com.nokia.nsw.uiv.exception.BadRequestException;
@@ -12,16 +10,10 @@ import com.nokia.nsw.uiv.framework.action.Action;
 import com.nokia.nsw.uiv.framework.action.ActionContext;
 import com.nokia.nsw.uiv.framework.action.HttpAction;
 import com.nokia.nsw.uiv.model.common.party.Customer;
+import com.nokia.nsw.uiv.model.resource.logical.*;
 import com.nokia.nsw.uiv.model.service.*;
-import com.nokia.nsw.uiv.repository.CustomerCustomRepository;
-import com.nokia.nsw.uiv.model.resource.logical.LogicalDevice;
-import com.nokia.nsw.uiv.repository.CustomerCustomRepository;
-import com.nokia.nsw.uiv.repository.LogicalDeviceCustomRepository;
-import com.nokia.nsw.uiv.model.resource.logical.LogicalDeviceRepository;
-import com.nokia.nsw.uiv.model.resource.logical.LogicalComponent;
-import com.nokia.nsw.uiv.model.resource.logical.LogicalComponentRepository;
-import com.nokia.nsw.uiv.repository.*;
-import com.nokia.nsw.uiv.repository.LogicalDeviceCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.CustomerCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.LogicalDeviceCustomRepository;
 import com.nokia.nsw.uiv.request.DeleteCBMRequest;
 import com.nokia.nsw.uiv.response.DeleteCBMResponse;
 import com.nokia.nsw.uiv.utils.Constants;

@@ -10,9 +10,9 @@ import com.nokia.nsw.uiv.model.common.party.Customer;
 import com.nokia.nsw.uiv.model.service.Product;
 import com.nokia.nsw.uiv.model.service.Service;
 import com.nokia.nsw.uiv.model.service.Subscription;
-import com.nokia.nsw.uiv.repository.CustomerCustomRepository;
-import com.nokia.nsw.uiv.repository.ProductCustomRepository;
-import com.nokia.nsw.uiv.repository.SubscriptionCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.CustomerCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.ProductCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.SubscriptionCustomRepository;
 import com.nokia.nsw.uiv.request.CreateProductSubscriptionRequest;
 import com.nokia.nsw.uiv.response.CreateProductSubscriptionResponse;
 import com.nokia.nsw.uiv.utils.Constants;
@@ -24,7 +24,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 

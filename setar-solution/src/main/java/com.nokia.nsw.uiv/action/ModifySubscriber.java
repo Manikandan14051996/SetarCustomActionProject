@@ -3,9 +3,12 @@ package com.nokia.nsw.uiv.action;
 import com.nokia.nsw.uiv.framework.action.Action;
 import com.nokia.nsw.uiv.framework.action.ActionContext;
 import com.nokia.nsw.uiv.framework.action.HttpAction;
+import com.nokia.nsw.uiv.model.resource.logical.CustomerCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.ProductCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.ServiceCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.SubscriptionCustomRepository;
 import com.nokia.nsw.uiv.model.service.Product;
 import com.nokia.nsw.uiv.model.service.Service;
-import com.nokia.nsw.uiv.repository.*;
 import com.nokia.nsw.uiv.request.ModifySubscriberRequest;
 import com.nokia.nsw.uiv.response.ModifySubscriberResponse;
 import com.nokia.nsw.uiv.utils.Constants;
@@ -13,9 +16,7 @@ import com.nokia.nsw.uiv.utils.DateTimeUtil;
 import com.nokia.nsw.uiv.utils.Validations;
 
 import com.nokia.nsw.uiv.model.service.Subscription;
-import com.nokia.nsw.uiv.model.service.SubscriptionRepository;
 import com.nokia.nsw.uiv.model.common.party.Customer;
-import com.nokia.nsw.uiv.model.common.party.CustomerRepository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Instant;
 import java.util.*;
 
 @Component

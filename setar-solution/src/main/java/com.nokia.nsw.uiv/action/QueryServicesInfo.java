@@ -6,12 +6,10 @@ import com.nokia.nsw.uiv.framework.action.ActionContext;
 import com.nokia.nsw.uiv.framework.action.HttpAction;
 import com.nokia.nsw.uiv.model.common.party.Customer;
 import com.nokia.nsw.uiv.model.resource.Resource;
-import com.nokia.nsw.uiv.model.resource.logical.LogicalDevice;
-import com.nokia.nsw.uiv.model.resource.logical.LogicalInterface;
+import com.nokia.nsw.uiv.model.resource.logical.*;
 import com.nokia.nsw.uiv.model.service.Product;
 import com.nokia.nsw.uiv.model.service.Service;
 import com.nokia.nsw.uiv.model.service.Subscription;
-import com.nokia.nsw.uiv.repository.*;
 import com.nokia.nsw.uiv.request.QueryServicesInfoRequest;
 import com.nokia.nsw.uiv.response.CreateServiceIPTVResponse;
 import com.nokia.nsw.uiv.response.QueryServicesInfoResponse;
@@ -23,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -93,13 +90,13 @@ public class QueryServicesInfo implements HttpAction {
 
             if (accno != null && !accno.trim().isEmpty()) {
                 log.debug("Searching RFS by subscriber/account number '{}'", accno);
-                List<Service> resourceFacingServices = (List<Service>) serviceCustomRepository.findAll();
+                List<Service> resourceFacingServices = serviceCustomRepository.findByDiscoveredNameContainingAndKindIgnoreCase(
+                        accno,
+                        Constants.SETAR_KIND_SETAR_RFS);
                 if (!resourceFacingServices.isEmpty()) {
                     for (Service rfs : resourceFacingServices) {
-                        if (rfs.getDiscoveredName().contains(accno) && rfs.getKind().equalsIgnoreCase(Constants.SETAR_KIND_SETAR_RFS)) {
                             setarsRFS.add(rfs);
                             isAccno = true;
-                        }
                     }
                 }
 
@@ -107,12 +104,12 @@ public class QueryServicesInfo implements HttpAction {
                 // ontSN branch
                 log.debug("Searching RFS by ontSN '{}'", ontSN);
                 List<Service> rfsByOnt = new ArrayList<>();
-                List<Service> resourceFacingServicesONT = (List<Service>) serviceCustomRepository.findAll();
+                List<Service> resourceFacingServicesONT = serviceCustomRepository.findByDiscoveredNameContainingAndKindIgnoreCase(
+                        ontSN,
+                        Constants.SETAR_KIND_SETAR_RFS);
                 if (!resourceFacingServicesONT.isEmpty()) {
                     for (Service rfs : resourceFacingServicesONT) {
-                        if (rfs.getDiscoveredName().contains(ontSN) && rfs.getKind().equalsIgnoreCase(Constants.SETAR_KIND_SETAR_RFS)) {
                             rfsByOnt = Collections.singletonList(rfs);
-                        }
                     }
                 }
 
@@ -125,12 +122,12 @@ public class QueryServicesInfo implements HttpAction {
                             if (parts.length >= 2) {
                                 String anchorAccNo = parts[1];
                                 List<Service> candidates = new ArrayList<>();
-                                List<Service> resourceFacingServicesCand = (List<Service>) serviceCustomRepository.findAll();
+                                List<Service> resourceFacingServicesCand = serviceCustomRepository.findByDiscoveredNameContainingAndKindIgnoreCase(
+                                        anchorAccNo,
+                                        Constants.SETAR_KIND_SETAR_RFS);
                                 if (!resourceFacingServicesCand.isEmpty()) {
                                     for (Service rfs : resourceFacingServicesCand) {
-                                        if (rfs.getDiscoveredName().contains(anchorAccNo)) {
                                             rfsByOnt = Collections.singletonList(rfs);
-                                        }
                                     }
                                 }
                                 if (candidates != null && !candidates.isEmpty()) {
@@ -354,10 +351,12 @@ public class QueryServicesInfo implements HttpAction {
                     }
 
                     // Components: products whose name begins with serviceID
-                    List<Product> products = (List<Product>) productRepository.findAll();
-                    List<Product> compos = new ArrayList<>();
+                    List<Service> products = serviceCustomRepository.findByDiscoveredNameContainingAndKindIgnoreCase(
+                            serviceID,
+                            Constants.SETAR_KIND_SETAR_PRODUCT);
+                    List<Service> compos = new ArrayList<>();
 
-                    for (Product pds : products) {
+                    for (Service pds : products) {
                         if (pds.getDiscoveredName().contains(serviceID)) {
 
                             compos.add(pds);
@@ -365,7 +364,7 @@ public class QueryServicesInfo implements HttpAction {
                     }
 
                     if (compos != null && !compos.isEmpty()) {
-                        for (Product prod : compos) {
+                        for (Service prod : compos) {
                             String pname = prod.getDiscoveredName();
                             if (pname != null) {
                                 String[] parts = pname.split(Constants.UNDER_SCORE, -1);

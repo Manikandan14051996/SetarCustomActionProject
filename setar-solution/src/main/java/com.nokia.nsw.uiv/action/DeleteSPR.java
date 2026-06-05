@@ -16,30 +16,24 @@
 package com.nokia.nsw.uiv.action;
 
 import com.nokia.nsw.uiv.exception.BadRequestException;
-import com.nokia.nsw.uiv.exception.InternalServerErrorException;
 import com.nokia.nsw.uiv.framework.action.Action;
 import com.nokia.nsw.uiv.framework.action.ActionContext;
 import com.nokia.nsw.uiv.framework.action.HttpAction;
 
 import com.nokia.nsw.uiv.model.common.party.Customer;
-import com.nokia.nsw.uiv.model.common.party.CustomerRepository;
 
 
 import com.nokia.nsw.uiv.model.resource.logical.*;
 import com.nokia.nsw.uiv.model.service.Product;
 import com.nokia.nsw.uiv.model.service.Service;
 import com.nokia.nsw.uiv.model.service.Subscription;
-import com.nokia.nsw.uiv.model.service.SubscriptionRepository;
 
-import com.nokia.nsw.uiv.repository.*;
 import com.nokia.nsw.uiv.request.DeleteSPRRequest;
 import com.nokia.nsw.uiv.response.DeleteSPRResponse;
 
 import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.utils.DateTimeUtil;
-import com.nokia.nsw.uiv.utils.Validations;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.net.bsd.RLoginClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;

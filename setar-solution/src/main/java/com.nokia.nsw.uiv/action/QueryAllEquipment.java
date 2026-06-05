@@ -5,7 +5,7 @@ import com.nokia.nsw.uiv.framework.action.Action;
 import com.nokia.nsw.uiv.framework.action.ActionContext;
 import com.nokia.nsw.uiv.framework.action.HttpAction;
 import com.nokia.nsw.uiv.model.service.Service;
-import com.nokia.nsw.uiv.repository.ServiceCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.ServiceCustomRepository;
 import com.nokia.nsw.uiv.request.QueryAllEquipmentRequest;
 import com.nokia.nsw.uiv.response.QueryAllEquipmentResponse;
 import com.nokia.nsw.uiv.utils.Constants;
@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;

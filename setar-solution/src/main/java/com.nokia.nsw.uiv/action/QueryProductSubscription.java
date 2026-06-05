@@ -1,15 +1,12 @@
 package com.nokia.nsw.uiv.action;
 
-import com.nokia.nsw.uiv.exception.AccessForbiddenException;
 import com.nokia.nsw.uiv.exception.BadRequestException;
-import com.nokia.nsw.uiv.exception.ModificationNotAllowedException;
 import com.nokia.nsw.uiv.framework.action.Action;
 import com.nokia.nsw.uiv.framework.action.ActionContext;
 import com.nokia.nsw.uiv.framework.action.HttpAction;
 import com.nokia.nsw.uiv.model.service.Product;
-import com.nokia.nsw.uiv.repository.ProductCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.ProductCustomRepository;
 import com.nokia.nsw.uiv.request.QueryProductSubscriptionRequest;
-import com.nokia.nsw.uiv.response.CreateServiceCBMResponse;
 import com.nokia.nsw.uiv.response.QueryProductSubscriptionResponse;
 import com.nokia.nsw.uiv.utils.Constants;
 import com.nokia.nsw.uiv.utils.DateTimeUtil;

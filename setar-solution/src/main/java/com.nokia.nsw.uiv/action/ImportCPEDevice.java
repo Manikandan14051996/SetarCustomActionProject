@@ -9,9 +9,9 @@ import com.nokia.nsw.uiv.framework.action.HttpAction;
 import com.nokia.nsw.uiv.model.resource.logical.LogicalComponent;
 import com.nokia.nsw.uiv.model.resource.logical.LogicalDevice;
 import com.nokia.nsw.uiv.model.resource.logical.LogicalInterface;
-import com.nokia.nsw.uiv.repository.LogicalComponentCustomRepository;
-import com.nokia.nsw.uiv.repository.LogicalDeviceCustomRepository;
-import com.nokia.nsw.uiv.repository.LogicalInterfaceCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.LogicalComponentCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.LogicalDeviceCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.LogicalInterfaceCustomRepository;
 import com.nokia.nsw.uiv.request.ImportCPEDeviceRequest;
 import com.nokia.nsw.uiv.response.ImportCPEDeviceResponse;
 import com.nokia.nsw.uiv.utils.Constants;
@@ -77,7 +77,9 @@ public class ImportCPEDevice implements HttpAction {
                 return ResponseEntity.status(400).body(new ImportCPEDeviceResponse("400", ERROR_PREFIX + " : " + bre.getMessage(),
                         DateTimeUtil.now()));
             }
+            log.error("Before-DB");
             Optional<LogicalDevice> optDevice = cpeDeviceRepository.findByDiscoveredName(devName);
+            log.error("After-DB");
             LogicalDevice cpeDevice;
             if (optDevice.isPresent()) {
                 cpeDevice = optDevice.get();

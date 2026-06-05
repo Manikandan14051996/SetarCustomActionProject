@@ -6,13 +6,8 @@ import com.nokia.nsw.uiv.exception.ModificationNotAllowedException;
 import com.nokia.nsw.uiv.framework.action.Action;
 import com.nokia.nsw.uiv.framework.action.ActionContext;
 import com.nokia.nsw.uiv.framework.action.HttpAction;
-import com.nokia.nsw.uiv.model.resource.AdministrativeState;
-import com.nokia.nsw.uiv.model.resource.OperationalState;
-import com.nokia.nsw.uiv.model.resource.logical.LogicalInterface;
-import com.nokia.nsw.uiv.model.resource.logical.LogicalInterfaceRepository;
+import com.nokia.nsw.uiv.model.resource.logical.*;
 import com.nokia.nsw.uiv.model.service.Service;
-import com.nokia.nsw.uiv.repository.*;
-import com.nokia.nsw.uiv.request.AssociateResourcesRequest;
 import com.nokia.nsw.uiv.request.ChangeTechnologyRequest;
 import com.nokia.nsw.uiv.response.ChangeTechnologyResponse;
 import com.nokia.nsw.uiv.utils.Constants;
@@ -21,20 +16,15 @@ import com.nokia.nsw.uiv.utils.Validations;
 
 import com.nokia.nsw.uiv.model.common.party.Customer;
 import com.nokia.nsw.uiv.model.service.Subscription;
-import com.nokia.nsw.uiv.model.resource.logical.LogicalDevice;
 
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.common.recycler.Recycler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Component
 @RestController

@@ -6,8 +6,8 @@ import com.nokia.nsw.uiv.framework.action.ActionContext;
 import com.nokia.nsw.uiv.framework.action.HttpAction;
 import com.nokia.nsw.uiv.model.resource.logical.LogicalDevice;
 import com.nokia.nsw.uiv.model.resource.logical.LogicalInterface;
-import com.nokia.nsw.uiv.repository.LogicalDeviceCustomRepository;
-import com.nokia.nsw.uiv.repository.LogicalInterfaceCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.LogicalDeviceCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.LogicalInterfaceCustomRepository;
 import com.nokia.nsw.uiv.request.QueryTemplateNameVLANRequest;
 import com.nokia.nsw.uiv.response.QueryTemplateNameVLANResponse;
 import com.nokia.nsw.uiv.utils.Constants;
@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 

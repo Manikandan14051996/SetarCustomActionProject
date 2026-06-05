@@ -5,19 +5,16 @@ import com.nokia.nsw.uiv.framework.action.Action;
 import com.nokia.nsw.uiv.framework.action.ActionContext;
 import com.nokia.nsw.uiv.framework.action.HttpAction;
 
-import com.nokia.nsw.uiv.model.common.party.CustomerRepository;
-
 import com.nokia.nsw.uiv.model.service.Service;
 import com.nokia.nsw.uiv.model.service.Subscription;
-import com.nokia.nsw.uiv.model.service.SubscriptionRepository;
 
 import com.nokia.nsw.uiv.model.resource.logical.LogicalDevice;
 import com.nokia.nsw.uiv.model.resource.logical.LogicalDeviceRepository;
 
-import com.nokia.nsw.uiv.repository.CustomerCustomRepository;
-import com.nokia.nsw.uiv.repository.LogicalDeviceCustomRepository;
-import com.nokia.nsw.uiv.repository.ServiceCustomRepository;
-import com.nokia.nsw.uiv.repository.SubscriptionCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.CustomerCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.LogicalDeviceCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.ServiceCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.SubscriptionCustomRepository;
 import com.nokia.nsw.uiv.request.ChangeStateRequest;
 import com.nokia.nsw.uiv.response.ChangeStateResponse;
 

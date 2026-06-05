@@ -5,10 +5,13 @@ import com.nokia.nsw.uiv.framework.action.Action;
 import com.nokia.nsw.uiv.framework.action.ActionContext;
 import com.nokia.nsw.uiv.framework.action.HttpAction;
 import com.nokia.nsw.uiv.model.common.party.Customer;
+import com.nokia.nsw.uiv.model.resource.logical.CustomerCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.ProductCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.ServiceCustomRepository;
+import com.nokia.nsw.uiv.model.resource.logical.SubscriptionCustomRepository;
 import com.nokia.nsw.uiv.model.service.Product;
 import com.nokia.nsw.uiv.model.service.Service;
 import com.nokia.nsw.uiv.model.service.Subscription;
-import com.nokia.nsw.uiv.repository.*;
 import com.nokia.nsw.uiv.request.QueryAddrByServiceIDRequest;
 import com.nokia.nsw.uiv.response.QueryAddrByServiceIDResponse;
 import com.nokia.nsw.uiv.utils.Constants;
@@ -19,11 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 @Component
