@@ -205,6 +205,8 @@ public class QueryEquipment implements HttpAction {
             if (successFlag) {
                 response.setStatus(CODE_SUCCESS);
                 response.setMessage("Equipment Queried.");
+                log.error(Constants.ACTION_COMPLETED);
+                return ResponseEntity.status(200).body(response);
             } else {
                 StringBuilder reason = new StringBuilder("Error, Equipment Not Queried. ");
 
@@ -218,9 +220,11 @@ public class QueryEquipment implements HttpAction {
 
                 response.setStatus(CODE_EQUIP_NOT_FOUND);
                 response.setMessage(reason.toString());
+                log.error(Constants.ACTION_COMPLETED);
+                return ResponseEntity.status(404).body(response);
             }
-            log.error(Constants.ACTION_COMPLETED);
-            return ResponseEntity.status(404).body(response);
+
+
 
         } catch (Exception e) {
             log.error("Exception querying equipment", e);
