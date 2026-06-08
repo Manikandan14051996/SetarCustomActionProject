@@ -715,11 +715,11 @@ public class CreateServiceEVPN implements HttpAction {
             if (req.getTemplateNameOnt() != null) ont.getProperties().put("ontTemplate", req.getTemplateNameOnt());
             ont.getProperties().put("oltPosition", req.getOltName());
             ont.addUsedResource(olt);
-            ont.setUsingService(new HashSet<>(List.of(rfs)));
+            ont.getUsingService().add(rfs);
             logicalDeviceRepo.save(ont);
             olt = logicalDeviceRepo.findByDiscoveredName(olt.getDiscoveredName()).get();
             olt.getProperties().put("linkedRFS", rfs.getDiscoveredName());
-            olt.setUsingService(new HashSet<>(List.of(rfs)));
+            olt.getUsingService().add(rfs);
             logicalDeviceRepo.save(olt);
 
             // final response
