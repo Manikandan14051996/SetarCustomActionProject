@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -48,8 +49,6 @@ public class ChangeState implements HttpAction {
     @Autowired
     private LogicalDeviceCustomRepository logicalDeviceCustomRepository;
 
-    @Autowired
-    private LogicalDeviceRepository logicalDeviceRepository;
 
     @Autowired
     private CustomerCustomRepository customerRepository;
@@ -138,16 +137,24 @@ public class ChangeState implements HttpAction {
                 optOnt = logicalDeviceCustomRepository.findByDiscoveredName(ontName);
             }
 
+
+
             if (!isEmpty(req.getCbmMac())) {
                 // attempt find by GDN "CBM" + Constants.UNDER_SCORE +mac (as per naming in your system)
-                Iterable<LogicalDevice> devices = logicalDeviceRepository.findAll();
-                Iterator<LogicalDevice> deviceIterator = devices.iterator();
+                List<LogicalDevice> devices =
+                        logicalDeviceCustomRepository.findByKindAndDiscoveredNameStartingWith(
+                                Constants.SETAR_KIND_STB_AP_CM_DEVICE,
+                                "CBM");
 
-                while(deviceIterator.hasNext()){
-                    LogicalDevice d = deviceIterator.next();
-                    if(d.getProperties().get("macAddress")!=null && d.getProperties().get("macAddress").toString().contains(req.getCbmMac())){
+                for (LogicalDevice d : devices) {
+                    Object macAddress = d.getProperties().get("macAddress");
+
+                    if (macAddress != null
+                            && macAddress.toString().contains(req.getCbmMac())) {
+
                         optCbm = Optional.of(d);
-                        cbmName = optCbm.get().getDiscoveredName();
+                        cbmName = d.getDiscoveredName();
+                        break; // stop once found
                     }
                 }
             }

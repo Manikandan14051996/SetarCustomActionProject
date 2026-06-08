@@ -16,5 +16,9 @@ public interface ServiceCustomRepository extends ServiceRepository {
     List<Service> findByDiscoveredNameContainingAndKindIgnoreCase(
             String discoveredName,
             String kind);
+    List<Service> findByKind(String kind);
+    long countByKindIgnoreCaseAndDiscoveredNameContaining(
+            String kind,
+            String discoveredName);
 //    Optional<Service> findByProperty(String key, String value);
 }

@@ -103,17 +103,12 @@ public class QueryCPEDevice implements HttpAction {
         } else if ("ONT".equalsIgnoreCase(resourceType)) {
             response.setResourceModelSubtype("GPON");
 
-            Iterable<LogicalInterface> interfaceIterable = lanRepository.findAll();
-            List<LogicalInterface> interfaceList = new ArrayList<>();
-            interfaceIterable.forEach(interfaceList::add);
 
             for (int portNumber = 1; portNumber <= 5; portNumber++) {
                 String portName = request.getResourceSN() + "_P" + portNumber + "_SINGLETAGGED";
 //                String portName = request.getResourceSN() + Constants.UNDER_SCORE+ "ETH_" + portNumber;
 
-                long vlanCount = interfaceList.stream()
-                        .filter(in -> in.getDiscoveredName().contains(portName))
-                        .count();
+                long vlanCount = lanRepository.countByDiscoveredNameContaining(portName);
 
                 String dataPortStatus = vlanCount < 7 ? "Available" : "Allocated";
                 response.setDataPortStatus(portNumber, dataPortStatus);

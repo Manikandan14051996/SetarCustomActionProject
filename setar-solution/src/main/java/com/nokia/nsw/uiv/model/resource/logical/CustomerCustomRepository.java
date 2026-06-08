@@ -14,5 +14,7 @@ public interface CustomerCustomRepository extends CustomerRepository {
 
     // Add your new method here
     Optional<Customer> findByDiscoveredName(String discoveredName);
+
+    List<Customer> findByDiscoveredNameContaining(String discoveredName);
 }
 

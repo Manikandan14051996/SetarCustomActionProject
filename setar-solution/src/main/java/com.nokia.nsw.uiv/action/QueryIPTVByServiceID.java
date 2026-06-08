@@ -72,15 +72,7 @@ public class QueryIPTVByServiceID implements HttpAction {
 
             // 2. Identify target CFS names
             Set<String> matchingCfsNames = new TreeSet<>();
-            List<Service> allCFS = (List<Service>) serviceCustomRepository.findAll();
-            List<Service> cfsServices=new ArrayList<>();
-            for(Service s:allCFS)
-            {
-                if(s.getKind().equalsIgnoreCase(Constants.SETAR_KIND_SETAR_CFS))
-                {
-                    cfsServices.add(s);
-                }
-            }
+            List<Service> cfsServices=serviceCustomRepository.findByKind(Constants.SETAR_KIND_SETAR_CFS);
             for (Service cfs : cfsServices) {
                 String cfsName = cfs.getDiscoveredName();
                 if (cfsName == null) continue;
@@ -122,12 +114,12 @@ public class QueryIPTVByServiceID implements HttpAction {
             // 4. Retrieve related entities for each CFS
             for (String cfsName : matchingCfsNames) {
                 // try to load CFS by exact name (global name lookup may be required; using name directly)
-                Optional<Service> optCfs;
+                Optional<Service> optCfs = Optional.empty();
                 try {
                     optCfs = serviceCustomRepository.findByDiscoveredName(cfsName);
                 } catch (Exception e) {
-                    // fallback to find by iterating (we already have cfsName); try to get from repo.findAll
-                    optCfs = findCfsByNameFromAll(cfsName);
+                    // fallback to find by iterating (we already have cfsName); try to get from repo
+                    log.error("There is no CFS Matched");
                 }
                 if (!optCfs.isPresent()) continue;
                 Service cfs = optCfs.get();
@@ -139,7 +131,7 @@ public class QueryIPTVByServiceID implements HttpAction {
                     optRfs = serviceCustomRepository.findByDiscoveredName(rfsName);
                 } catch (Exception e) {
                     // fallback: find by iterating
-                    optRfs = findRfsByNameFromAll(rfsName);
+                    log.error("There is no RFS Matched");
                 }
 
                 // From CFS get Product -> Subscription -> Subscriber
@@ -431,19 +423,6 @@ public class QueryIPTVByServiceID implements HttpAction {
     // Helper / utility methods
     // -------------------------
 
-    private Optional<Service> findCfsByNameFromAll(String name) {
-        for (Service cfs : serviceCustomRepository.findAll()) {
-            if (name.equals(cfs.getName())) return Optional.of(cfs);
-        }
-        return Optional.empty();
-    }
-
-    private Optional<Service> findRfsByNameFromAll(String name) {
-        for (Service rfs : serviceCustomRepository.findAll()) {
-            if (name.equals(rfs.getName())) return Optional.of(rfs);
-        }
-        return Optional.empty();
-    }
 
     /**
      * Safely fetch a string property from properties map

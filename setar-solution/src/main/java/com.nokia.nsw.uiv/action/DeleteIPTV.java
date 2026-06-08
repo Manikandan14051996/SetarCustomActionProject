@@ -143,7 +143,7 @@ public class DeleteIPTV implements HttpAction {
                 if (olt != null) {
 
                     // Check if ANY RFS is associated with this OLT
-                    List<Service> allServices = (List<Service>) serviceCustomRepository.findAll();
+                    List<Service> allServices = serviceCustomRepository.findByKind(Constants.SETAR_KIND_SETAR_RFS);
 
                     boolean oltHasAssociatedRfs = allServices.stream()
                             .filter(s -> s.getDiscoveredName().startsWith("RFS") ||

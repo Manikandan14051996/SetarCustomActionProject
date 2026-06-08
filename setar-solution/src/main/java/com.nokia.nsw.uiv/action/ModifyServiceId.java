@@ -89,16 +89,7 @@ public class ModifyServiceId implements HttpAction {
             log.error("------------Test Trace # 3--------------- old=" + oldServiceId + ", new=" + newServiceId);
 
             // 2. Locate CFS candidates
-            List<Service> cfsList1 = (List<Service>) serviceCustomRepository.findAll();
-            List<Service> cfsList = new ArrayList<>();
-            for(Service cfs:cfsList1)
-            {
-                if(cfs.getKind().equalsIgnoreCase(Constants.SETAR_KIND_SETAR_CFS)) {
-                    if (cfs.getDiscoveredName().contains(oldServiceId)) {
-                        cfsList.add(cfs);
-                    }
-                }
-            }
+            List<Service> cfsList = serviceCustomRepository.findByDiscoveredNameContainingAndKindIgnoreCase(oldServiceId,Constants.SETAR_KIND_SETAR_CFS);
             log.error("------------Test Trace # 4--------------- Found CFS candidates: " + cfsList.size());
 
             for (Service cfs : cfsList) {

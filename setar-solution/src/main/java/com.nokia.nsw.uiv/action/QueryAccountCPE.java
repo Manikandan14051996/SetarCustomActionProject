@@ -21,9 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * QueryAccountCPE retrieves broadband CPE identifiers for a given subscriberName + serviceId.
@@ -73,23 +71,26 @@ public class QueryAccountCPE implements HttpAction {
             // Step 2: Find candidate subscriptions (Name CONTAINS pattern)
             String pattern;
 
-            List<Subscription> subscriptionList = new ArrayList<>();
-            List<Subscription> subscriptions= (List<Subscription>) subscriptionRepo.findAll();
-            for(Subscription s:subscriptions) {
-                if (accountNumber != null && serviceId != null) {
-                    pattern = accountNumber + Constants.UNDER_SCORE + serviceId;
-                    if(s.getDiscoveredName().equalsIgnoreCase(pattern))
-                    {
-                      subscriptionList.add(s);
-                    } else if (s.getDiscoveredName().contains("-"+serviceId))
-                    {
-                        subscriptionList.add(s);
-                    } else if(s.getDiscoveredName().contains(accountNumber))
-                    {
-                        subscriptionList.add(s);
-                    }
-                }
+
+            List<Subscription> subscriptionList = Collections.emptyList();
+
+            if (accountNumber != null && serviceId != null) {
+
+                subscriptionList = subscriptionRepo.findByDiscoveredNameContaining(
+                        accountNumber + Constants.UNDER_SCORE + serviceId);
+
+            } else if (accountNumber == null && serviceId != null) {
+
+                subscriptionList = subscriptionRepo.findByDiscoveredNameContaining(
+                        Constants.UNDER_SCORE + serviceId);
+
+            } else if (accountNumber != null) {
+
+                subscriptionList = subscriptionRepo.findByDiscoveredNameContaining(
+                        accountNumber);
             }
+
+
 
             // Step 3: Select matching subscription
             for (Subscription s : subscriptionList) {

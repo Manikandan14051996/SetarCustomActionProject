@@ -159,11 +159,9 @@ public class QueryFlags implements HttpAction {
                 (ontSN == null || ontSN.trim().isEmpty() || "NA".equalsIgnoreCase(ontSN))) {
 
             String rfsPattern = "RFS_" + subscriber + (serviceID != null ? "_" + serviceID : "");
-            List<Service> rfsTempLists = (List<Service>) serviceCustomRepository.findAll();
-            List<Service> rfsTempList = rfsTempLists.stream()
-                    .filter(s -> SETAR_KIND_SETAR_RFS.equalsIgnoreCase(s.getKind()))
-                    .filter(s -> s.getDiscoveredName() != null && s.getDiscoveredName().contains(rfsPattern))
-                    .collect(Collectors.toList());
+            List<Service> rfsTempList = serviceCustomRepository.findByDiscoveredNameContainingAndKindIgnoreCase(
+                    rfsPattern,
+                    Constants.SETAR_KIND_SETAR_RFS);
 
             for (Service rfs : rfsTempList) {
                 Service cfs = getFirstUsedService(rfs);
@@ -213,9 +211,10 @@ public class QueryFlags implements HttpAction {
 
         List<Service> rfsList = null;
         if (serviceID != null && !serviceID.trim().isEmpty()) {
-            List<Service> rfsLists = (List<Service>) serviceCustomRepository.findAll();
+            List<Service> rfsLists = serviceCustomRepository.findByDiscoveredNameContainingAndKindIgnoreCase(
+                    serviceID,
+                    Constants.SETAR_KIND_SETAR_RFS);
             rfsList = rfsLists.stream()
-                    .filter(s -> Constants.SETAR_KIND_SETAR_RFS.equalsIgnoreCase(s.getKind()))
                     .filter(s -> {
                         String name = s.getDiscoveredName();
                         if (name == null) return false;
@@ -269,35 +268,18 @@ public class QueryFlags implements HttpAction {
                 } else {
                     effectiveOntSN = ontSN;
                 }
-                String ontsn = effectiveOntSN;
                 if (!"NA".equalsIgnoreCase(effectiveOntSN) && effectiveOntSN != null && !effectiveOntSN.isEmpty()) {
-                    List<Subscription> subscriptions = (List<Subscription>) subscriptionRepository.findAll();
-                    long count = subscriptions.stream()
-                            .filter(s -> {
-                                Map<String, Object> p = safeProps(s.getProperties());
-                                return "IPTV".equalsIgnoreCase(safeString(p.get("serviceSubType"))) &&
-                                        (ontsn.equals(safeString(p.get("serviceSN"))) ||
-                                                ontsn.equals(safeString(p.get("macAddress"))));
-                            })
-                            .count();
+                    long count = subscriptionRepository.countIptvByOntSn(effectiveOntSN);
                     iptvCount = String.valueOf(count);
                     flags.put("IPTV_COUNT", iptvCount);
                 }
             } else if (equalsAnyIgnoreCase(productSubType, "Fibernet", "Broadband", "Voice") ||
                     (equalsIgnoreCase(productName, "Broadband") && equalsAnyIgnoreCase(productSubType, "Bridged","Cloudstarter"))) {
 
-                rfslist = (List<Service>) serviceCustomRepository.findAll();
                 if (ontSN != null && !ontSN.equals("NA") && ontSN.contains("ALCL")) {
-                    String containsontsn = ontSN;
-                    rfscounts = rfslist.stream()
-                            .filter(s -> SETAR_KIND_SETAR_RFS.equalsIgnoreCase(s.getKind()))
-                            .filter(s -> s.getDiscoveredName() != null && s.getDiscoveredName().contains(containsontsn))
-                            .collect(Collectors.toList());
+                    rfscounts = serviceCustomRepository.findByDiscoveredNameContainingAndKindIgnoreCase(ontSN, SETAR_KIND_SETAR_RFS);
                 } else {
-                    rfscounts = rfslist.stream()
-                            .filter(s -> SETAR_KIND_SETAR_RFS.equalsIgnoreCase(s.getKind()))
-                            .filter(s -> s.getDiscoveredName() != null && s.getDiscoveredName().contains(subscriber))
-                            .collect(Collectors.toList());
+                    rfscounts = serviceCustomRepository.findByDiscoveredNameContainingAndKindIgnoreCase(subscriber, SETAR_KIND_SETAR_RFS);
                 }
                 String ontsn = ontSN;
                 long subCount = rfscounts.stream()
@@ -446,7 +428,16 @@ public class QueryFlags implements HttpAction {
                     }
 
                     // Subscriber names
-                    List<Customer> customers = (List<Customer>) customerRepository.findAll();
+                    Set<Customer> customerSet = new HashSet<>();
+
+                    customerSet.addAll(
+                            customerRepository.findByDiscoveredNameContaining(subToFind));
+
+                    customerSet.addAll(
+                            customerRepository.findByDiscoveredNameContaining(subNamefoFind));
+
+                    List<Customer> customers = new ArrayList<>(customerSet);
+
                     for (Customer cust : customers) {
                         if (cust.getDiscoveredName().equalsIgnoreCase(subToFind) || cust.getDiscoveredName().contains(subNamefoFind)) {
                             Map<String, Object> cp = safeProps(cust.getProperties());
@@ -687,14 +678,11 @@ public class QueryFlags implements HttpAction {
 
                 // VLAN MGMT template check
                 Set<String> countVlan = new TreeSet<>();
-                String vlanont = ontPort;
-                logicalInterfaceRepository.findAll().forEach(vif -> {
-                    String vname = vif.getDiscoveredName();
-
-                    if (vname != null && vname.contains("_P" + vlanont + "_")) {
-                        countVlan.add(vname);
-                    }
-                });
+                List<LogicalInterface> allInterfaces=logicalInterfaceRepository.findByDiscoveredNameContaining("_P" + ontPort + "_");
+                for(LogicalInterface li:allInterfaces)
+                {
+                    countVlan.add(li.getDiscoveredName());
+                }
 
                 Set<String> countMgmt = new TreeSet<>();
 
@@ -724,9 +712,8 @@ public class QueryFlags implements HttpAction {
             }
         } else {
             if (equalsIgnoreCase(productSubType, "Voice")) {
-                List<Subscription> voiceSubscriptions = (List<Subscription>) subscriptionRepository.findAll();
+                List<Subscription> voiceSubscriptions = (List<Subscription>) subscriptionRepository.findByDiscoveredNameContaining(subscriber);
                 List<Subscription> voiceSubs = voiceSubscriptions.stream()
-                        .filter(s -> s.getDiscoveredName() != null && s.getDiscoveredName().contains(subscriber))
                         .filter(s -> "Voice".equalsIgnoreCase(safeString(safeProps(s.getProperties()).get("serviceSubType"))))
                         .collect(Collectors.toList());
 
@@ -792,7 +779,7 @@ public class QueryFlags implements HttpAction {
                 boolean iptvExists = false;
                 boolean broadbandExists = false;
 
-                List<Subscription> subscriptionList = (List<Subscription>) subscriptionRepository.findAll();
+                List<Subscription> subscriptionList = (List<Subscription>) subscriptionRepository.findByDiscoveredNameContaining(subscriber);
 
                 for (Subscription subscription : subscriptionList) {
 
@@ -822,7 +809,7 @@ public class QueryFlags implements HttpAction {
             List<String> iptvIds = new ArrayList<>();
 
             if ("ONT".equalsIgnoreCase(serviceLink)) {
-                for (Subscription s : subscriptionRepository.findAll()) {
+                for (Subscription s : subscriptionRepository.findByDiscoveredNameContaining(subscriber)) {
 
                     if (s.getDiscoveredName() == null ||
                             !s.getDiscoveredName().contains(subscriber)) {
@@ -852,7 +839,7 @@ public class QueryFlags implements HttpAction {
                 String macLocal = flags.getOrDefault("CBM_MAC", serviceMAC);
                 if (!macLocal.isEmpty()) {
 
-                    for (Subscription s : subscriptionRepository.findAll()) {
+                    for (Subscription s : subscriptionRepository.findByDiscoveredNameContaining(subscriber)) {
 
                         Map<String, Object> props = safeProps(s.getProperties());
 
@@ -932,12 +919,9 @@ public class QueryFlags implements HttpAction {
                         String iswifiMain = "false";
 
                         // Get attached RFS
-                        List<Service> listRFS = (List<Service>) serviceCustomRepository.findAll();
-                        String ontsn = ontSN;
-                        List<Service> attachedRfs = listRFS.stream()
-                                .filter(s -> SETAR_KIND_SETAR_RFS.equalsIgnoreCase(s.getKind()))
-                                .filter(s -> s.getDiscoveredName() != null && s.getDiscoveredName().contains(ontsn))
-                                .collect(Collectors.toList());
+                        List<Service> attachedRfs = serviceCustomRepository.findByDiscoveredNameContainingAndKindIgnoreCase(
+                                ontSN,
+                                Constants.SETAR_KIND_SETAR_RFS);
 
                         if (!attachedRfs.isEmpty() && attachedRfs.size() == 1) {
                             Service firstRfs = attachedRfs.get(0);
@@ -1014,13 +998,10 @@ public class QueryFlags implements HttpAction {
                         String ontname = "";
                         String iswifiMain = "false";
 
-                        List<Service> listRFS = (List<Service>) serviceCustomRepository.findAll();
-                        String ontsn = ontSN;
 
-                        List<Service> attachedRfs = listRFS.stream()
-                                .filter(s -> SETAR_KIND_SETAR_RFS.equalsIgnoreCase(s.getKind()))
-                                .filter(s -> s.getDiscoveredName() != null && s.getDiscoveredName().contains(ontsn))
-                                .collect(Collectors.toList());
+                        List<Service> attachedRfs = serviceCustomRepository.findByDiscoveredNameContainingAndKindIgnoreCase(
+                                ontSN,
+                                Constants.SETAR_KIND_SETAR_RFS);
 
                         if (!attachedRfs.isEmpty() && attachedRfs.size() == 1) {
 
@@ -1110,12 +1091,9 @@ public class QueryFlags implements HttpAction {
                         String ontname = "";
                         String iswifiMain = "false";
 
-                        List<Service> listRFS = (List<Service>) serviceCustomRepository.findAll();
-                        String tmpontsn = ontSN;
-                        List<Service> attachedRfs = listRFS.stream()
-                                .filter(s -> SETAR_KIND_SETAR_RFS.equalsIgnoreCase(s.getKind()))
-                                .filter(s -> s.getDiscoveredName() != null && s.getDiscoveredName().contains(tmpontsn))
-                                .collect(Collectors.toList());
+                        List<Service> attachedRfs = serviceCustomRepository.findByDiscoveredNameContainingAndKindIgnoreCase(
+                                ontSN,
+                                Constants.SETAR_KIND_SETAR_RFS);
 
                         if (!attachedRfs.isEmpty() && attachedRfs.size() == 1) {
 
@@ -1227,11 +1205,9 @@ public class QueryFlags implements HttpAction {
                         "IPBH".equalsIgnoreCase(productSubType)) {
 
                     String rfsPattern = "RFS_" + subscriber + "_" + serviceID;
-                    List<Service> rfsTempLists = (List<Service>) serviceCustomRepository.findAll();
-                    List<Service> rfsTempList = rfsTempLists.stream()
-                            .filter(s -> SETAR_KIND_SETAR_RFS.equalsIgnoreCase(s.getKind()))
-                            .filter(s -> s.getDiscoveredName() != null && s.getDiscoveredName().contains(rfsPattern))
-                            .collect(Collectors.toList());
+                    List<Service> rfsTempList = serviceCustomRepository.findByDiscoveredNameContainingAndKindIgnoreCase(
+                            rfsPattern,
+                            Constants.SETAR_KIND_SETAR_RFS);
 
                     if (!rfsTempList.isEmpty()) {
                         Service rfsTemp = rfsTempList.get(0);
@@ -1338,7 +1314,9 @@ public class QueryFlags implements HttpAction {
                             // WIFI Maintenance check
                             Set<String> wifiMaintSet = new TreeSet<>();
 
-                            List<Service> allRfs = (List<Service>) serviceCustomRepository.findAll();
+                            List<Service> allRfs = serviceCustomRepository.findByDiscoveredNameContainingAndKindIgnoreCase(
+                                    ontSN,
+                                    Constants.SETAR_KIND_SETAR_RFS);
 
                             for (Service rfs : allRfs) {
 
@@ -1754,11 +1732,8 @@ public class QueryFlags implements HttpAction {
         result.put("SERVICE_FLAG", "New");
         result.put("CBM_ACCOUNT_EXIST", "New");
 
-        List<Subscription> subscriptions = (List<Subscription>) subscriptionRepository.findAll();
 
-        List<Subscription> subs = subscriptions.stream()
-                .filter(s -> s.getDiscoveredName() != null && s.getDiscoveredName().contains(subscriber))
-                .collect(Collectors.toList());
+        List<Subscription> subs = subscriptionRepository.findByDiscoveredNameContaining(subscriber);
 
         if (actionType.contains("Unconfigure") || equalsAnyIgnoreCase(actionType, "MoveOut", "ChangeTechnology", "AccountTransfer")) {
             int count = subs.size();
@@ -1815,7 +1790,7 @@ public class QueryFlags implements HttpAction {
                 }
             }
         } else {
-            List<Customer>customers= (List<Customer>) customerRepository.findAll();
+            List<Customer>customers= (List<Customer>) customerRepository.findByDiscoveredNameContaining(subscriber);
             boolean exists=false;
             for(Customer cust:customers) {
                 if (cust.getDiscoveredName().contains("_")) {

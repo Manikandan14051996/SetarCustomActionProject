@@ -61,18 +61,9 @@ public class AccountTransferByServiceID implements HttpAction {
             String oldSubscriberName = req.getSubscriberNameOld();
             String subscriberName = req.getSubscriberName();
             // Step 2: Search for CFS containing old subscriber and service ID
-            List<Service> serviceList = StreamSupport
-                    .stream(serviceRepository.findAll().spliterator(), false).filter(service->service.getDiscoveredName().contains(Constants.CFS))
-                    .collect(Collectors.toList());
-            List<Service> cfsList = new ArrayList<>();
-            for(Service cfs:serviceList)
-            {
-                if(cfs.getDiscoveredName().contains(oldSubscriberName))
-                {
-                    log.error("Cfs found containing oldSuscriberName: "+cfs.getDiscoveredName());
-                    cfsList.add(cfs);
-                }
-            }
+            List<Service> cfsList = serviceRepository.findByDiscoveredNameContainingAndKindIgnoreCase(
+                    oldSubscriberName,
+                    Constants.SETAR_KIND_SETAR_CFS);
 
             cfsList.removeIf(cfs -> !cfs.getDiscoveredName().contains(req.getServiceId()));
             if (cfsList.isEmpty()) {

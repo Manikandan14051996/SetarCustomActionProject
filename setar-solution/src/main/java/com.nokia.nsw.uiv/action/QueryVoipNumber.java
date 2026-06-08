@@ -135,7 +135,7 @@ public class QueryVoipNumber implements HttpAction {
                     // Step 6: Retrieve Subscription by Search on Identifiers (Fallback Path)
                     log.error("Executing fallback subscription search for linkType: {}", linkType);
 
-                    ArrayList<Subscription> allSubscriptions = (ArrayList<Subscription>) subscriptionRepo.findAll();
+                    ArrayList<Subscription> allSubscriptions = (ArrayList<Subscription>) subscriptionRepo.findByDiscoveredNameContaining(req.getOntSN());
                     ArrayList<Subscription> matchedSubs = new ArrayList<>();
 
                     if ("ONT".equals(linkType)) {

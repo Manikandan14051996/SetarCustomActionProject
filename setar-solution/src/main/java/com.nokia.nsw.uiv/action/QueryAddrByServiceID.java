@@ -72,12 +72,8 @@ public class QueryAddrByServiceID implements HttpAction {
             log.error("Looking up RFS entries containing service id '{}'", serviceId);
 
             // 2) Locate the target service (RFS) using SERVICE_ID
-            List<Service> rfsListAll = StreamSupport.stream(serviceCustomRepository.findAll().spliterator(),false).filter(service -> service.getDiscoveredName().contains(Constants.RFS)).toList();
-            List<Service> rfsList =new ArrayList<>();
-            rfsListAll.forEach(rFS -> {
-                if (rFS.getDiscoveredName().contains(serviceId) && rFS.getKind().equalsIgnoreCase(Constants.SETAR_KIND_SETAR_RFS)) {
-                    rfsList.add(rFS);
-                }});
+            List<Service> rfsList =serviceCustomRepository.findByDiscoveredNameContainingAndKindIgnoreCase(serviceId,Constants.SETAR_KIND_SETAR_RFS);
+
             if (rfsList == null || rfsList.isEmpty()) {
                 log.error("No RFS entries found containing '{}'", serviceId);
                 return ResponseEntity.status(404).body(createErrorResponse("404", ERROR_PREFIX + "No Service Details Found"));

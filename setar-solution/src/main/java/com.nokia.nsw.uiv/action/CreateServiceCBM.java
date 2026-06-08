@@ -222,7 +222,7 @@ public class CreateServiceCBM implements HttpAction {
                     }
                     Map<String, Object> prop = new HashMap<>();
                     prop.put("productStatus", "Active");
-                    prop.put("productType",request.getProductType());
+                    prop.put("productType",request.getFxOrderID());
                     prop.put("createdBy",
                             request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
                                     ? request.getCreatedBy()

@@ -89,16 +89,7 @@ public class ModifySubscriber implements HttpAction {
             boolean updatesApplied = false;
 
             // 3. Locate CFS containing old subscriber
-            List<Service> cfsList1 = (List<Service>) serviceCustomRepository.findAll();
-            List<Service> cfsList = new ArrayList<>();
-            for(Service cfs:cfsList1)
-            {
-                if(cfs.getKind().equalsIgnoreCase(Constants.SETAR_KIND_SETAR_CFS)) {
-                    if (cfs.getDiscoveredName().contains(oldSubscriberName)) {
-                        cfsList.add(cfs);
-                    }
-                }
-            }
+            List<Service> cfsList = serviceCustomRepository.findByDiscoveredNameContainingAndKindIgnoreCase(oldSubscriberName,Constants.SETAR_KIND_SETAR_CFS);
             log.error("------------Test Trace # 4--------------- CFS candidates found: " + cfsList.size());
 
             for (Service cfs : cfsList) {
