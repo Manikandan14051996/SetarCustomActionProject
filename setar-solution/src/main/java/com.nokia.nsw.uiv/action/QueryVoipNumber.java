@@ -184,9 +184,14 @@ public class QueryVoipNumber implements HttpAction {
                         simaEndpointId = (String) s.getProperties().getOrDefault("simaEndpointId1", "");
                         voipCode1      = (String) s.getProperties().getOrDefault("voipServiceCode1", "");
                         voipPackage    = (String) s.getProperties().getOrDefault("voipPackage1", "");
-
+                        simaCustId2     = (String) s.getProperties().getOrDefault("simaCustId2", "");
+                        simaSubsId2     = (String) s.getProperties().getOrDefault("simaSubsId2", "");
+                        simaEndpointId2 = (String) s.getProperties().getOrDefault("simaEndpointId2", "");
+                        voipCode2      = (String) s.getProperties().getOrDefault("voipServiceCode2", "");
+                        voipPackage2    = (String) s.getProperties().getOrDefault("voipPackage2", "");
                         if ("Cable_Modem".equals(linkType)) {
                             voipNumber1 = (String) s.getProperties().getOrDefault("voipNumber1", "");
+                            voipNumber2 = (String) s.getProperties().getOrDefault("voipNumber2", "");
                         }
 
                     } else {
