@@ -33,8 +33,10 @@ public class QueryVoipNumber implements HttpAction {
 
     private static final String ERROR_PREFIX = "UIV action QueryVoipNumber execution failed - ";
     protected static final String ACTION_LABEL = Constants.QUERY_VOIP_NUMBER;
-    @Autowired private LogicalDeviceCustomRepository logicalDeviceRepo;
-    @Autowired private SubscriptionCustomRepository subscriptionRepo;
+    @Autowired
+    private LogicalDeviceCustomRepository logicalDeviceRepo;
+    @Autowired
+    private SubscriptionCustomRepository subscriptionRepo;
 
     @Override
     public Class<?> getActionClass() {
@@ -59,14 +61,14 @@ public class QueryVoipNumber implements HttpAction {
                         ERROR_PREFIX + "Missing mandatory parameter: " + bre.getMessage(),
                         DateTimeUtil.now(),
                         "",
-                        "","","","","","","","","","","","",""
+                        "", "", "", "", "", "", "", "", "", "", "", "", ""
                 ));
             }
 
             // Step 2: Service link
             String linkType = (req.getServiceLink() != null && "Cable_Modem".equalsIgnoreCase(req.getServiceLink()))
                     ? "Cable_Modem" : "ONT";
-            String ontName ="ONT" + req.getOntSN();
+            String ontName = "ONT" + req.getOntSN();
 
             // Step 3: Prepare empty fields
             String voipNumber1 = "";
@@ -96,30 +98,30 @@ public class QueryVoipNumber implements HttpAction {
             }
 
             // Step 5: Exact subscription lookup
-            if (req.getSubscriberName() != null) {
+            if (req.getSubscriberName() != null && req.getServiceId()!=null) {
                 String subscriptionName = ("Cable_Modem".equals(linkType))
-                        ? req.getSubscriberName() + Constants.UNDER_SCORE  + req.getServiceId()
-                        : req.getSubscriberName() + Constants.UNDER_SCORE  + req.getServiceId() + Constants.UNDER_SCORE  + req.getOntSN();
+                        ? req.getSubscriberName() + Constants.UNDER_SCORE + req.getServiceId()
+                        : req.getSubscriberName() + Constants.UNDER_SCORE + req.getServiceId() + Constants.UNDER_SCORE + req.getOntSN();
 
                 Optional<Subscription> subsOpt = subscriptionRepo.findByDiscoveredName(subscriptionName);
                 if (subsOpt.isPresent()) {
                     Subscription subs = subsOpt.get();
-                    simaCustId     = (String) subs.getProperties().getOrDefault("simaCustId1","");
-                    simaSubsId     = (String) subs.getProperties().getOrDefault("simaSubsId1","");
-                    simaEndpointId = (String) subs.getProperties().getOrDefault("simaEndpointId1","");
-                    voipCode1      = (String) subs.getProperties().getOrDefault("voipServiceCode1","");
-                    voipPackage    = (String) subs.getProperties().getOrDefault("voipPackage1","");
-                    voipPackage2    = (String) subs.getProperties().getOrDefault("voipPackage2","");
-                    simaCustId2     = (String) subs.getProperties().getOrDefault("simaCustId2","");
-                    simaSubsId2     = (String) subs.getProperties().getOrDefault("simaSubsId2","");
-                    simaEndpointId2 = (String) subs.getProperties().getOrDefault("simaEndpointId2","");
-                    voipCode2      = (String) subs.getProperties().getOrDefault("voipServiceCode2","");
+                    simaCustId = (String) subs.getProperties().getOrDefault("simaCustId1", "");
+                    simaSubsId = (String) subs.getProperties().getOrDefault("simaSubsId1", "");
+                    simaEndpointId = (String) subs.getProperties().getOrDefault("simaEndpointId1", "");
+                    voipCode1 = (String) subs.getProperties().getOrDefault("voipServiceCode1", "");
+                    voipPackage = (String) subs.getProperties().getOrDefault("voipPackage1", "");
+                    voipPackage2 = (String) subs.getProperties().getOrDefault("voipPackage2", "");
+                    simaCustId2 = (String) subs.getProperties().getOrDefault("simaCustId2", "");
+                    simaSubsId2 = (String) subs.getProperties().getOrDefault("simaSubsId2", "");
+                    simaEndpointId2 = (String) subs.getProperties().getOrDefault("simaEndpointId2", "");
+                    voipCode2 = (String) subs.getProperties().getOrDefault("voipServiceCode2", "");
 
                     Customer subscriber = subsOpt.get().getCustomer();
 
                     if (subscriber != null && subscriber.getProperties() != null) {
                         firstName = Objects.toString(subscriber.getProperties().get("subscriberFirstName"), "");
-                        lastName  = Objects.toString(subscriber.getProperties().get("subscriberLastName"), "");
+                        lastName = Objects.toString(subscriber.getProperties().get("subscriberLastName"), "");
                     } else {
                         firstName = "";
                         lastName = "";
@@ -131,114 +133,113 @@ public class QueryVoipNumber implements HttpAction {
                         voipNumber2 = (String) subs.getProperties().get("voipNumber2");
                     }
 
-                }else {
-                    // Step 6: Retrieve Subscription by Search on Identifiers (Fallback Path)
-                    log.error("Executing fallback subscription search for linkType: {}", linkType);
+                }
+            }else {
+                // Step 6: Retrieve Subscription by Search on Identifiers (Fallback Path)
+                log.error("Executing fallback subscription search for linkType: {}", linkType);
 
+
+                ArrayList<Subscription> matchedSubs = new ArrayList<>();
+
+                if ("ONT".equals(linkType)) {
                     ArrayList<Subscription> allSubscriptions = (ArrayList<Subscription>) subscriptionRepo.findByDiscoveredNameContaining(req.getOntSN());
-                    ArrayList<Subscription> matchedSubs = new ArrayList<>();
-
-                    if ("ONT".equals(linkType)) {
-                        // Priority 1: ontSN + subtype = VOIP
-                        for (Subscription s : allSubscriptions) {
-                            String discoveredName = s.getDiscoveredName();
-                            String subtype = (String) s.getProperties().getOrDefault("serviceSubType", "");
-                            if (discoveredName != null && discoveredName.contains(req.getOntSN()) && "VOIP".equalsIgnoreCase(subtype)) {
-                                matchedSubs.add(s);
-                            }
-                        }
-
-                        // Priority 2: ontSN + subtype = Voice
-                        if (matchedSubs.isEmpty()) {
-                            for (Subscription s : allSubscriptions) {
-                                String discoveredName = s.getDiscoveredName();
-                                String subtype = (String) s.getProperties().getOrDefault("serviceSubType", "");
-                                if (discoveredName != null && discoveredName.contains(req.getOntSN()) && "Voice".equalsIgnoreCase(subtype)) {
-                                    matchedSubs.add(s);
-                                }
-                            }
-                        }
-                    } else { // CBM
-                        // CBM case: subscriberName + subtype = Voice
-                        for (Subscription s : allSubscriptions) {
-                            String discoveredName = s.getDiscoveredName();
-                            String subtype = (String) s.getProperties().getOrDefault("serviceSubType", "");
-                            if (discoveredName != null && discoveredName.contains(req.getSubscriberName()) && "Voice".equalsIgnoreCase(subtype)) {
-                                matchedSubs.add(s);
-                            }
+                    // Priority 1: ontSN + subtype = VOIP
+                    for (Subscription s : allSubscriptions) {
+                        String discoveredName = s.getDiscoveredName();
+                        String subtype = (String) s.getProperties().getOrDefault("serviceSubType", "");
+                        if (discoveredName != null && discoveredName.contains(req.getOntSN()) && "VOIP".equalsIgnoreCase(subtype)) {
+                            matchedSubs.add(s);
                         }
                     }
 
-                    log.error("Fallback search found {} matching subscriptions", matchedSubs.size());
-
-                    // 0 → No SIMA ID found
+                    // Priority 2: ontSN + subtype = Voice
                     if (matchedSubs.isEmpty()) {
-                        return ResponseEntity.status(404).body(errorResponse("404", "No SIMA Customer ID found"));
+                        for (Subscription s : allSubscriptions) {
+                            String discoveredName = s.getDiscoveredName();
+                            String subtype = (String) s.getProperties().getOrDefault("serviceSubType", "");
+                            if (discoveredName != null && discoveredName.contains(req.getOntSN()) && "Voice".equalsIgnoreCase(subtype)) {
+                                matchedSubs.add(s);
+                            }
+                        }
                     }
-
-                    // 1 → Capture primary record
-                    if (matchedSubs.size() == 1) {
-                        Subscription s = matchedSubs.get(0);
-                        simaCustId     = (String) s.getProperties().getOrDefault("simaCustId1", "");
-                        simaSubsId     = (String) s.getProperties().getOrDefault("simaSubsId1", "");
-                        simaEndpointId = (String) s.getProperties().getOrDefault("simaEndpointId1", "");
-                        voipCode1      = (String) s.getProperties().getOrDefault("voipServiceCode1", "");
-                        voipPackage    = (String) s.getProperties().getOrDefault("voipPackage1", "");
-                        simaCustId2     = (String) s.getProperties().getOrDefault("simaCustId2", "");
-                        simaSubsId2     = (String) s.getProperties().getOrDefault("simaSubsId2", "");
-                        simaEndpointId2 = (String) s.getProperties().getOrDefault("simaEndpointId2", "");
-                        voipCode2      = (String) s.getProperties().getOrDefault("voipServiceCode2", "");
-                        voipPackage2    = (String) s.getProperties().getOrDefault("voipPackage2", "");
-                        if ("Cable_Modem".equals(linkType)) {
-                            voipNumber1 = (String) s.getProperties().getOrDefault("voipNumber1", "");
-                            voipNumber2 = (String) s.getProperties().getOrDefault("voipNumber2", "");
+                } else { // CBM
+                    ArrayList<Subscription> allSubscriptions = (ArrayList<Subscription>) subscriptionRepo.findByDiscoveredNameContaining(req.getSubscriberName());
+                    // CBM case: subscriberName + subtype = Voice
+                    for (Subscription s : allSubscriptions) {
+                        String discoveredName = s.getDiscoveredName();
+                        String subtype = (String) s.getProperties().getOrDefault("serviceSubType", "");
+                        if (discoveredName != null && discoveredName.contains(req.getSubscriberName()) && "Voice".equalsIgnoreCase(subtype)) {
+                            matchedSubs.add(s);
                         }
-
-                    } else {
-                        // 2 → Capture both records (primary and secondary)
-                        for (Subscription sub : matchedSubs) {
-                            Map<String, Object> props = sub.getProperties();
-
-                            if (props.containsKey("simaCustId1")) {
-                                simaCustId     = (String) props.getOrDefault("simaCustId1", "");
-                                simaSubsId     = (String) props.getOrDefault("simaSubsId1", "");
-                                simaEndpointId = (String) props.getOrDefault("simaEndpointId1", "");
-                                voipCode1      = (String) props.getOrDefault("voipServiceCode1", "");
-                                voipPackage    = (String) props.getOrDefault("voipPackage1", "");
-                            }
-
-                            else if (props.containsKey("simaCustId2")) {
-                                simaCustId2     = (String) props.getOrDefault("simaCustId2", "");
-                                simaSubsId2     = (String) props.getOrDefault("simaSubsId2", "");
-                                simaEndpointId2 = (String) props.getOrDefault("simaEndpointId2", "");
-                                voipCode2       = (String) props.getOrDefault("voipServiceCode2", "");
-                                voipPackage2    = (String) props.getOrDefault("voipPackage2", "");
-                            }
-                            if ("Cable_Modem".equals(linkType)) {
-
-                                if (props.containsKey("voipNumber1")) {
-                                    voipNumber1 = (String) props.getOrDefault("voipNumber1", "");
-                                }
-
-                                if (props.containsKey("voipNumber2")) {
-                                    voipNumber2 = (String) props.getOrDefault("voipNumber2", "");
-                                }
-                            }
-                            Customer subscriber = sub.getCustomer();
-
-                            if (subscriber != null && subscriber.getProperties() != null) {
-                                firstName = Objects.toString(subscriber.getProperties().get("subscriberFirstName"), "");
-                                lastName  = Objects.toString(subscriber.getProperties().get("subscriberLastName"), "");
-                            } else {
-                                firstName = "";
-                                lastName = "";
-                            }
-                        }
-
-
                     }
                 }
 
+                log.error("Fallback search found {} matching subscriptions", matchedSubs.size());
+
+                // 0 → No SIMA ID found
+                if (matchedSubs.isEmpty()) {
+                    return ResponseEntity.status(404).body(errorResponse("404", "No SIMA Customer ID found"));
+                }
+
+                // 1 → Capture primary record
+                if (matchedSubs.size() == 1) {
+                    Subscription s = matchedSubs.get(0);
+                    simaCustId = (String) s.getProperties().getOrDefault("simaCustId1", "");
+                    simaSubsId = (String) s.getProperties().getOrDefault("simaSubsId1", "");
+                    simaEndpointId = (String) s.getProperties().getOrDefault("simaEndpointId1", "");
+                    voipCode1 = (String) s.getProperties().getOrDefault("voipServiceCode1", "");
+                    voipPackage = (String) s.getProperties().getOrDefault("voipPackage1", "");
+                    simaCustId2 = (String) s.getProperties().getOrDefault("simaCustId2", "");
+                    simaSubsId2 = (String) s.getProperties().getOrDefault("simaSubsId2", "");
+                    simaEndpointId2 = (String) s.getProperties().getOrDefault("simaEndpointId2", "");
+                    voipCode2 = (String) s.getProperties().getOrDefault("voipServiceCode2", "");
+                    voipPackage2 = (String) s.getProperties().getOrDefault("voipPackage2", "");
+                    if ("Cable_Modem".equals(linkType)) {
+                        voipNumber1 = (String) s.getProperties().getOrDefault("voipNumber1", "");
+                        voipNumber2 = (String) s.getProperties().getOrDefault("voipNumber2", "");
+                    }
+
+                } else {
+                    // 2 → Capture both records (primary and secondary)
+                    for (Subscription sub : matchedSubs) {
+                        Map<String, Object> props = sub.getProperties();
+
+                        if (props.containsKey("simaCustId1")) {
+                            simaCustId = (String) props.getOrDefault("simaCustId1", "");
+                            simaSubsId = (String) props.getOrDefault("simaSubsId1", "");
+                            simaEndpointId = (String) props.getOrDefault("simaEndpointId1", "");
+                            voipCode1 = (String) props.getOrDefault("voipServiceCode1", "");
+                            voipPackage = (String) props.getOrDefault("voipPackage1", "");
+                        } else if (props.containsKey("simaCustId2")) {
+                            simaCustId2 = (String) props.getOrDefault("simaCustId2", "");
+                            simaSubsId2 = (String) props.getOrDefault("simaSubsId2", "");
+                            simaEndpointId2 = (String) props.getOrDefault("simaEndpointId2", "");
+                            voipCode2 = (String) props.getOrDefault("voipServiceCode2", "");
+                            voipPackage2 = (String) props.getOrDefault("voipPackage2", "");
+                        }
+                        if ("Cable_Modem".equals(linkType)) {
+
+                            if (props.containsKey("voipNumber1")) {
+                                voipNumber1 = (String) props.getOrDefault("voipNumber1", "");
+                            }
+
+                            if (props.containsKey("voipNumber2")) {
+                                voipNumber2 = (String) props.getOrDefault("voipNumber2", "");
+                            }
+                        }
+                        Customer subscriber = sub.getCustomer();
+
+                        if (subscriber != null && subscriber.getProperties() != null) {
+                            firstName = Objects.toString(subscriber.getProperties().get("subscriberFirstName"), "");
+                            lastName = Objects.toString(subscriber.getProperties().get("subscriberLastName"), "");
+                        } else {
+                            firstName = "";
+                            lastName = "";
+                        }
+                    }
+
+
+                }
             }
             log.error(Constants.ACTION_COMPLETED);
             // Step 7: Final response
@@ -278,7 +279,7 @@ public class QueryVoipNumber implements HttpAction {
                 ERROR_PREFIX + msg,
                 DateTimeUtil.now(),
                 "", "", "", "", "", "",
-                "", "", "", "", "","", "", ""
+                "", "", "", "", "", "", "", ""
         );
     }
 }
