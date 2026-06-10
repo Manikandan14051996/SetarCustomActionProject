@@ -64,21 +64,15 @@ public class QueryServicesInfo implements HttpAction {
         QueryServicesInfoRequest request = (QueryServicesInfoRequest) actionContext.getObject();
 
         try {
-            try {
-                // 1) Input validations (both optional but at least one required)
-                Validations.validateMandatoryParams(request.getSubscriberName(), "subscriberName");
-            } catch (BadRequestException bre) {
-                log.error("QueryServicesInfo start: subscriberName='{}', ontSN='{}'", request.getSubscriberName(), request.getOntSn());
-                return ResponseEntity.status(400).body(new CreateServiceIPTVResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                        DateTimeUtil.now(), "", ""));
-            }
             // 1) Input validations (both optional but at least one required)
-            String accno = request.getSubscriberName();
+            String accno = "";
+            if (request.getSubscriberName() != null) {
+                accno = request.getSubscriberName();
+            }
 
-            String ontSN=null;
-            if(request.getOntSn()!=null)
-            {
-                ontSN=request.getOntSn();
+            String ontSN = "";
+            if (request.getOntSn() != null) {
+                ontSN = request.getOntSn();
             }
 
             log.error("QueryServicesInfo start: subscriberName='{}', ontSN='{}'", accno, ontSN);
@@ -95,8 +89,8 @@ public class QueryServicesInfo implements HttpAction {
                         Constants.SETAR_KIND_SETAR_RFS);
                 if (!resourceFacingServices.isEmpty()) {
                     for (Service rfs : resourceFacingServices) {
-                            setarsRFS.add(rfs);
-                            isAccno = true;
+                        setarsRFS.add(rfs);
+                        isAccno = true;
                     }
                 }
 
@@ -109,7 +103,7 @@ public class QueryServicesInfo implements HttpAction {
                         Constants.SETAR_KIND_SETAR_RFS);
                 if (!resourceFacingServicesONT.isEmpty()) {
                     for (Service rfs : resourceFacingServicesONT) {
-                            rfsByOnt = Collections.singletonList(rfs);
+                        rfsByOnt = Collections.singletonList(rfs);
                     }
                 }
 
@@ -127,7 +121,7 @@ public class QueryServicesInfo implements HttpAction {
                                         Constants.SETAR_KIND_SETAR_RFS);
                                 if (!resourceFacingServicesCand.isEmpty()) {
                                     for (Service rfs : resourceFacingServicesCand) {
-                                            rfsByOnt = Collections.singletonList(rfs);
+                                        rfsByOnt = Collections.singletonList(rfs);
                                     }
                                 }
                                 if (candidates != null && !candidates.isEmpty()) {
@@ -158,7 +152,7 @@ public class QueryServicesInfo implements HttpAction {
 
             // 4) Prepare working space (collectors & flags)
             boolean success = true;
-            int p = 1, q = 1, r = 1, s = 1, u = 1,b=1; // counters
+            int p = 1, q = 1, r = 1, s = 1, u = 1, b = 1; // counters
             Map<String, Object> allvalues = new LinkedHashMap<>();
 
             // 5) For each service
@@ -259,7 +253,7 @@ public class QueryServicesInfo implements HttpAction {
                             ontSno = ssn.toString();
                         }
 
-                        if(setarSubscription.getProperties().get("subscriberID_CableModem")!=null) {
+                        if (setarSubscription.getProperties().get("subscriberID_CableModem") != null) {
                             cbmSubscriberID = setarSubscription.getProperties().get("subscriberID_CableModem").toString();
                             if (cbmSubscriberID != null || !serviceLink.equalsIgnoreCase("ONT")) {
                                 // setarSubscribername then from subscription's subscriber
@@ -403,7 +397,7 @@ public class QueryServicesInfo implements HttpAction {
                     } else if (serviceSubTypeLower.contains("cloudstarter")) {
                         sname = "CLOUDSTARTER";
                         t = u;
-                    } else if(serviceSubTypeLower.contains("bridged")){
+                    } else if (serviceSubTypeLower.contains("bridged")) {
                         sname = "BRIDGED";
                         t = b;
                     }
@@ -418,7 +412,7 @@ public class QueryServicesInfo implements HttpAction {
                             serviceTypeLower.contains("voice") ||
                             serviceTypeLower.contains("evpn") ||
                             serviceTypeLower.contains("enterprise") ||
-                            serviceSubTypeLower.contains("cloudstarter")||
+                            serviceSubTypeLower.contains("cloudstarter") ||
                             serviceSubTypeLower.contains("bridged");
 
                     if (!applicableType) {
@@ -547,14 +541,14 @@ public class QueryServicesInfo implements HttpAction {
                             allvalues.put(prefix + "VOIP_PACKAGE", sprops.getOrDefault("voipPackage1", ""));
                             allvalues.put(prefix + "VOIP_PACKAGE2", sprops.getOrDefault("voipPackage2", ""));
                             // VoIP service code logic: if code2 exists overwrite code1
-                            allvalues.put(prefix + "VOIP_SERVICE_CODE",sprops.getOrDefault("voipServiceCode1", ""));
+                            allvalues.put(prefix + "VOIP_SERVICE_CODE", sprops.getOrDefault("voipServiceCode1", ""));
                             allvalues.put(prefix + "VOIP_SERVICE_CODE2", sprops.getOrDefault("voipServiceCode2", ""));
 
                         }
                     }
 
                     // EVPN / Enterprise / Cloudstarter
-                    if (serviceTypeLower.contains("evpn") || serviceTypeLower.contains("enterprise") && serviceSubTypeLower.contains("cloudstarter")||serviceSubTypeLower.contains("bridged")) {
+                    if (serviceTypeLower.contains("evpn") || serviceTypeLower.contains("enterprise") && serviceSubTypeLower.contains("cloudstarter") || serviceSubTypeLower.contains("bridged")) {
                         if (setarServiceLink != null && setarServiceLink.equalsIgnoreCase("ONT")) {
                             // Evpn templates on oltDevice
                             if (oltDevice != null && oltDevice.getProperties() != null) {
@@ -587,11 +581,11 @@ public class QueryServicesInfo implements HttpAction {
                                     String vlanIntName = prefixText + Constants.UNDER_SCORE + evpnVlan;
                                     Optional<LogicalInterface> optVlanInt = logicalInterfaceRepository.findByDiscoveredName(vlanIntName);
                                     if (optVlanInt.isPresent()) {
-                                        if(optVlanInt.get().getProperties().get("mgmtTemplate")!=null) {
+                                        if (optVlanInt.get().getProperties().get("mgmtTemplate") != null) {
 
                                             String mgmt = optVlanInt.get().getProperties().get("mgmtTemplate").toString();
                                             allvalues.put(prefix + "SERVICE_TEMPLATE_MGMT", mgmt == null ? "" : mgmt);
-                                        }else {
+                                        } else {
                                             allvalues.put(prefix + "SERVICE_TEMPLATE_MGMT", "");
                                         }
                                     } else {
