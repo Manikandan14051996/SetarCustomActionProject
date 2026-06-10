@@ -107,8 +107,8 @@ public class DeleteIPTV implements HttpAction {
             // Step 4: Update OLT template values
             if (olt != null) {
                 Map<String, Object> props = olt.getProperties();
-                props.put("hsiTemplate", "");
-                props.put("iptvTemplate", "");
+                props.put("veipServiceTemplate", "");
+                props.put("veipIptvTemplate", "");
                 props.put("igmpTemplate", "");
                 deviceRepository.save(olt);
             }
