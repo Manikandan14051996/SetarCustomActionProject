@@ -100,18 +100,18 @@ public class QueryFlags implements HttpAction {
         String serviceevpnwififlag = "NO";
 
         String templateNameOnt = "New";
-        String templateNameCard = "New";
-        String templateNamePort = "New";
-        String templateNamePort2 = "New";
-        String templateNamePort3 = "New";
-        String templateNamePort4 = "New";
-        String templateNamePort5 = "New";
-        String templateNameVeip = "New";
-        String templateNameVoip = "New";
-        String templateNamePots1 = "New";
-        String templateNamePots2 = "New";
-        String templateNameHSI = "New";
-        String templateNameIPTV = "New";
+        String templateNameCard = "";
+        String templateNamePort = "";
+        String templateNamePort2 = "";
+        String templateNamePort3 = "";
+        String templateNamePort4 = "";
+        String templateNamePort5 = "";
+        String templateNameVeip = "";
+        String templateNameVoip = "";
+        String templateNamePots1 = "";
+        String templateNamePots2 = "";
+        String templateNameHSI = "";
+        String templateNameIPTV = "";
 
         String tempVLAN = "";
         String tempVPLS = "";
