@@ -1844,6 +1844,9 @@ public class QueryFlags implements HttpAction {
     }
 
     private Product getProductFromCFS(Service cfs) {
+        cfs = serviceCustomRepository
+                .findByDiscoveredName(cfs.getDiscoveredName())
+                .orElse(cfs);
         if (cfs == null || cfs.getUsingService() == null) return null;
         String prodName = cfs.getUsingService().stream()
                 .filter(s -> SETAR_KIND_SETAR_PRODUCT.equalsIgnoreCase(s.getKind()))
