@@ -75,6 +75,10 @@ public class QueryServicesInfo implements HttpAction {
                 ontSN = request.getOntSn();
             }
 
+            if(ontSN.isEmpty() && accno.isEmpty() || ontSN.equalsIgnoreCase("NA")||accno.equalsIgnoreCase("NA"))
+            {
+                throw new RuntimeException("SubscriberName and Ontsn both are Empty");
+            }
             log.error("QueryServicesInfo start: subscriberName='{}', ontSN='{}'", accno, ontSN);
 
             // 2) Find initial candidate services
@@ -94,7 +98,7 @@ public class QueryServicesInfo implements HttpAction {
                     }
                 }
 
-            } else {
+            } else if(!ontSN.trim().isEmpty() && !isAccno) {
                 // ontSN branch
                 log.debug("Searching RFS by ontSN '{}'", ontSN);
                 List<Service> rfsByOnt = new ArrayList<>();
