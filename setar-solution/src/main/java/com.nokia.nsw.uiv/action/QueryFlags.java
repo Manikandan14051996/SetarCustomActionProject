@@ -1249,8 +1249,8 @@ public class QueryFlags implements HttpAction {
 
                                     Map<String, Object> cp = safeProps(cust.getProperties());
 
-                                    subscriberFirstName = safeString(cp.get("firstName"));
-                                    subscriberLastName = safeString(cp.get("lastName"));
+                                    subscriberFirstName = safeString(cp.get("subscriberFirstName"));
+                                    subscriberLastName = safeString(cp.get("subscriberLastName"));
 
                                     flags.put("FIRST_NAME", subscriberFirstName);
                                     flags.put("LAST_NAME", subscriberLastName);
