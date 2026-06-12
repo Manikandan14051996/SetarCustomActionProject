@@ -1241,7 +1241,7 @@ public class QueryFlags implements HttpAction {
                                 flags.put("SERVICE_LINK", serviceLink);
 
                                 // Subscriber names from subscription (approximated from customer)
-                                Optional<Customer> custOpt = customerRepository.findByDiscoveredName(subscriber);
+                                Optional<Customer> custOpt = customerRepository.findByDiscoveredName(sub.getCustomer().getDiscoveredName());
 
                                 if (custOpt.isPresent()) {
 
