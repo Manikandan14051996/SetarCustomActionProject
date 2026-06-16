@@ -20,9 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 @RestController
@@ -239,6 +237,10 @@ public class ChangeTechnologyVoice implements HttpAction {
                 }
                 oltProps.put("OperationalState", "Available");
                 olt.setProperties(oltProps);
+                if(rfsOpt.isPresent())
+                {
+                    olt.setUsingService(new HashSet<>(List.of(rfsOpt.get())));
+                }
                 logicalDeviceRepo.save(olt);
                 log.error("------------Test Trace # 25--------------- OLT updated and saved: " + olt.getLocalName());
             } else {
@@ -294,6 +296,7 @@ public class ChangeTechnologyVoice implements HttpAction {
                 // attach RFS (if present)
                 if (rfsOpt.isPresent()) {
                     // store reference name in properties for downstream consumers
+                    ontDevice.setUsingService(new HashSet<>(List.of(rfsOpt.get())));
                     ontDevice.getProperties().put("linkedRFS", rfsOpt.get().getDiscoveredName());
                 }
                 logicalDeviceRepo.save(ontDevice);
