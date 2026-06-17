@@ -30,11 +30,16 @@ public class DeleteIPTV implements HttpAction {
     protected static final String ACTION_LABEL = Constants.DELETE_IPTV;
     private static final String ERROR_PREFIX = "UIV action DeleteIPTV execution failed - ";
 
-    @Autowired private CustomerCustomRepository customerRepository;
-    @Autowired private SubscriptionCustomRepository subscriptionRepository;
-    @Autowired private ProductCustomRepository productRepository;
-    @Autowired private ServiceCustomRepository serviceCustomRepository;
-    @Autowired private LogicalDeviceCustomRepository deviceRepository;
+    @Autowired
+    private CustomerCustomRepository customerRepository;
+    @Autowired
+    private SubscriptionCustomRepository subscriptionRepository;
+    @Autowired
+    private ProductCustomRepository productRepository;
+    @Autowired
+    private ServiceCustomRepository serviceCustomRepository;
+    @Autowired
+    private LogicalDeviceCustomRepository deviceRepository;
 
     @Override
     public Class getActionClass() {
@@ -54,7 +59,7 @@ public class DeleteIPTV implements HttpAction {
 
         try {
             // Step 1: Validate mandatory parameters
-            try{
+            try {
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_STARTED);
                 Validations.validateMandatoryParams(subscriberName, "subscriberName");
                 Validations.validateMandatoryParams(productType, "productType");
@@ -63,23 +68,23 @@ public class DeleteIPTV implements HttpAction {
                 Validations.validateMandatoryParams(ontSN, "ontSN");
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
 
-            }catch (BadRequestException bre) {
+            } catch (BadRequestException bre) {
                 return ResponseEntity.status(400).body(new DeleteIPTVResponse("400", ERROR_PREFIX + "Missing mandatory parameter : " + bre.getMessage(),
-                        DateTimeUtil.now(), "",""));
+                        DateTimeUtil.now(), "", ""));
             }
             // Step 2: Prepare entity names
-            String subscriptionName = subscriberName + Constants.UNDER_SCORE  + serviceId;
-            String productName = subscriberName+ Constants.UNDER_SCORE + productSubtype+Constants.UNDER_SCORE + serviceId;
+            String subscriptionName = subscriberName + Constants.UNDER_SCORE + serviceId;
+            String productName = subscriberName + Constants.UNDER_SCORE + productSubtype + Constants.UNDER_SCORE + serviceId;
             String cfsName = "CFS" + Constants.UNDER_SCORE + subscriptionName;
             String rfsName = "RFS" + Constants.UNDER_SCORE + subscriptionName;
-            String ontName ="ONT" + ontSN;
+            String ontName = "ONT" + ontSN;
 
             if (ontName.length() > 100) {
                 return ResponseEntity.status(400).body(errorResponse("400", ERROR_PREFIX + "ONT name too long"));
             }
 
             if (subscriptionName.length() > 100) {
-                return  ResponseEntity.status(400).body(errorResponse("400", ERROR_PREFIX + "Subscription name too long"));
+                return ResponseEntity.status(400).body(errorResponse("400", ERROR_PREFIX + "Subscription name too long"));
             }
 
             if (productName.length() > 100) {
@@ -100,7 +105,7 @@ public class DeleteIPTV implements HttpAction {
 
 
             LogicalDevice olt = optOnt
-                    .map(ont -> (LogicalDevice)ont.getUsedResource().stream().findFirst().orElse(null))
+                    .map(ont -> (LogicalDevice) ont.getUsedResource().stream().findFirst().orElse(null))
                     .orElse(null);
 
 
@@ -120,12 +125,13 @@ public class DeleteIPTV implements HttpAction {
                     if (res.getDiscoveredName().startsWith("STB") || res.getDiscoveredName().startsWith("AP")) {
                         try {
                             deviceRepository.findByDiscoveredName(res.getDiscoveredName()).ifPresent(dev -> {
-                                if(dev.getDiscoveredName().startsWith("STB"))
-                                dev.getProperties().put("deviceGroupId", "");
+                                if (dev.getDiscoveredName().startsWith("STB"))
+                                    dev.getProperties().put("deviceGroupId", "");
                                 dev.getProperties().put("AdministrativeState", "Available");
                                 deviceRepository.save(dev);
                             });
-                        } catch (Exception ignored) {}
+                        } catch (Exception ignored) {
+                        }
                     }
                 });
             }
@@ -141,19 +147,11 @@ public class DeleteIPTV implements HttpAction {
 
                 // Only proceed if OLT exists
                 if (olt != null) {
-
+                    olt=deviceRepository.findByDiscoveredName(olt.getDiscoveredName()).get();
                     // Check if ANY RFS is associated with this OLT
-                    List<Service> allServices = serviceCustomRepository.findByKind(Constants.SETAR_KIND_SETAR_RFS);
+                    Set<Service> rfs =  olt.getUsingService();
 
-                    boolean oltHasAssociatedRfs = allServices.stream()
-                            .filter(s -> s.getDiscoveredName().startsWith("RFS") ||
-                                    s.getDiscoveredName().startsWith("RFS_"))
-                            .anyMatch(s ->
-                                    s.getUsedResource().stream()
-                                            .anyMatch(res ->
-                                                    res.getDiscoveredName()
-                                                            .equalsIgnoreCase(olt.getDiscoveredName()))
-                            );
+                    boolean oltHasAssociatedRfs = !rfs.isEmpty();
 
                     // === Required Business Logic ===
                     if (!oltHasAssociatedRfs) {
@@ -176,7 +174,7 @@ public class DeleteIPTV implements HttpAction {
             // Step 8: Conditional deletion of Subscriber & Subscription
             if (optCust.isPresent() && optSub.isPresent()) {
                 Customer cust = optCust.get();
-                Set<Subscription> subscriptions= cust.getSubscription();
+                Set<Subscription> subscriptions = cust.getSubscription();
                 if (subscriptions.size() <= 1) {
                     subscriptionRepository.delete(optSub.get());
                     customerRepository.delete(cust);
@@ -198,6 +196,6 @@ public class DeleteIPTV implements HttpAction {
     }
 
     private DeleteIPTVResponse successResponse(String subscriptionId, String ontName, String message) {
-        return ResponseEntity.status(200).body(new DeleteIPTVResponse("200", message, DateTimeUtil.now(), subscriptionId,ontName)).getBody();
+        return ResponseEntity.status(200).body(new DeleteIPTVResponse("200", message, DateTimeUtil.now(), subscriptionId, ontName)).getBody();
     }
 }
