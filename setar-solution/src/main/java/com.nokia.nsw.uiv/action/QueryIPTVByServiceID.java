@@ -72,7 +72,9 @@ public class QueryIPTVByServiceID implements HttpAction {
 
             // 2. Identify target CFS names
             Set<String> matchingCfsNames = new TreeSet<>();
-            List<Service> cfsServices=serviceCustomRepository.findByKind(Constants.SETAR_KIND_SETAR_CFS);
+            List<Service> cfsServices=serviceCustomRepository.findByDiscoveredNameContainingAndKindIgnoreCase(
+                    serviceId,
+                    Constants.SETAR_KIND_SETAR_CFS);
             for (Service cfs : cfsServices) {
                 String cfsName = cfs.getDiscoveredName();
                 if (cfsName == null) continue;
