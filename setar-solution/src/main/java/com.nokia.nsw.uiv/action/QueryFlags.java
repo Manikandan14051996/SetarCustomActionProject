@@ -1341,6 +1341,7 @@ public class QueryFlags implements HttpAction {
 
                                 if ("WIFI Maintenance".equalsIgnoreCase(safeString(subMProps.get("serviceSubType")))) {
                                     wifiMaintSet.add(subM.getDiscoveredName());
+                                    setarsubset.add(safeString(subMProps.get("serviceSubType")));
                                 }
                             }
 

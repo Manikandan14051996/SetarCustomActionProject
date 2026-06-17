@@ -109,8 +109,9 @@ public class QueryCPEDevice implements HttpAction {
 //                String portName = request.getResourceSN() + Constants.UNDER_SCORE+ "ETH_" + portNumber;
 
                 long vlanCount = lanRepository.countByDiscoveredNameContaining(portName);
+                vlanCount+=  lanRepository.countVlanByPortNumber(String.valueOf(portNumber));
 
-                String dataPortStatus = vlanCount < 7 ? "Available" : "Allocated";
+                String dataPortStatus = vlanCount <= 7 ? "Available" : "Allocated";
                 response.setDataPortStatus(portNumber, dataPortStatus);
             }
         }
