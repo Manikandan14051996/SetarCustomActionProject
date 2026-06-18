@@ -231,11 +231,11 @@ public class ChangeTechnologyVoice implements HttpAction {
                 }
                 // Set pots template based on requested port
                 if ("1".equals(req.getOntPort())) {
-                    oltProps.put("potsTemplate1", req.getTemplateNamePots1());
+                    oltProps.put("voipPots1Template", req.getTemplateNamePots1());
                 } else {
-                    oltProps.put("potsTemplate2", req.getTemplateNamePots2());
+                    oltProps.put("voipPots2Template", req.getTemplateNamePots2());
                 }
-                oltProps.put("OperationalState", "Available");
+//                oltProps.put("OperationalState", "Available");
                 olt.setProperties(oltProps);
                 if(rfsOpt.isPresent())
                 {
@@ -289,7 +289,7 @@ public class ChangeTechnologyVoice implements HttpAction {
                 } else {
                     ontProps.put("potsPort2Number", req.getServiceId());
                 }
-                ontProps.put("OperationalState", "Available");
+//                ontProps.put("OperationalState", "Available");
                 // set other ONT attributes if needed
                 ontDevice.setProperties(ontProps);
 
