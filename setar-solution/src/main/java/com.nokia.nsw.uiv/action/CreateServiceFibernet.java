@@ -204,7 +204,7 @@ public class CreateServiceFibernet implements HttpAction {
                 product.setContext(Constants.SETAR);
                 Map<String, Object> prodProps = new HashMap<>();
                 prodProps.put("productType", request.getProductType());
-                prodProps.put("productSubtype", request.getProductSubtype());
+//                prodProps.put("productSubtype", request.getProductSubtype());
                 prodProps.put("productStatus", "Active");
                 prodProps.put("createdBy",
                         request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
@@ -382,7 +382,7 @@ public class CreateServiceFibernet implements HttpAction {
                     Map<String, Object> vlanProps = new HashMap<>();
                     vlanProps.put("vlanId", request.getVlanID());
                     vlanProps.put("OperationalState", "Active");
-                    vlanProps.put("serviceId", request.getServiceID());
+//                    vlanProps.put("serviceId", request.getServiceID());
                     vlanProps.put("createdBy",
                             request.getCreatedBy() != null && !request.getCreatedBy().isEmpty()
                                     ? request.getCreatedBy()
