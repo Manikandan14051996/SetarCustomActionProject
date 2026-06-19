@@ -128,7 +128,7 @@ public class CreateProductSubscription implements HttpAction {
                 subscription.setKind("SetarSubscription");
                 subscription.setContext(Constants.SETAR);
                 Map<String, Object> props = new HashMap<>();
-                props.put("name", subscriptionName);
+//                props.put("name", subscriptionName);
                 props.put("subscriptionStatus", "Active");
                 props.put("serviceID", request.getServiceID());
                 props.put("createdBy",
@@ -162,7 +162,7 @@ public class CreateProductSubscription implements HttpAction {
                 product.setKind("SetarProduct");
                 product.setContext(Constants.SETAR);
                 Map<String, Object> props = new HashMap<>();
-                props.put("name", productName);
+//                props.put("name", productName);
                 props.put("productStatus", "Active");
                 props.put("productType", request.getProductType());
                 props.put("productId", request.getReferenceID());
@@ -180,7 +180,7 @@ public class CreateProductSubscription implements HttpAction {
                 log.error("Created new product: {}", productName);
             }
             if (isSubscriberExist.get() && isSubscriptionExist.get() && isProductExist.get()) {
-                log.error("createServiceEVPN service already exist");
+                log.error("CreateProductSubscription service already exist");
                 return ResponseEntity.status(409).body(new CreateProductSubscriptionResponse("409", "Service already exist/Duplicate entry", DateTimeUtil.now(), subscriptionName, productName));
             }
             if(isSubscriptionExist.get()){
