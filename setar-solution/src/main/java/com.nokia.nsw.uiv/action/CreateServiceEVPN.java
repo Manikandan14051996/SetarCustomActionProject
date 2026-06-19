@@ -694,7 +694,11 @@ public class CreateServiceEVPN implements HttpAction {
                                 singleVlan.setProperties(svProps);
                                 vlanRepo.save(singleVlan);
                                 ont = logicalDeviceRepo.findByDiscoveredName(ont.getDiscoveredName()).get();
-                                ont.setContained(new HashSet<>(List.of(singleVlan)));
+                                if (ont.getContained() == null) {
+                                    ont.setContained(new HashSet<>());
+                                }
+
+                                ont.getContained().add(singleVlan);
                                 logicalDeviceRepo.save(ont);
                                 break;
                             }
