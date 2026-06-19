@@ -269,7 +269,7 @@ public class ModifySPR implements HttpAction {
                     tempNumberOnt2 = "empty";
                 }
                 if (tempNumberOnt2.equals(request.getServiceId())) {
-                    subProps.put("voipNumber1", request.getModifyParam1());
+                    subProps.put("voipNumber2", request.getModifyParam1());
                     ont.getProperties().put("potsPort2Number", request.getModifyParam1());
                 } else {
                     subProps.put("voipNumber1", request.getModifyParam1());
