@@ -312,6 +312,7 @@ public class ChangeTechnologyVoice implements HttpAction {
             if (cbmDeviceOpt.isPresent()) {
                 LogicalDevice cbmDevice = cbmDeviceOpt.get();
                 // clear RFS association (store null or remove prop)
+                cbmDevice.setUsingService(null);
                 Map<String, Object> cbmProps = cbmDevice.getProperties() == null ? new HashMap<>() : new HashMap<>(cbmDevice.getProperties());
                 cbmProps.put("AdministrativeState", "Available");
                 cbmProps.put("OperationalState", "Available");
