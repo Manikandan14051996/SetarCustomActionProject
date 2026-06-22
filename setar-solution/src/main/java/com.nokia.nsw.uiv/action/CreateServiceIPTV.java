@@ -395,8 +395,8 @@ public class CreateServiceIPTV implements HttpAction {
             oltProp.put("igmpTemplate", request.getTemplateNameIGMP());
             oltDevice.setUsingService(new HashSet<>(List.of(rfs)));
             oltDevice.setProperties(oltProp);
-            logicalDeviceRepository.save(oltDevice);
             logicalDeviceRepository.save(ontDevice);
+            logicalDeviceRepository.save(oltDevice);
 
 
             log.error(Constants.ACTION_COMPLETED);
