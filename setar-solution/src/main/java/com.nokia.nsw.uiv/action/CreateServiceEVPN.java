@@ -557,7 +557,11 @@ public class CreateServiceEVPN implements HttpAction {
                         vlanRepo.save(v, 2);
                         if (usedStandardEvpn) {
                             ont = logicalDeviceRepo.findByDiscoveredName(ont.getDiscoveredName()).get();
-                            ont.setContained(new HashSet<>(List.of(v)));
+                            if (ont.getContained() == null) {
+                                ont.setContained(new HashSet<>());
+                            }
+
+                            ont.getContained().add(v);
                             logicalDeviceRepo.save(ont);
                         }
                         serviceVlan = v;
