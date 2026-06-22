@@ -95,7 +95,7 @@ public class CreateProductSubscription implements HttpAction {
                 subscriber.setKind("SetarSubscriber");
                 subscriber.setContext(Constants.SETAR);
                 Map<String, Object> props = new HashMap<>();
-                props.put("name", subscriberName);
+//                props.put("name", subscriberName);
                 props.put("subscriberStatus", "Active");
                 props.put("subscriberType", "Regular");
                 props.put("createdBy",
