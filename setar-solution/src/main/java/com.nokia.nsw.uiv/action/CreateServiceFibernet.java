@@ -339,7 +339,11 @@ public class CreateServiceFibernet implements HttpAction {
                 if (request.getTemplateNameONT() != null) ontProps.put("ontTemplate", request.getTemplateNameONT());
                 if (request.getMenm() != null) ontProps.put("description", request.getMenm());
                 if (request.getVlanID() != null) ontProps.put("mgmtVlan", request.getVlanID());
-                ontDevice.setUsingService(new HashSet<>(List.of(rfs)));
+                if(ontDevice.getUsingService()==null)
+                {
+                    ontDevice.setUsingService(new HashSet<>());
+                }
+                ontDevice.getUsingService().add(rfs);
                 ontDevice.setProperties(ontProps);
                 logicalDeviceRepository.save(ontDevice, 2);
                 log.error("Found existing ONT: {}", ontName);
@@ -423,9 +427,22 @@ public class CreateServiceFibernet implements HttpAction {
                 ontDevice.getProperties().put("oltPosition", request.getOltName());
                 if (request.getTemplateNameONT() != null)
                     ontDevice.getProperties().put("ontTemplate", request.getTemplateNameONT());
-                ontDevice.setUsingService(new HashSet<>(List.of(rfs)));
-                ontDevice.setUsedResource(new HashSet<>(List.of(oltDevice)));
-                oltDevice.setUsingService(new HashSet<>(List.of(rfs)));
+
+                if(ontDevice.getUsingService()==null)
+                {
+                    ontDevice.setUsingService(new HashSet<>());
+                }
+                if (ontDevice.getUsedResource() == null) {
+                    ontDevice.setUsedResource(new HashSet<>());
+                }
+                if(oltDevice.getUsingService()==null)
+                {
+                    oltDevice.setUsingService(new HashSet<>());
+                }
+                ontDevice.getUsingService().add(rfs);
+                ontDevice.getUsedResource().add(oltDevice);
+                oltDevice.getUsingService().add(rfs);
+
                 logicalDeviceRepository.save(ontDevice, 3);
                 logicalDeviceRepository.save(oltDevice, 3);
             }
