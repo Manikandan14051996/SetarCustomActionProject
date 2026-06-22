@@ -52,7 +52,7 @@ public class UpdateVOIPService implements HttpAction {
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_STARTED);
                 Validations.validateMandatoryParams(req.getSubscriberName(), "subscriberName");
                 Validations.validateMandatoryParams(req.getOntSN(), "ontSN");
-                Validations.validateMandatoryParams(req.getSimaSubsId(), "simaSubsId");
+                Validations.validateMandatoryParams(req.getServiceId(), "serviceId");
                 log.error(Constants.MANDATORY_PARAMS_VALIDATION_COMPLETED);
             } catch (BadRequestException bre) {
                 return ResponseEntity.status(400).body(new UpdateVOIPServiceResponse(

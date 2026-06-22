@@ -77,14 +77,14 @@ public class QueryResource implements HttpAction {
             String devDesc = Objects.toString(props.get("description"), "");
 
 
-            String devGroupID = "NA";
+            String devGroupID = "";
             String devSubTYPE = "";
 
             // Step 3b: Handle subtype/groupID for AP/STB
             if ("AP".equalsIgnoreCase(resourceType)) {
                 devSubTYPE = "Not Applicable";
             } else if ("STB".equalsIgnoreCase(resourceType)) {
-                devGroupID = (String) device.getProperties().getOrDefault("deviceGroupId", "NA");
+                devGroupID = (String) device.getProperties().getOrDefault("deviceGroupId", "");
                 devSubTYPE = (String) device.getProperties().getOrDefault("modelSubType", "");
             }
             log.error(Constants.ACTION_COMPLETED);
