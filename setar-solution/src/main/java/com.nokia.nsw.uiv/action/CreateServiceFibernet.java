@@ -339,11 +339,6 @@ public class CreateServiceFibernet implements HttpAction {
                 if (request.getTemplateNameONT() != null) ontProps.put("ontTemplate", request.getTemplateNameONT());
                 if (request.getMenm() != null) ontProps.put("description", request.getMenm());
                 if (request.getVlanID() != null) ontProps.put("mgmtVlan", request.getVlanID());
-                if(ontDevice.getUsingService()==null)
-                {
-                    ontDevice.setUsingService(new HashSet<>());
-                }
-                ontDevice.getUsingService().add(rfs);
                 ontDevice.setProperties(ontProps);
                 logicalDeviceRepository.save(ontDevice, 2);
                 log.error("Found existing ONT: {}", ontName);
@@ -442,9 +437,9 @@ public class CreateServiceFibernet implements HttpAction {
                 ontDevice.getUsingService().add(rfs);
                 ontDevice.getUsedResource().add(oltDevice);
                 oltDevice.getUsingService().add(rfs);
-
-                logicalDeviceRepository.save(ontDevice, 3);
                 logicalDeviceRepository.save(oltDevice, 3);
+                logicalDeviceRepository.save(ontDevice, 3);
+
             }
 
             log.error(Constants.ACTION_COMPLETED);
