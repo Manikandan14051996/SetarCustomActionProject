@@ -805,7 +805,7 @@ public class QueryFlags implements HttpAction {
         }
 
 
-        if (equalsAnyIgnoreCase(actionType, "AccountTransfer", "Modify_CPE", "ChangeTechnology", "Unconfigure", "MoveOut")) {
+        if (actionType.equals("AccountTransfer") || actionType.contains("Modify_CPE") || actionType.equals("ChangeTechnology") || actionType.equals("Unconfigure") || actionType.equals("MoveOut")) {
             List<String> iptvIds = new ArrayList<>();
 
             if ("ONT".equalsIgnoreCase(serviceLink)) {
