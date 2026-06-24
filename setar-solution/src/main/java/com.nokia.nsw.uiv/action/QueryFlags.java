@@ -102,10 +102,11 @@ public class QueryFlags implements HttpAction {
         String templateNameOnt = "New";
         String templateNameCard = "";
         String templateNamePort = "";
-        String templateNamePort2 = "";
-        String templateNamePort3 = "";
-        String templateNamePort4 = "";
-        String templateNamePort5 = "";
+
+        String templateNamePort2 = "New";
+        String templateNamePort3 = "New";
+        String templateNamePort4 = "New";
+        String templateNamePort5 = "New";
         String templateNameVeip = "";
         String templateNameVoip = "";
         String templateNamePots1 = "";
@@ -1676,10 +1677,10 @@ public class QueryFlags implements HttpAction {
         flags.putIfAbsent("CBM_MAC", cbmmac);
         flags.putIfAbsent("ONT_MODEL", ontModel);
         flags.putIfAbsent("OLT_POSITION", oltPosition);
-        flags.putIfAbsent("SERVICE_PORT2_EXIST", templateNamePort2);
-        flags.putIfAbsent("SERVICE_PORT3_EXIST", templateNamePort3);
-        flags.putIfAbsent("SERVICE_PORT4_EXIST", templateNamePort4);
-        flags.putIfAbsent("SERVICE_PORT5_EXIST", templateNamePort5);
+        flags.put("SERVICE_PORT2_EXIST", templateNamePort2);
+        flags.put("SERVICE_PORT3_EXIST", templateNamePort3);
+        flags.put("SERVICE_PORT4_EXIST", templateNamePort4);
+        flags.put("SERVICE_PORT5_EXIST", templateNamePort5);
 //        putIfNotBlank(flags, "SERVICE_PORT2_EXIST", templateNamePort2);
 //        putIfNotBlank(flags, "SERVICE_PORT3_EXIST", templateNamePort3);
 //        putIfNotBlank(flags, "SERVICE_PORT4_EXIST", templateNamePort4);
