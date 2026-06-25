@@ -182,6 +182,13 @@ public class ModifyCBM implements HttpAction {
                     String subscriberWithMAC = input.getSubscriberName() + Constants.UNDER_SCORE + sanitizeForName(input.getResourceSN());
                     Optional<Customer> optSubscriberWithMac = customerCustomRepository.findByDiscoveredName(subscriberWithMAC);
                     Optional<Customer> subscriberWithMac = optSubscriberWithMac;
+                    Set<Subscription> subscriptionList=new HashSet<>();
+                    if(optSubscriberWithMac.isPresent())
+                    {
+                        Customer subs=optSubscriberWithMac.get();
+                        subscriptionList=subs.getSubscription();
+                        log.error("No of Subscription {}" + subscriptionList.size());
+                    }
 
                     // CBM for modifyParam1 if present
                     LogicalDevice cbmForParam1 = null;
@@ -193,125 +200,129 @@ public class ModifyCBM implements HttpAction {
                             cbmModelInput = cbmForParam1.getProperties().get("deviceModel").toString();
                         }
                     }
+                    for(Subscription subs:subscriptionList) {
+                        try {
+                            Map<String, Object> subProps = subscription.getProperties() == null ? new HashMap<>() : subscription.getProperties();
+                            subscription = subscriptionRepository.findByDiscoveredName(subs.getDiscoveredName()).get();
+                            String svcMac = subProps.get("serviceMAC") != null ? subProps.get("serviceMAC").toString() : "";
 
-                    try {
-                        Map<String, Object> subProps = subscription.getProperties() == null ? new HashMap<>() : subscription.getProperties();
-                        subscription=subscriptionRepository.findByDiscoveredName(subscription.getDiscoveredName()).get();
-                        String svcMac = subProps.get("serviceMAC") != null ? subProps.get("serviceMAC").toString() : "";
-
-                        // when serviceMAC equals input.resourceSN -> update the "current" CBM
-                        if (svcMac != null && svcMac.equalsIgnoreCase(input.getResourceSN())) {
-                            String subType = subProps.get("serviceSubType") != null ? subProps.get("serviceSubType").toString() : "";
-                            if ("IPTV".equalsIgnoreCase(subType)) {
-                                // IPTV special-case
-                                if (modifyParam1 != null && !modifyParam1.isEmpty()) {
-                                    subProps.put("serviceMAC", modifyParam1);
-                                    cbmDevice.getProperties().put("macAddress", modifyParam1);
-                                    if (cbmModelInput != null)
-                                        cbmDevice.getProperties().put("deviceModel", cbmModelInput);
-                                }
-                                if (modifyParam2 != null && !modifyParam2.isEmpty()) {
-                                    subProps.put("gatewayMAC", modifyParam2);
-                                    cbmDevice.getProperties().put("gatewayMAC", modifyParam2);
-                                }
-                                subscription.setProperties(subProps);
-                                subscriptionRepository.save(subscription,0);
-                            } else {
-                                // serviceMAC mismatch: try to find CBM by serviceID (from subscription) and update that device
-                                String serviceID = (String) subscription.getProperties().getOrDefault("serviceID", "");
-                                String newCBMName = "CBM" + serviceID;
-                                Optional<LogicalDevice> optNewCbm = logicalDeviceRepository.findByDiscoveredName(newCBMName);
-                                Map<String, Object> dProps = Optional.ofNullable(subscription.getProperties()).map(HashMap::new).orElse(new HashMap<>());
-                                if (optNewCbm.isPresent()) {
-                                    LogicalDevice newCBM = optNewCbm.get();
-                                    Map<String, Object> sProps = Optional.ofNullable(subscription.getProperties()).map(HashMap::new).orElse(new HashMap<>());
+                            // when serviceMAC equals input.resourceSN -> update the "current" CBM
+                            if (svcMac != null && svcMac.equalsIgnoreCase(input.getResourceSN())) {
+                                String subType = subProps.get("serviceSubType") != null ? subProps.get("serviceSubType").toString() : "";
+                                if ("IPTV".equalsIgnoreCase(subType)) {
+                                    // IPTV special-case
                                     if (modifyParam1 != null && !modifyParam1.isEmpty()) {
-                                        sProps.put("serviceMAC", modifyParam1);
-                                        dProps.put("macAddress", modifyParam1);
-                                        if (cbmModelInput != null) dProps.put("deviceModel", cbmModelInput);
+                                        subProps.put("serviceMAC", modifyParam1);
+                                        cbmDevice.getProperties().put("macAddress", modifyParam1);
+                                        if (cbmModelInput != null)
+                                            cbmDevice.getProperties().put("deviceModel", cbmModelInput);
                                     }
                                     if (modifyParam2 != null && !modifyParam2.isEmpty()) {
-                                        sProps.put("gatewayMAC", modifyParam2);
-                                        dProps.put("gatewayMAC", modifyParam2);
+                                        subProps.put("gatewayMAC", modifyParam2);
+                                        cbmDevice.getProperties().put("gatewayMAC", modifyParam2);
                                     }
-                                    // Voice subtype handling
-                                    String sType = (String) sProps.getOrDefault("serviceSubType", "");
-                                    if ("Voice".equalsIgnoreCase(sType) && modifyParam1 != null && !modifyParam1.isEmpty()) {
-                                        sProps.put("serviceSN", modifyParam1);
-                                    }
-                                    subscription.setProperties(sProps);
-                                    subscriptionRepository.save(subscription,0);
-                                    newCBM = logicalDeviceRepository.findByDiscoveredName(cbmDeviceName).get();
-                                    newCBM.setProperties(dProps);
-                                    logicalDeviceRepository.save(newCBM,0);
-
-                                    // update subscriber name replace resourceSN with modifyParam1
-                                    if (modifyParam1 != null && !modifyParam1.isEmpty() && subscriber.isPresent()) {
-                                        Customer customer = subscriber.get();
-                                        Customer subscriberObj = customerCustomRepository.findByDiscoveredName(customer.getDiscoveredName()).get();
-                                        String newSubscriberName = customer.getDiscoveredName().replace(input.getResourceSN().replaceAll(":", ""), input.getModifyParam1().replaceAll(":", ""));
-                                        subscriberObj.setDiscoveredName(newSubscriberName);
-                                        Map<String, Object> custProps = Optional.ofNullable(subscriberObj.getProperties()).map(HashMap::new).orElse(new HashMap<>());
-                                        custProps.put("name", newSubscriberName);
-                                        subscriberObj.setProperties(custProps);
-                                        customerCustomRepository.save(subscriberObj,0);
-                                    }
+                                    subscription.setProperties(subProps);
+                                    subscriptionRepository.save(subscription, 0);
                                 } else {
-                                    // no matching CBM found by serviceID - nothing to change
-                                    log.error("no matching CBM found by serviceID - nothing to change");
+                                    // serviceMAC mismatch: try to find CBM by serviceID (from subscription) and update that device
+                                    String serviceID = (String) subscription.getProperties().getOrDefault("serviceID", "");
+                                    String newCBMName = "CBM" + serviceID;
+                                    Optional<LogicalDevice> optNewCbm = logicalDeviceRepository.findByDiscoveredName(newCBMName);
+                                    Map<String, Object> dProps = Optional.ofNullable(subscription.getProperties()).map(HashMap::new).orElse(new HashMap<>());
+                                    if (optNewCbm.isPresent()) {
+                                        LogicalDevice newCBM = optNewCbm.get();
+                                        Map<String, Object> sProps = Optional.ofNullable(subscription.getProperties()).map(HashMap::new).orElse(new HashMap<>());
+                                        if (modifyParam1 != null && !modifyParam1.isEmpty()) {
+                                            sProps.put("serviceMAC", modifyParam1);
+                                            dProps.put("macAddress", modifyParam1);
+                                            if (cbmModelInput != null) dProps.put("deviceModel", cbmModelInput);
+                                        }
+                                        if (modifyParam2 != null && !modifyParam2.isEmpty()) {
+                                            sProps.put("gatewayMAC", modifyParam2);
+                                            dProps.put("gatewayMAC", modifyParam2);
+                                        }
+                                        // Voice subtype handling
+                                        String sType = (String) sProps.getOrDefault("serviceSubType", "");
+                                        if ("Voice".equalsIgnoreCase(sType) && modifyParam1 != null && !modifyParam1.isEmpty()) {
+                                            sProps.put("serviceSN", modifyParam1);
+                                        }
+                                        subscription.setProperties(sProps);
+                                        subscriptionRepository.save(subscription, 0);
+                                        newCBM = logicalDeviceRepository.findByDiscoveredName(cbmDeviceName).get();
+                                        newCBM.setProperties(dProps);
+                                        logicalDeviceRepository.save(newCBM, 0);
+
+                                        // update subscriber name replace resourceSN with modifyParam1
+                                        if (modifyParam1 != null && !modifyParam1.isEmpty() && subscriber.isPresent()) {
+                                            String discName = subscriber
+                                                    .flatMap(c -> customerCustomRepository.findById(c.getUuid()))
+                                                    .map(c -> c.getDiscoveredName().toString())
+                                                    .orElse(input.getSubscriberName());
+                                            Customer subscriberObj = customerCustomRepository.findByDiscoveredName(discName).get();
+                                            String newSubscriberName = subscriberObj.getDiscoveredName().replace(input.getResourceSN().replaceAll(":", ""), input.getModifyParam1().replaceAll(":", ""));
+                                            subscriberObj.setDiscoveredName(newSubscriberName);
+                                            customerCustomRepository.save(subscriberObj, 0);
+                                        }
+                                    } else {
+                                        // no matching CBM found by serviceID - nothing to change
+                                        log.error("no matching CBM found by serviceID - nothing to change");
+                                    }
                                 }
                             }
+                        } catch (Exception ex) {
+                            log.error("Error updating MAC/Gateway", ex);
+                            String msg = ERROR_PREFIX + "Error, ModifyCableModem request " + input.getModifyType() + " not executed";
+                            return ResponseEntity.status(500).body(new ModifyCBMResponse("500", msg + " - " + ex.getMessage(), DateTimeUtil.now(), "", ""));
                         }
-                    } catch (Exception ex) {
-                        log.error("Error updating MAC/Gateway", ex);
-                        String msg = ERROR_PREFIX + "Error, ModifyCableModem request " + input.getModifyType() + " not executed";
-                        return ResponseEntity.status(500).body(new ModifyCBMResponse("500", msg + " - " + ex.getMessage(), DateTimeUtil.now(), "", ""));
                     }
-                }
 
-                //Migrate Broadband Port Assignments
-                if ("Broadband".equalsIgnoreCase(input.getProductType()) && modifyParam1 != null && !modifyParam1.isEmpty()) {
-                    try {
-                        String oldCbmName = "CBM_" + sanitizeForName(input.getResourceSN());
-                        String newCbmName = "CBM_" + sanitizeForName(modifyParam1);
 
-                        Optional<LogicalDevice> optOldCbm = logicalDeviceRepository.findByDiscoveredName(oldCbmName);
-                        Optional<LogicalDevice> optNewCbm = logicalDeviceRepository.findByDiscoveredName(newCbmName);
+                    //Migrate Broadband Port Assignments
+                    if ("Broadband".equalsIgnoreCase(input.getProductType()) && modifyParam1 != null && !modifyParam1.isEmpty()) {
+                        try {
+                            String oldCbmName = "CBM_" + input.getResourceSN();
+                            String newCbmName = "CBM_" + modifyParam1;
 
-                        if (optOldCbm.isPresent() && optNewCbm.isPresent()) {
-                            LogicalDevice oldCbm = optOldCbm.get();
-                            LogicalDevice newCbm = optNewCbm.get();
+                            Optional<LogicalDevice> optOldCbm = logicalDeviceRepository.findByDiscoveredName(oldCbmName);
+                            Optional<LogicalDevice> optNewCbm = logicalDeviceRepository.findByDiscoveredName(newCbmName);
 
-                            Map<String, Object> oldProps = Optional.ofNullable(oldCbm.getProperties()).map(HashMap::new).orElse(new HashMap<>());
-                            Map<String, Object> newProps = Optional.ofNullable(newCbm.getProperties()).map(HashMap::new).orElse(new HashMap<>());
+                            if (optOldCbm.isPresent()) {
+                                LogicalDevice oldCbm = optOldCbm.get();
+                                Map<String, Object> oldProps = Optional.ofNullable(oldCbm.getProperties()).map(HashMap::new).orElse(new HashMap<>());
+                                if(optNewCbm.isPresent())
+                                {
+                                    LogicalDevice newCbm = optNewCbm.get();
+                                    Map<String, Object> newProps = Optional.ofNullable(newCbm.getProperties()).map(HashMap::new).orElse(new HashMap<>());
+                                    // Copy VOIP_PORT1, VOIP_PORT2 if present
+                                    if (oldProps.containsKey("voipPort1")) newProps.put("voipPort1", oldProps.get("voipPort1"));
+                                    if (oldProps.containsKey("voipPort2")) newProps.put("voipPort2", oldProps.get("voipPort2"));
 
-                            // Copy VOIP_PORT1, VOIP_PORT2 if present
-                            if (oldProps.containsKey("voipPort1")) newProps.put("voipPort1", oldProps.get("voipPort1"));
-                            if (oldProps.containsKey("voipPort2")) newProps.put("voipPort2", oldProps.get("voipPort2"));
+                                    // Set new CBM fields
+                                    newProps.put("AdministrativeState", "Allocated");
+                                    newProps.put("description", "Internet");
+                                    newProps.put("modelSubtype", "HFC");
+                                    String voip1 = (String) newProps.getOrDefault("voipPort1", "Available");
+                                    String voip2 = (String) newProps.getOrDefault("voipPort2", "Available");
+                                    newProps.put("voipPort1", voip1);
+                                    newProps.put("voipPort2", voip2);
 
-                            // Set new CBM fields
-                            newProps.put("AdministrativeState", "Allocated");
-                            newProps.put("description", "Internet");
-                            newProps.put("modelSubtype", "HFC");
-                            String voip1 = (String) newProps.getOrDefault("voipPort1", "Available");
-                            String voip2 = (String) newProps.getOrDefault("voipPort2", "Available");
-                            newProps.put("voipPorts", voip1 + "," + voip2);
-
-                            newCbm.setProperties(newProps);
-                            logicalDeviceRepository.save(newCbm,0);
-
-                            // Reset old CBM
-                            oldProps.put("AdministrativeState", "Available");
-                            oldProps.put("description", "");
-                            oldProps.put("modelSubtype", "");
-                            oldProps.put("voipPorts", "Available");
-                            oldCbm.setProperties(oldProps);
-                            logicalDeviceRepository.save(oldCbm,0);
+                                    newCbm.setProperties(newProps);
+                                    logicalDeviceRepository.save(newCbm,0);
+                                }
+                                // Reset old CBM
+                                oldProps.put("AdministrativeState", "Available");
+                                oldProps.put("description", "");
+                                oldProps.put("modelSubtype", "");
+                                oldProps.put("voipPort1", "Available");
+                                oldProps.put("voipPort2", "Available");
+                                oldCbm.setProperties(oldProps);
+                                logicalDeviceRepository.save(oldCbm,0);
+                            }
+                        } catch (Exception ex) {
+                            log.error("Error migrating broadband ports", ex);
+                            String msg = ERROR_PREFIX + "Error while migrating broadband ports";
+                            return ResponseEntity.status(500).body(new ModifyCBMResponse("500", msg + " - " + ex.getMessage(), DateTimeUtil.now(), "", ""));
                         }
-                    } catch (Exception ex) {
-                        log.error("Error migrating broadband ports", ex);
-                        String msg = ERROR_PREFIX + "Error while migrating broadband ports";
-                        return ResponseEntity.status(500).body(new ModifyCBMResponse("500", msg + " - " + ex.getMessage(), DateTimeUtil.now(), "", ""));
                     }
                 }
 
