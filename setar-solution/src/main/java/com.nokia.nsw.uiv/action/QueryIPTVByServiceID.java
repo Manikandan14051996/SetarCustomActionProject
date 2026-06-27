@@ -201,6 +201,7 @@ public class QueryIPTVByServiceID implements HttpAction {
 
                     // 6. Capture service components (products under subscription)
                     try {
+                        subscription=subscriptionRepo.findByDiscoveredName(subscription.getDiscoveredName()).get();
                         Set<Service> prodSet = subscription.getService().stream().filter(ser->ser.getKind().equalsIgnoreCase(Constants.SETAR_KIND_SETAR_PRODUCT)).collect(Collectors.toSet());
                         if (prodSet != null && !prodSet.isEmpty()) {
                             for (Service prodItem : prodSet) {
