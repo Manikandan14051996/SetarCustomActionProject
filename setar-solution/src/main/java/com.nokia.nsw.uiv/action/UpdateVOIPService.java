@@ -88,7 +88,19 @@ public class UpdateVOIPService implements HttpAction {
             if (subscriberOpt.isPresent() && req.getSimaCustId() != null && !req.getSimaCustId().isEmpty()) {
                 Customer subscriber = subscriberOpt.get();
                 Map<String, Object> props = subscriber.getProperties();
-                props.put("simaCustId1", req.getSimaCustId());
+                if(subscriptionOpt.isPresent())
+                {
+                    Subscription subs = subscriptionOpt.get();
+                    Map<String, Object> props1 = subs.getProperties();
+                    String voipNumber1= props1.getOrDefault("voipNumber1","").toString();
+                    if(!voipNumber1.isEmpty())
+                    {
+                        props.put("simaCustId1", req.getSimaCustId());
+                    }else {
+                        props.put("simaCustId2", req.getSimaCustId());
+                    }
+                }
+
                 subscriber.setProperties(props);
                 try {
                     customerRepo.save(subscriber);
@@ -109,17 +121,28 @@ public class UpdateVOIPService implements HttpAction {
                 subscriptionOpt = subscriptionRepo.findByDiscoveredName(subscriptionName);
                 Subscription subs = subscriptionOpt.get();
                 Map<String, Object> props = subs.getProperties();
+                String voipNumber1= props.getOrDefault("voipNumber1","").toString();
+
 
                 if (req.getSimaCustId() != null && !req.getSimaCustId().isEmpty()) {
-                    props.put("simaCustId1", req.getSimaCustId());
+                    if(!voipNumber1.isEmpty())
+                        props.put("simaCustId1", req.getSimaCustId());
+                    else
+                        props.put("simaCustId2", req.getSimaCustId());
                     updatedFlag = true;
                 }
                 if (req.getSimaSubsId() != null && !req.getSimaSubsId().isEmpty()) {
+                    if(!voipNumber1.isEmpty())
                     props.put("simaSubsId1", req.getSimaSubsId());
+                    else
+                        props.put("simaSubsId2", req.getSimaSubsId());
                     updatedFlag = true;
                 }
                 if (req.getSimaEndpointId() != null && !req.getSimaEndpointId().isEmpty()) {
+                    if(!voipNumber1.isEmpty())
                     props.put("simaEndpointId1", req.getSimaEndpointId());
+                    else
+                        props.put("simaEndpointId2", req.getSimaEndpointId());
                     updatedFlag = true;
                 }
 
