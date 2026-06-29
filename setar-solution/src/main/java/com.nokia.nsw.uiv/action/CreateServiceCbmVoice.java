@@ -228,6 +228,7 @@ public class CreateServiceCbmVoice implements HttpAction {
                             props.put("customerGroupId", request.getCustomerGroupId());
                         if (request.getSubscriberId() != null) props.put("subscriberID_CableModem", request.getSubscriberId());
                         if (request.getKenanUidNo() != null) props.put("billingId", request.getKenanUidNo());
+                        props.put("servicePackage",request.getServicePackage());
                         String voipPort = request.getVoipPort();
                         if (voipPort != null) {
                             int port = Integer.parseInt(voipPort);
@@ -239,7 +240,6 @@ public class CreateServiceCbmVoice implements HttpAction {
                                 props.put("simaSubsId1", request.getSimaSubsId());
                                 props.put("simaEndpointId1", request.getSimaEndpointId());
                                 props.put("voipServiceCode1",request.getVoipServiceCode());
-                                props.put("servicePackage",request.getServicePackage());
                             } else if (port == 2) {
                                 props.put("simaCustId2", request.getSimaCustId());
                                 props.put("voipNumber2", request.getVoipNumber1());
@@ -247,7 +247,6 @@ public class CreateServiceCbmVoice implements HttpAction {
                                 if (request.getServicePackage() != null) props.put("voipPackage2", request.getServicePackage());
                                 props.put("simaEndpointId2", request.getSimaEndpointId());
                                 props.put("voipServiceCode2",request.getVoipServiceCode());
-                                props.put("servicePackage2",request.getServicePackage());
                             }
                         }
                         props.put("createdBy",
