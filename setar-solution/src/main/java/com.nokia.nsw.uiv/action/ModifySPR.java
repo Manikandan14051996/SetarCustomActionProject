@@ -249,8 +249,14 @@ public class ModifySPR implements HttpAction {
         if (request.getModifyType().contains("Package") || request.getModifyType().contains("Product")) {
             try {
                 Map<String, Object> subProps = subscription.getProperties();
-                subProps.put("voipPackage1", request.getModifyParam1());
-                subProps.put("voipServiceCode1", request.getModifyParam2());
+                String voipNumber1= subProps.getOrDefault("voipNumber1","").toString();
+                if(!voipNumber1.isEmpty()) {
+                    subProps.put("voipPackage1", request.getModifyParam1());
+                    subProps.put("voipServiceCode1", request.getModifyParam2());
+                }else{
+                    subProps.put("voipPackage2", request.getModifyParam1());
+                    subProps.put("voipServiceCode2", request.getModifyParam2());
+                }
                 subscription.setProperties(subProps);
                 subscriptionRepository.save(subscription, 2);
                 return true;
