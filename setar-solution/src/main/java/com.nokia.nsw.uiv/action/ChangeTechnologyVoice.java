@@ -120,30 +120,51 @@ public class ChangeTechnologyVoice implements HttpAction {
                 props.put("serviceMAC", req.getOntMacAddr());
                 props.put("serviceSN", req.getOntSN());
                 props.put("serviceSubType", "Voice");
-
+                String voipNumber1= props.getOrDefault("voipNumber1","").toString();
                 // SIMA fields if provided
                 if (req.getSimaSubsId() != null && !req.getSimaSubsId().trim().isEmpty()) {
-                    props.put("simaSubsId1", req.getSimaSubsId());
+                    if(!voipNumber1.isEmpty()) {
+                        props.put("simaSubsId1", req.getSimaSubsId());
+                    }else {
+                        props.put("simaSubsId2", req.getSimaSubsId());
+                    }
                     log.error("------------Test Trace # 8--------------- Set SIMA subs id: " + req.getSimaSubsId());
                 }
                 if (req.getServiceEndpointNumber1() != null && !req.getServiceEndpointNumber1().trim().isEmpty()) {
                     // map to subscription endpoint slot 1
-                    props.put("simaEndpointId1", req.getServiceEndpointNumber1());
+                    if(!voipNumber1.isEmpty()) {
+                        props.put("simaEndpointId1", req.getServiceEndpointNumber1());
+                    }else {
+                        props.put("simaEndpointId2", req.getServiceEndpointNumber1());
+                    }
                     log.error("------------Test Trace # 9--------------- Set SIMA endpoint id 1: " + req.getServiceEndpointNumber1());
                 }
 
                 if (req.getServiceEndpointNumber2() != null && !req.getServiceEndpointNumber2().trim().isEmpty()) {
-                    props.put("simaEndpointId1", req.getServiceEndpointNumber2());
+                    if(!voipNumber1.isEmpty()) {
+                        props.put("simaEndpointId1", req.getServiceEndpointNumber2());
+                    }else{
+                        props.put("simaEndpointId2", req.getServiceEndpointNumber2());
+                    }
                     log.error("------------Test Trace # 9--------------- Set SIMA endpoint id 1: " + req.getServiceEndpointNumber1());
                 }
 
                 // VoIP package/code
                 if (req.getVoipPackage() != null && !req.getVoipPackage().trim().isEmpty()) {
-                    props.put("voipPackage1", req.getVoipPackage());
+                    if(!voipNumber1.isEmpty()) {
+                        props.put("voipPackage1", req.getVoipPackage());
+                    }
+                    else {
+                        props.put("voipPackage2", req.getVoipPackage());
+                    }
                     log.error("------------Test Trace # 10--------------- Set VoIP package: " + req.getVoipPackage());
                 }
                 if (req.getVoipServiceCode() != null && !req.getVoipServiceCode().trim().isEmpty()) {
-                    props.put("voipServiceCode1", req.getVoipServiceCode());
+                    if(!voipNumber1.isEmpty()) {
+                        props.put("voipServiceCode1", req.getVoipServiceCode());
+                    }else {
+                        props.put("voipServiceCode2", req.getVoipServiceCode());
+                    }
                     log.error("------------Test Trace # 11--------------- Set VoIP service code: " + req.getVoipServiceCode());
                 }
 

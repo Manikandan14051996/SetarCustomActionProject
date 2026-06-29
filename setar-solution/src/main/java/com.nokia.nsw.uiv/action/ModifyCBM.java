@@ -334,7 +334,12 @@ public class ModifyCBM implements HttpAction {
                         if (modifyParam1 != null && !modifyParam1.isEmpty()) {
                             sProps.put("veipQosSessionProfile", modifyParam1);
                             sProps.put("servicePackage", modifyParam1);
-                            sProps.put("voipPackage1", modifyParam1);
+                            String voipNumber1= sProps.getOrDefault("voipNumber1","").toString();
+                            if(!voipNumber1.isEmpty()) {
+                                sProps.put("voipPackage1", modifyParam1);
+                            }else{
+                                sProps.put("voipPackage2", modifyParam1);
+                            }
                         }
                         subscription.setProperties(sProps);
                         subscriptionRepository.save(subscription,0);
