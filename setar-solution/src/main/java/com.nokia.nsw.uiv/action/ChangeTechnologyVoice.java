@@ -132,21 +132,13 @@ public class ChangeTechnologyVoice implements HttpAction {
                 }
                 if (req.getServiceEndpointNumber1() != null && !req.getServiceEndpointNumber1().trim().isEmpty()) {
                     // map to subscription endpoint slot 1
-                    if(!voipNumber1.isEmpty()) {
                         props.put("simaEndpointId1", req.getServiceEndpointNumber1());
-                    }else {
-                        props.put("simaEndpointId2", req.getServiceEndpointNumber1());
-                    }
                     log.error("------------Test Trace # 9--------------- Set SIMA endpoint id 1: " + req.getServiceEndpointNumber1());
                 }
 
                 if (req.getServiceEndpointNumber2() != null && !req.getServiceEndpointNumber2().trim().isEmpty()) {
-                    if(!voipNumber1.isEmpty()) {
-                        props.put("simaEndpointId1", req.getServiceEndpointNumber2());
-                    }else{
                         props.put("simaEndpointId2", req.getServiceEndpointNumber2());
-                    }
-                    log.error("------------Test Trace # 9--------------- Set SIMA endpoint id 1: " + req.getServiceEndpointNumber1());
+                    log.error("------------Test Trace # 9--------------- Set SIMA endpoint id 2: " + req.getServiceEndpointNumber1());
                 }
 
                 // VoIP package/code
