@@ -165,8 +165,8 @@ public class DeleteSPR implements HttpAction {
             if ("Bridged".equalsIgnoreCase(req.getProductSubtype())) {
                 String ontPort = nullSafe(req.getOntPort());
                 // Clear EVPN template on that port in both OLT and ONT
-                optOlt.ifPresent(olt -> clearEvpnsOnPort(olt, ontPort));
-                optOnt.ifPresent(ont -> clearEvpnsOnOntPort(ont, ontPort));
+                optOlt.ifPresent(olt -> clearEvpnsOnPort(olt, ontPort,req.getProductSubtype()));
+                optOnt.ifPresent(ont -> clearEvpnsOnOntPort(ont, ontPort,req.getProductSubtype()));
 
                 // If all EVPN port templates on OLT cleared -> clear EVPN card template
                 optOlt.ifPresent(this::maybeClearOntCardTemplateIfAllPortsEmpty);
@@ -190,9 +190,9 @@ public class DeleteSPR implements HttpAction {
                 removePossibleVlanInterfaces(req.getOntSN(), ontPort);
 
                 if ("1".equals(currentEvpnTemplateVal)) {
-                    optOlt.ifPresent(olt -> clearEvpnsOnPort(olt, ontPort));
+                    optOlt.ifPresent(olt -> clearEvpnsOnPort(olt, ontPort, req.getProductType()));
                     optOnt.ifPresent(ont -> {
-                        clearEvpnsOnOntPort(ont, ontPort);
+                        clearEvpnsOnOntPort(ont, ontPort,req.getProductType());
                         clearOntCreateTemplate(ont);
                         safeSaveLogicalDevice(ont);
                     });
@@ -297,12 +297,25 @@ public class DeleteSPR implements HttpAction {
             if (!"Exist".equalsIgnoreCase(nullSafe(req.getServiceFlag()))) {
                 shouldDeleteDevices = true;
             }
-            if (lastServiceForSubscriber) {
-                shouldDeleteDevices = true;
+            if(optOnt.isPresent())
+            {
+                LogicalDevice ontDevice=optOnt.get();
+                ontDevice=logicalDeviceRepository.findByDiscoveredName(ontDevice.getDiscoveredName()).get();
+                Set<Service> rfs = ontDevice.getUsingService();
+                if (rfs.isEmpty()) {
+                    shouldDeleteDevices = true;
+                }
             }
+
+
             if (shouldDeleteDevices) {
                 optOnt.ifPresent(logicalDeviceRepository::delete);
                 optOlt.ifPresent(logicalDeviceRepository::delete);
+                if (req.getOntSN() != null && !req.getOntSN().isEmpty()) {
+                    logicalDeviceRepository
+                            .findByDiscoveredName("ONT" + Constants.UNDER_SCORE + req.getOntSN())
+                            .ifPresent(cpe -> cpe.getProperties().put("AdministrativeState", "Available"));
+                }
             }
 
             // -----------------------------
@@ -401,20 +414,32 @@ public class DeleteSPR implements HttpAction {
         ont.setProperties(p);
     }
 
-    private void clearEvpnsOnPort(LogicalDevice olt, String port) {
+    private void clearEvpnsOnPort(LogicalDevice olt, String port,String productType) {
         if (isEmpty(port)) return;
         Map<String, Object> p = ensureProps(olt);
         // Map common EVPN OLT port templates (2..5)
-        p.put("evpnEthPort" + port + "Template", "");
+        if(productType.equalsIgnoreCase("Bridged")) {
+            if (!port.equalsIgnoreCase("5")) {
+                p.put("evpnEthPort" + port + "Template", "");
+            }
+        }else {
+            p.put("evpnEthPort" + port + "Template", "");
+        }
         olt.setProperties(p);
         safeSaveLogicalDevice(olt);
     }
 
-    private void clearEvpnsOnOntPort(LogicalDevice ont, String port) {
+    private void clearEvpnsOnOntPort(LogicalDevice ont, String port,String productType) {
         if (isEmpty(port)) return;
         Map<String, Object> p = ensureProps(ont);
         // clear both create and active templates for the port
-        p.put("evpnEthPort" + port + "Template", "");
+        if(productType.equalsIgnoreCase("Bridged")) {
+            if (!port.equalsIgnoreCase("5")) {
+                p.put("evpnEthPort" + port + "Template", "0");
+            }
+        }else {
+            p.put("evpnEthPort" + port + "Template", "0");
+        }
         p.put("evpnEthPort" + port + "CreateTemplate", "");
         ont.setProperties(p);
         safeSaveLogicalDevice(ont);

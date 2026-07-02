@@ -88,6 +88,7 @@ public class ChangeResourceStatus implements HttpAction {
             String currentStatus = device.getProperties().get("AdministrativeState")!=null?device.getProperties().get("AdministrativeState").toString():null;
             String model = device.getProperties().get("deviceModel") == null ? "" : device.getProperties().get("deviceModel").toString();
             String mac = device.getProperties().get("macAddress") == null ? "" : device.getProperties().get("macAddress").toString() ;
+            String deviceType = device.getProperties().get("deviceType") == null ? "" : device.getProperties().get("deviceType").toString() ;
 
             log.error("------------Test Trace # 6--------------- Device found. Current status=" + currentStatus);
 
@@ -118,7 +119,7 @@ public class ChangeResourceStatus implements HttpAction {
                     mac,
                     targetStatus,
                     model,
-                    type
+                    deviceType
             );
 
         } catch (Exception ex) {

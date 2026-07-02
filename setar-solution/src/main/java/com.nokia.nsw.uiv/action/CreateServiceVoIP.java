@@ -176,6 +176,7 @@ public class CreateServiceVoIP implements HttpAction {
                 subProps.put("serviceID", req.getServiceId());
                 subProps.put("oltPosition", req.getOltName());
                 subProps.put("householdId", req.getHhid());
+                if (req.getKenanUidNo() != null) subProps.put("kenanSubscriberId", req.getKenanUidNo());
                 subProps.put("createdBy",
                         req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
                                 ? req.getCreatedBy()
