@@ -229,7 +229,6 @@ public class CreateServiceEVPN implements HttpAction {
                 subsProps.put("oltPosition", oltPos);
                 subsProps.put("kenanSubscriberId", req.getKenanUidNo());
                 subsProps.put("subscriberID_CableModem", req.getSubscriberId());
-                subsProps.put("linkedSubscriber", subscriber.getDiscoveredName());
                 subsProps.put("serviceSN", req.getOntSN());
                 if (req.getProductSubtype() != null && (req.getProductSubtype().contains("Bridged") || req.getProductSubtype().contains("Cloudstarter"))) {
                     subsProps.put("subscriptionDetails", req.getServiceId());
@@ -244,10 +243,6 @@ public class CreateServiceEVPN implements HttpAction {
                 subscriptionRepo.save(subs, 2);
             }
             // ensure we keep subscriber-subscription link when we didn't create subs
-            if (!subscription.getProperties().containsKey("linkedSubscriber")) {
-                subscription.getProperties().put("linkedSubscriber", subscriber.getDiscoveredName());
-                subscriptionRepo.save(subscription);
-            }
 
             // 5) Product: find or create (properties map)
             Optional<Product> productOpt = productRepo.findByDiscoveredName(productNameStr);
@@ -269,8 +264,6 @@ public class CreateServiceEVPN implements HttpAction {
                 Map<String, Object> prodProps = new HashMap<>();
                 prodProps.put("productType", req.getProductType());
                 prodProps.put("productStatus", "Active");
-                prodProps.put("linkedSubscriber", subscriber.getDiscoveredName());
-                prodProps.put("linkedSubscription", subscription.getDiscoveredName());
                 prodProps.put("createdBy",
                         req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
                                 ? req.getCreatedBy()
@@ -324,7 +317,6 @@ public class CreateServiceEVPN implements HttpAction {
                 );
                 cfsProps.put("actionName", ACTION_LABEL);
                 if (req.getFxOrderID() != null) cfsProps.put("transactionId", req.getFxOrderID());
-                cfsProps.put("linkedProduct", product.getDiscoveredName());
                 newCfs.setProperties(cfsProps);
                 newCfs.addUsingService(product);
                 cfs = newCfs;
@@ -350,7 +342,6 @@ public class CreateServiceEVPN implements HttpAction {
                 Map<String, Object> rfsProps = new HashMap<>();
                 rfsProps.put("serviceStatus", "Active");
                 rfsProps.put("serviceType", req.getProductType());
-                rfsProps.put("linkedCFS", cfs.getDiscoveredName());
                 rfsProps.put("createdBy",
                         req.getCreatedBy() != null && !req.getCreatedBy().isEmpty()
                                 ? req.getCreatedBy()
@@ -391,7 +382,6 @@ public class CreateServiceEVPN implements HttpAction {
                 if (req.getTemplateNameOnt() != null) oltProps.put("ontTemplate", req.getTemplateNameOnt());
                 dev.setProperties(oltProps);
                 // link RFS reference if exists
-                dev.getProperties().put("linkedRFS", rfs.getDiscoveredName());
                 olt = dev;
                 logicalDeviceRepo.save(dev, 2);
             }
@@ -435,7 +425,6 @@ public class CreateServiceEVPN implements HttpAction {
                     ontProps.put("mgmtTemplate", req.getTemplateNameVlanMgmnt());
                 if (req.getMgmntVlanId() != null) ontProps.put("mgmtVlan", req.getMgmntVlanId());
                 // link RFS
-                ontProps.put("linkedRFS", rfs.getDiscoveredName());
                 dev.setProperties(ontProps);
                 dev.getProperties().put("containingDevice", olt.getDiscoveredName());
                 logicalDeviceRepo.save(dev);
@@ -546,7 +535,6 @@ public class CreateServiceEVPN implements HttpAction {
                             );
                             vProps.put("actionName", ACTION_LABEL);
                             // associate with ONT
-                            vProps.put("linkedOnt", ont.getDiscoveredName());
                         } else {
                             // generic (no ONT association)
                             if (req.getTemplateNameVlan() != null) {
@@ -694,7 +682,6 @@ public class CreateServiceEVPN implements HttpAction {
                                                 : "CA"
                                 );
                                 svProps.put("actionName", ACTION_LABEL);
-                                svProps.put("linkedOnt", ont.getDiscoveredName());
                                 singleVlan.setProperties(svProps);
                                 vlanRepo.save(singleVlan);
                                 ont = logicalDeviceRepo.findByDiscoveredName(ont.getDiscoveredName()).get();
@@ -711,14 +698,9 @@ public class CreateServiceEVPN implements HttpAction {
                 }
             }
 
-            if(req.getServiceId().equalsIgnoreCase("checkrollback"))
-            {
-                throw new RuntimeException("checking Rollback");
-            }
             // 16) Ensure associations & final persist for RFS/ONT/OLT
             // - add linked RFS on ONT and OLT properties
             ont = logicalDeviceRepo.findByDiscoveredName(ont.getDiscoveredName()).get();
-            ont.getProperties().put("linkedRFS", rfs.getDiscoveredName());
             // persist again
             if (req.getTemplateNameOnt() != null) ont.getProperties().put("ontTemplate", req.getTemplateNameOnt());
             ont.getProperties().put("oltPosition", req.getOltName());
@@ -726,7 +708,6 @@ public class CreateServiceEVPN implements HttpAction {
             ont.getUsingService().add(rfs);
             logicalDeviceRepo.save(ont);
             olt = logicalDeviceRepo.findByDiscoveredName(olt.getDiscoveredName()).get();
-            olt.getProperties().put("linkedRFS", rfs.getDiscoveredName());
             olt.getUsingService().add(rfs);
             logicalDeviceRepo.save(olt);
 
