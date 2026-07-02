@@ -294,15 +294,17 @@ public class DeleteSPR implements HttpAction {
             // 9) Delete OLT and ONT Device if Unused
             // -----------------------------
             boolean shouldDeleteDevices = false;
-            if (!"Exist".equalsIgnoreCase(nullSafe(req.getServiceFlag()))) {
-                shouldDeleteDevices = true;
-            }
-            if(optOnt.isPresent())
-            {
-                LogicalDevice ontDevice=optOnt.get();
-                ontDevice=logicalDeviceRepository.findByDiscoveredName(ontDevice.getDiscoveredName()).get();
-                Set<Service> rfs = ontDevice.getUsingService();
-                if (rfs.isEmpty()) {
+            if (optOlt.isPresent()) {
+                LogicalDevice oltDevice = logicalDeviceRepository
+                        .findByDiscoveredName(optOlt.get().getDiscoveredName())
+                        .orElseThrow();
+
+                boolean shouldDelete =
+                        (oltDevice.getUsingService().isEmpty()
+                                && !"Exist".equalsIgnoreCase(req.getServiceFlag()))
+                                || lastServiceForSubscriber;
+
+                if (shouldDelete) {
                     shouldDeleteDevices = true;
                 }
             }
